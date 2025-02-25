@@ -1,5 +1,5 @@
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <unordered_map>
 #include <fstream>
 #include <complex>
