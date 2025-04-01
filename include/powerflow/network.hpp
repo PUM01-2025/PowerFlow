@@ -8,8 +8,8 @@ using complex_t = std::complex<double>;
 
 // Graph edge struct
 struct GridEdge {
-    size_t parent;
-    size_t child;
+    int parent;
+    int child;
     complex_t z_c;
     complex_t i;
 };
@@ -23,7 +23,7 @@ enum NodeType {
 
 // Graph node struct
 struct GridNode {
-    NodeType type = MIDDLE;
+    NodeType type = NodeType::MIDDLE;
     complex_t v = 1;
     complex_t s = 0;
     std::vector<int> edges;
@@ -31,19 +31,19 @@ struct GridNode {
 
 // Edge between two grids
 struct GridConnection {
-    size_t slack_grid;
-    size_t pq_grid;
-    size_t slack_node;
-    size_t pq_node;
+    int slack_grid;
+    int pq_grid;
+    int slack_node;
+    int pq_node;
     double slackToPq; // Lindningsförhållande
 };
 
 // Conversion base
-struct Base {
-    double const S; // complex_t?
-    double const V;
-    //double I;
-};
+// struct Base {
+//     double const S; // complex_t?
+//     double const V;
+//     //double I;
+// };
 
 // Grid
 struct Grid {

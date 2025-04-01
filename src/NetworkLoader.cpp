@@ -1,4 +1,4 @@
-#include "NetworkLoader.hpp"
+#include "powerflow/NetworkLoader.hpp"
 
 NetworkLoader::NetworkLoader(std::istream &file) : file{file} {}
 

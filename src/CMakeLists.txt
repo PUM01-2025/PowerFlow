@@ -1,4 +1,2 @@
-add_library(PowerFlowLib add.cpp add.h)
-target_include_directories(PowerFlowLib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-add_executable(PowerFlow main.cpp)
-target_link_libraries(PowerFlow PRIVATE PowerFlowLib)
+add_library(PowerFlowLib STATIC powerflow.cpp NetworkLoader.cpp)
+target_include_directories(PowerFlowLib PUBLIC ${PROJECT_SOURCE_DIR}/include PRIVATE ${PROJECT_SOURCE_DIR}/lib)

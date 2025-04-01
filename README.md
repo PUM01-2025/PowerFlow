@@ -1,14 +1,18 @@
-# Power-flow simulation
+# powerflow
 
-## Hur man installerar
-1. Installera WSL genom att köra följande i PowerShell (som admin): `wsl --install`
+Add some info here...
 
-2. Uppdatera och installera paket med följande kommandon i WSL:
-```
-$ sudo apt update && sudo apt upgrade
-$ sudo apt install cmake make g++
-```
+## Building
 
-4. Starta vscode som vanligt i Windows, välj den blåa knappen längst ned till väsnter och välj "Connect to WSL".
+Text
 
-5. När ansluten till WSL, installera CMake och C++ extensions.
+## Project Structure
+
+- `examples/` - Various examples.
+- `include/powerflow/` - Public headers.
+- `lib/` - Libraries (Eigen).
+- `matlab/` - Matlab implementation.
+- `python/` - Python implementation.
+- `src/` - powerflow source code.
+- `standalone/` - Standalone executable.
+- `tests/` - Unit tests.

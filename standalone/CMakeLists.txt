@@ -1,0 +1,2 @@
+add_executable(PowerFlowStandalone main.cpp)
+target_link_libraries(PowerFlowStandalone PRIVATE PowerFlowLib)
