@@ -6,6 +6,10 @@ Add some info here...
 
 Text
 
+### Ubuntu 24.04
+
+Run Matlab using `LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6 matlab`
+
 ## Project Structure
 
 - `examples/` - Various examples.
