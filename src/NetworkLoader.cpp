@@ -2,19 +2,19 @@
 
 NetworkLoader::NetworkLoader(std::istream &file) : file{file} {}
 
-Network NetworkLoader::loadNetwork()
+std::unique_ptr<Network> NetworkLoader::loadNetwork()
 {
-    currentLine = 0;
     try
     {
-        Network network;
+        std::unique_ptr<Network> network = std::make_unique<Network>();
+
         std::string line;
         while (getNextLine(line))
         {
             if (line == "grid")
-                network.grids.push_back(loadGrid());
+                network->grids.push_back(loadGrid());
             else if (line == "connections")
-                network.connections = loadConnections();
+                network->connections = loadConnections();
             else
                 throw NetworkLoaderError("Invalid command");
         }

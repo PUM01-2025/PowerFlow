@@ -1,5 +1,4 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#pragma once
 
 #include <vector>
 #include <complex>
@@ -59,5 +58,3 @@ struct Network {
 
     // Här måste sparas undan vilka noder som ska skickas till matlab etc...
 };
-
-#endif /* NETWORK_H */
