@@ -5,8 +5,9 @@
 class GridSolver {
 public:
 	GridSolver(Grid* grid) : grid{ grid } { }
+	virtual ~GridSolver() { };
 
-	virtual void solve() = 0; // Returnera antal iterationer? Hur hantera differentiering?
+	virtual int solve() = 0; // Returnera antal iterationer
 protected:
 	Grid* grid;
 };
