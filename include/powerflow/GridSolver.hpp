@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRID_SOLVER_H
+#define GRID_SOLVER_H
 
 #include "powerflow/network.hpp"
 
@@ -9,5 +10,7 @@ public:
 
 	virtual int solve() = 0; // Returnera antal iterationer
 protected:
-	Grid* grid;
+	Grid* grid{nullptr};
 };
+
+#endif

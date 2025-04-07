@@ -1,7 +1,9 @@
-#pragma once
+#ifndef POWER_FLOW_SOLVER_H
+#define POWER_FLOW_SOLVER_H
 
 #include "powerflow/network.hpp"
 #include "powerflow/GridSolver.hpp"
+#include <memory>
 
 class PowerFlowSolver {
 public:
@@ -18,3 +20,5 @@ private:
 	void runGridSolvers();
 	std::vector<complex_t> getLoadVoltages();
 };
+
+#endif
