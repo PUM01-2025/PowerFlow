@@ -5,5 +5,8 @@
 class GaussSeidelSolver : public GridSolver {
 public:
 	GaussSeidelSolver(Grid* grid);
-	void solve();
+	int solve();
+private:
+	std::vector<complex_t> y; // Admittances
+	std::vector<complex_t> ySum; // "Self-admittances" (diagonal elements in admittance matrix)
 };

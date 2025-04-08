@@ -1,41 +1,81 @@
 #include "powerflow/GaussSeidelSolver.hpp"
 
-GaussSeidelSolver::GaussSeidelSolver(Grid* grid) : GridSolver(grid) { }
+static const int MAX_ITER = 10000;
+static const double PRECISION = 1e-12;
 
-void GaussSeidelSolver::solve()
-{
-    for (int i = 0; i < 100; ++i) { // Needs proper convergence check...
-        for (int nodeIndex = 0; nodeIndex < grid->nodes.size(); ++nodeIndex) { // For each node
-            GridNode& node = grid->nodes[nodeIndex];
-            if (node.type != NodeType::SLACK) { // Ignore Generator node, where voltage is known
-                std::complex<double> ySum = (0, 0);
-                std::complex<double> newV = std::conj(node.s) / std::conj(node.v);
-                for (int edgeIndex : node.edges) { // For each edge
-                    GridEdge& edge = grid->edges[edgeIndex];
-                    int neighborIndex = edge.parent == nodeIndex ? edge.child : edge.parent;
-                    GridNode& neighbor = grid->nodes[neighborIndex];
-                    std::complex<double> y = (std::complex<double>)1 / edge.z_c;
-                    newV += neighbor.v * y;
-                    ySum += y;
-                }
-                newV /= ySum;
-                node.v = newV;
-            }
-            else {
-                // Kanske inte behöver göra detta varje iteration??
-                std::complex<double> ySum = (0, 0);
-                std::complex<double> newS = (0, 0);
+GaussSeidelSolver::GaussSeidelSolver(Grid* grid)
+    : GridSolver(grid), y(grid->edges.size()), ySum(grid->nodes.size()) {
+    // Create admittance vector.
+    for (size_t edgeIdx = 0; edgeIdx < grid->edges.size(); ++edgeIdx) {
+        complex_t z = grid->edges[edgeIdx].z_c;
 
-                for (int edgeIndex : node.edges) {
-                    GridEdge& edge = grid->edges[edgeIndex];
-                    int neighborIndex = edge.parent == nodeIndex ? edge.child : edge.parent;
-                    GridNode& neighbor = grid->nodes[neighborIndex];
-                    std::complex<double> y = (std::complex<double>)1 / edge.z_c;
-                    newS += neighbor.v * y;
-                    ySum += y;
-                }
-                node.s = std::conj(std::conj(node.v) * (node.v * ySum - newS));
-            }
-        }
+        //if (z == (complex_t)0)
+        //    throw std::runtime_error("Invalid 0 impedance!");
+        
+        y[edgeIdx] = (complex_t)1 / z;
     }
+
+    // Create ySum vector.
+    for (size_t nodeIdx = 0; nodeIdx < grid->nodes.size(); ++nodeIdx) {
+        complex_t sum = (0, 0);
+
+        for (int edgeIdx : grid->nodes[nodeIdx].edges) {
+            sum += y.at(edgeIdx);
+        }
+        ySum[nodeIdx] = sum;
+    }
+}
+
+int GaussSeidelSolver::solve() {
+    bool converged = false;
+    int iter = 0;
+
+    // Update load voltages.
+    do {
+        converged = true; // Until proven otherwise
+
+        for (size_t nodeIdx = 0; nodeIdx < grid->nodes.size(); ++nodeIdx) { // For each node
+            GridNode& node = grid->nodes[nodeIdx];
+
+            if (node.type == NodeType::SLACK)
+                continue; // Slack node voltage is already known
+
+            complex_t i = std::conj(node.s) / std::conj(node.v); // Om node.v == 0 ????
+
+            for (size_t edgeIdx : node.edges) {
+                GridEdge& edge = grid->edges[edgeIdx];
+                int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent; // DUMT MED NAMN "CHILD" OCH "PARENT"?
+                GridNode& neighbor = grid->nodes[neighborIdx];
+
+                i += neighbor.v * y[edgeIdx];
+            }
+            complex_t newV = i / ySum[nodeIdx];
+            complex_t diff = node.v - newV;
+
+            if (diff.real() > PRECISION || diff.imag() > PRECISION) {
+                converged = false;
+            }
+            node.v = newV; // Update node voltage
+        }
+    } while (!converged && iter++ < MAX_ITER);
+
+    // Update slack power.
+    for (size_t nodeIdx = 0; nodeIdx < grid->nodes.size(); ++nodeIdx) {
+        GridNode& node = grid->nodes[nodeIdx];
+
+        if (node.type != NodeType::SLACK)
+            continue;
+
+        complex_t i = (0, 0);
+
+        for (size_t edgeIdx : node.edges) {
+            GridEdge& edge = grid->edges[edgeIdx];
+            int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
+            GridNode& neighbor = grid->nodes[neighborIdx];
+
+            i += neighbor.v * y[edgeIdx];
+        }
+        node.s = std::conj(std::conj(node.v) * (node.v * ySum[nodeIdx] - i));
+    }
+    return iter;
 }
