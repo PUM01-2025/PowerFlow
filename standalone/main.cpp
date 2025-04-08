@@ -1,14 +1,26 @@
 #include "powerflow/NetworkLoader.hpp"
 #include "powerflow/GaussSeidelSolver.hpp"
+#include "powerflow/BackwardForwardSweepSolver.hpp"
+#include "powerflow/PowerFlowSolver.hpp"
 
 #include <iostream>
 #include <fstream>
 
 
-void printResults(const Network& network) {
-
-}
-
+//int main(int argc, char* argv[])
+//{
+//    std::ifstream file("C:\\Users\\melvi\\Kandidat01\\examples\\example_network.txt");
+//    NetworkLoader loader(file);
+//    std::shared_ptr<Network> net = loader.loadNetwork();
+//    PowerFlowSolver pfs(net);
+//    // pfs.solve(); SKICKA IN U HÄR! (Ska inte vara i datafilen!!!!)
+//
+//    for (const Grid& grid : net->grids) {
+//        for (const GridNode& node : grid.nodes) {
+//            std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
+//        }
+//    }
+//}
 
 int main(int argc, char* argv[])
 {
@@ -18,14 +30,14 @@ int main(int argc, char* argv[])
 
     std::cout << "Loaded" << std::endl;
 
-    std::vector<GaussSeidelSolver> solvers;
+    std::vector<GridSolver*> solvers;
     for (Grid& grid : net->grids) {
-        solvers.push_back(GaussSeidelSolver(&grid));
+        solvers.push_back(new BackwardForwardSweepSolver(&grid));
     }
 
     for (int i = 0; i < 100; ++i) {
-        for (GaussSeidelSolver& solver : solvers) {
-            solver.solve();
+        for (GridSolver* solver : solvers) {
+            solver->solve();
 
             // Uppdatera connections (låtsaskablar med 0 impedans).
             for (GridConnection& connection : net->connections) {
