@@ -2,7 +2,7 @@
 
 static const double SQRT3 = 1.73205080757;
 static const int MAX_ITER = 10000;
-static const double PRECISION = 1e10;
+static const double PRECISION = 1e-10;
 
 BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid) :
 	GridSolver(grid) { }

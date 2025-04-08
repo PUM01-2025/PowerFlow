@@ -6,7 +6,7 @@ PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network) : network { n
 
 std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& P) {
 	if (firstRun) {
-		// TODO: Analysera ev felaktigheter i nätverket
+		// TODO: Analysera ev felaktigheter i nï¿½tverket
 
 		createGridSolvers();
 		firstRun = false;
@@ -18,15 +18,15 @@ std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& P) {
 
 void PowerFlowSolver::createGridSolvers() {
 	for (Grid& grid : network->grids) {
-		// TODO: Analysera respektive Grid och välj den Solver som är lämpligast
+		// TODO: Analysera respektive Grid och vï¿½lj den Solver som ï¿½r lï¿½mpligast
 
-		// Tillfällig lösning: Skapa en GaussSeidelSolver för varje Grid:
+		// Tillfï¿½llig lï¿½sning: Skapa en GaussSeidelSolver fï¿½r varje Grid:
 		gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid));
 	}
 }
 
 void PowerFlowSolver::updateLoads(std::vector<complex_t>& P) {
-	// TODO: Sätt node.s = P[i] för alla LOAD-noder.
+	// TODO: Sï¿½tt node.s = P[i] fï¿½r alla LOAD-noder.
 }
 
 void PowerFlowSolver::runGridSolvers() {
@@ -51,7 +51,7 @@ void PowerFlowSolver::runGridSolvers() {
 }
 
 std::vector<complex_t> getLoadVoltages() {
-	// TODO: Hämta ut alla node.v för alla LOAD-noder och returnera.
+	// TODO: Hï¿½mta ut alla node.v fï¿½r alla LOAD-noder och returnera.
 
 	std::vector<complex_t> U;
 
