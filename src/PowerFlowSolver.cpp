@@ -1,6 +1,7 @@
 #include "powerflow/PowerFlowSolver.hpp"
 
 #include "powerflow/GaussSeidelSolver.hpp"
+#include "powerflow/BackwardForwardSweepSolver.hpp"
 
 PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network) : network { network } { }
 
@@ -27,6 +28,21 @@ void PowerFlowSolver::createGridSolvers() {
 
 void PowerFlowSolver::updateLoads(std::vector<complex_t>& P) {
 	// TODO: S�tt node.s = P[i] f�r alla LOAD-noder.
+	size_t pIdx = 0;
+
+	for (Grid& grid : network->grids) {
+		for (GridNode& node : grid.nodes) {
+			if (node.type == NodeType::LOAD) {
+				if (pIdx == P.size()) {
+					throw std::runtime_error("P has too few elements");
+				}
+				node.s = -P.at(pIdx++); // NOTE negative sign!
+			}
+		}
+	}
+	if (pIdx != P.size()) {
+		throw std::runtime_error("P has incorrect size");
+	}
 }
 
 void PowerFlowSolver::runGridSolvers() {
@@ -37,23 +53,30 @@ void PowerFlowSolver::runGridSolvers() {
 	int maxGridIter = 0;
 
 	do {
+		maxGridIter = 0;
 		for (std::unique_ptr<GridSolver>& solver : gridSolvers) {
 			int gridIter = solver->solve();
 			maxGridIter = std::max(gridIter, maxGridIter);
 
 			// Update connections (simulates "fake" connection with z=0).
 			for (GridConnection& connection : network->connections) {
-				network->grids[connection.slack_grid].nodes[connection.slack_node].s =   -  network->grids[connection.pq_grid].nodes[connection.pq_node].s;
-				network->grids[connection.pq_grid].nodes[connection.pq_node].v = network->grids[connection.slack_grid].nodes[connection.slack_node].v;
+				network->grids[connection.slackGrid].nodes[connection.slackNode].s =   -  network->grids[connection.pqGrid].nodes[connection.pqNode].s;
+				network->grids[connection.pqGrid].nodes[connection.pqNode].v = network->grids[connection.slackGrid].nodes[connection.slackNode].v;
 			}
 		}
 	} while (maxGridIter > 1 && iter++ < MAX_ITER);
 }
 
-std::vector<complex_t> getLoadVoltages() {
+std::vector<complex_t> PowerFlowSolver::getLoadVoltages() {
 	// TODO: H�mta ut alla node.v f�r alla LOAD-noder och returnera.
 
 	std::vector<complex_t> U;
 
+	for (Grid& grid : network->grids) {
+		for (GridNode& node : grid.nodes) {
+			if (node.type == NodeType::LOAD)
+				U.push_back(node.v);
+		}
+	}
 	return U;
 }

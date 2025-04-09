@@ -5,56 +5,44 @@
 
 using complex_t = std::complex<double>;
 
-// Graph edge struct
+// Graph edge struct.
 struct GridEdge {
     int parent;
     int child;
-    complex_t z_c;
-    complex_t i;
+    complex_t z_c = 1;
+    complex_t i; // Ta bort?
 };
 
-// Possible node types
+// Possible node types.
 enum NodeType {
     SLACK,
     MIDDLE,
     LOAD
 };
 
-// Graph node struct
+// Graph node struct.
 struct GridNode {
     NodeType type = NodeType::MIDDLE;
-    complex_t v = 1;
-    complex_t s = 0;
+    complex_t v = 1; // Ta bort?
+    complex_t s = 0; // Ta bort?
     std::vector<int> edges;
 };
 
-// Edge between two grids
+// Edge between two grids.
 struct GridConnection {
-    int slack_grid;
-    int pq_grid;
-    int slack_node;
-    int pq_node;
-    double slackToPq; // Lindningsförhållande
+    int slackGrid;
+    int pqGrid;
+    int slackNode;
+    int pqNode;
 };
 
-// Conversion base
-// struct Base {
-//     double const S; // complex_t?
-//     double const V;
-//     //double I;
-// };
-
-// Grid
 struct Grid {
     std::vector<GridEdge> edges;
     std::vector<GridNode> nodes;
-    // Base base;
 };
 
-// Network of grids with connections between them
+// Network of grids with connections between them.
 struct Network {
     std::vector<Grid> grids;
     std::vector<GridConnection> connections;
-
-    // Här måste sparas undan vilka noder som ska skickas till matlab etc...
 };
