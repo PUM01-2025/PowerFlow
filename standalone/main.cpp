@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[])
 {
-    std::ifstream file("C:\\Users\\melvi\\Kandidat01\\examples\\example_network_single_grid.txt");
+    std::ifstream file("../examples/example_network_single_grid.txt");
     NetworkLoader loader(file);
     std::shared_ptr<Network> net = loader.loadNetwork();
     for (const Grid& grid : net->grids) {
@@ -59,9 +59,9 @@ int main(int argc, char* argv[])
 //        for (GridSolver* solver : solvers) {
 //            solver->solve();
 //
-//            // Uppdatera connections (låtsaskablar med 0 impedans).
+//            // Uppdatera connections (lï¿½tsaskablar med 0 impedans).
 //            for (GridConnection& connection : net->connections) {
-//                // OBS teckenbyte för s.
+//                // OBS teckenbyte fï¿½r s.
 //                net->grids[connection.slackGrid].nodes[connection.slackNode].s = -net->grids[connection.pqGrid].nodes[connection.pqNode].s;
 //                net->grids[connection.pqGrid].nodes[connection.pqNode].v = net->grids[connection.slackGrid].nodes[connection.slackNode].v;
 //            }

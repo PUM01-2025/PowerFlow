@@ -1,7 +1,7 @@
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/GaussSeidelSolver.hpp"
 #include "powerflow/BackwardForwardSweepSolver.hpp"
-#include "powerflow/solverEnums.hpp"
+#include "powerflow/SolverTypeEnum.hpp"
 #include "powerflow/NetworkAnalyzer.hpp"
 
 #include <iostream>
