@@ -26,14 +26,14 @@ using node_id_t = int;
 using edge_id_t = int;
 
 bool has_cycles(Grid const &grid)
-{   "Returns true if the Grid contains a cycle"
+{
+    // Returns true if the Grid contains a cycle
     std::stack<node_id_t> todo_list{};
     std::unordered_set<node_id_t> visited_nodes{};
     std::unordered_set<edge_id_t> visited_edges{};
 
     // Push root node
     todo_list.push(0);
-    
 
     while (!todo_list.empty())
     {
@@ -42,9 +42,10 @@ bool has_cycles(Grid const &grid)
         todo_list.pop();
 
         // Insert as visited, if not successful we have already visited, cycle!
-        auto [ _ , success ] = visited_nodes.insert(current_node);
-        
-        if (!success){
+        auto [_, success] = visited_nodes.insert(current_node);
+
+        if (!success)
+        {
             return true;
         }
 
@@ -79,19 +80,18 @@ bool has_cycles(Grid const &grid)
 
             visited_edges.insert(id);
         }
-
     }
 
     return false;
 }
 
 SolverType determine_solver(Grid const &grid)
-{   "Returns Solvertype Enum based out of grid structure"
-
-    if (has_cycles(grid)){
+{
+    // Returns Solvertype Enum depending on grid structure
+    if (has_cycles(grid))
+    {
         return GAUSSSEIDEL;
     }
 
     return BACKWARDFOWARDSWEEP;
-
 }

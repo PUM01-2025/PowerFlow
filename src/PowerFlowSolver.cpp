@@ -22,15 +22,19 @@ std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& P) {
 
 void PowerFlowSolver::createGridSolvers() {
 
+    int grid_no{};
+
 	for (Grid& grid : network->grids) {
 		// TODO: Analysera respektive Grid och välj den Solver som är lämpligast
 
         switch (determine_solver(grid))
         {
         case GAUSSSEIDEL:
+            std::cout << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
             gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid));
             break;
         case BACKWARDFOWARDSWEEP:
+        std::cout << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
             gridSolvers.push_back(std::make_unique<BackwardForwardSweepSolver>(&grid));
             break;
         default:
@@ -39,6 +43,7 @@ void PowerFlowSolver::createGridSolvers() {
         }
 
 		// Tillfällig läsning: Skapa en GaussSeidelSolver för varje Grid:
+        ++grid_no;
 	}
 }
 
