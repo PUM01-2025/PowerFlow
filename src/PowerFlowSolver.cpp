@@ -1,13 +1,16 @@
 #include "powerflow/PowerFlowSolver.hpp"
-
 #include "powerflow/GaussSeidelSolver.hpp"
 #include "powerflow/BackwardForwardSweepSolver.hpp"
+#include "powerflow/solverEnums.hpp"
+#include "powerflow/NetworkAnalyzer.hpp"
+
+#include <iostream>
 
 PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network) : network { network } { }
 
 std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& P) {
 	if (firstRun) {
-		// TODO: Analysera ev felaktigheter i n�tverket
+		// TODO: Analysera ev felaktigheter i nätverket
 
 		createGridSolvers();
 		firstRun = false;
@@ -18,16 +21,29 @@ std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& P) {
 }
 
 void PowerFlowSolver::createGridSolvers() {
-	for (Grid& grid : network->grids) {
-		// TODO: Analysera respektive Grid och v�lj den Solver som �r l�mpligast
 
-		// Tillf�llig l�sning: Skapa en GaussSeidelSolver f�r varje Grid:
-		gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid));
+	for (Grid& grid : network->grids) {
+		// TODO: Analysera respektive Grid och välj den Solver som är lämpligast
+
+        switch (determine_solver(grid))
+        {
+        case GAUSSSEIDEL:
+            gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid));
+            break;
+        case BACKWARDFOWARDSWEEP:
+            gridSolvers.push_back(std::make_unique<BackwardForwardSweepSolver>(&grid));
+            break;
+        default:
+            std::cerr << "No suitable solver found!" << std::endl;
+            break;
+        }
+
+		// Tillfällig läsning: Skapa en GaussSeidelSolver för varje Grid:
 	}
 }
 
 void PowerFlowSolver::updateLoads(std::vector<complex_t>& P) {
-	// TODO: S�tt node.s = P[i] f�r alla LOAD-noder.
+	// TODO: Sätt node.s = P[i] för alla LOAD-noder.
 	size_t pIdx = 0;
 
 	for (Grid& grid : network->grids) {

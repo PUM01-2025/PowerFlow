@@ -1,6 +1,4 @@
-#include <iostream>
-using namespace std;
-enum solvers {
+enum SolverType {
     JACOBI,
     GAUSSSEIDEL,
     BACKWARDFOWARDSWEEP
