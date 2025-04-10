@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAUSS_SEIDEL_SOLVER_H
+#define GAUSS_SEIDEL_SOLVER_H
 
 #include "powerflow/GridSolver.hpp"
 
@@ -7,6 +8,8 @@ public:
 	GaussSeidelSolver(Grid* grid);
 	int solve();
 private:
-	std::vector<complex_t> y; // Admittances
-	std::vector<complex_t> ySum; // "Self-admittances" (diagonal elements in admittance matrix)
+	std::vector<complex_t> y{}; // Admittances
+	std::vector<complex_t> ySum{}; // "Self-admittances" (diagonal elements in admittance matrix)
 };
+
+#endif
