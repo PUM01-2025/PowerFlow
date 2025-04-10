@@ -46,7 +46,7 @@ public:
         if (inputs.size() < 1 || inputs[0].getType() != matlab::data::ArrayType::MATLAB_STRING) {
             std::ostringstream stream;
             stream << "Not valid file"<<std::endl;
-            displayOnMATLAB()
+            displayOnMATLAB(stream);
             throw std::invalid_argument("Input must be a valid file name.");
         }
 
@@ -54,7 +54,22 @@ public:
         std::ifstream file{fileName};
         
         NetworkLoader loader(file);
-        std::unique_ptr<Network> net = loader.loadNetwork();
+        std::shared_ptr<Network> net = loader.loadNetwork();
+
+        // 2. Skapa en PowerFlowSolver med det inl�sta n�tverket och spara undan i solvers.
+
+        // Convert unique_ptr to shared_ptr (network returns unique Powerflow takes shared)
+       // std::shared_ptr<Network> sharedNet = std::move(net);
+
+        // create a shared pointer to PowerFlowSolver intitialized with net 
+
+        //FRÅGA MALTE
+        //std::shared_ptr<PowerFlowSolver> solver = std::<PowerFlowSolver>(net);
+        std::unique_ptr<PowerFlowSolver> pfs = std::make_unique<PowerFlowSolver>(net);
+      
+
+
+        // 3. Returnera n�gon slags pekare
 
         std::ostringstream stream;
         stream << "No of vectors: " << vec.size() << std::endl;
