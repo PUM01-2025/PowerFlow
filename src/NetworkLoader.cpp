@@ -30,19 +30,41 @@ Grid NetworkLoader::loadGrid()
 {
     Grid grid;
     std::string line;
+    int nodeCount = 0; // Number of nodes in the grid
 
-    // Get number of nodes in the grid
-    try
+    // Get edges.
+    while (getNextLine(line))
     {
-        getNextLine(line);
-        grid.nodes.resize(std::stoi(line));
+        if (line == "%") // End of edges list
+            break;
+        std::stringstream sstream(line);
+        GridEdge edge;
+        if (!(sstream >> edge.parent) || edge.parent < 0)
+            throw NetworkLoaderError("Invalid edge parent index");
+        if (!(sstream >> edge.child) || edge.child < 0 || edge.child == edge.parent)
+            throw NetworkLoaderError("Invalid edge child index");
+        if (!(sstream >> edge.z_c) || edge.z_c == (complex_t)0)
+            throw NetworkLoaderError("Invalid edge impedance");
+        
+        grid.edges.push_back(edge);
+        nodeCount = std::max(nodeCount, std::max(edge.parent + 1, edge.child + 1));
     }
-    catch (...)
-    {
-        throw NetworkLoaderError("Invalid node count");
+    if (line != "%")
+        throw NetworkLoaderError("Missing end-of-list indicator");
+    if (nodeCount == 0)
+        throw NetworkLoaderError("Empty grid");
+
+    grid.nodes.resize(nodeCount);
+    grid.nodes.at(0).type = NodeType::SLACK;
+
+    for (size_t edgeIdx = 0; edgeIdx < grid.edges.size(); ++edgeIdx) {
+        GridEdge& edge = grid.edges[edgeIdx];
+
+        grid.nodes.at(edge.parent).edges.push_back(edgeIdx);
+        grid.nodes.at(edge.child).edges.push_back(edgeIdx);
     }
 
-    // Get node info
+    // Get load nodes
     while (getNextLine(line))
     {
         if (line == "%") // End of node list
@@ -51,48 +73,11 @@ Grid NetworkLoader::loadGrid()
         int nodeIdx = 0;
         if (!(sstream >> nodeIdx) || nodeIdx < 0 || nodeIdx >= grid.nodes.size())
             throw NetworkLoaderError("Invalid node index");
-        GridNode &node = grid.nodes.at(nodeIdx);
-        std::string type;
-        sstream >> type;
-        if (type == "s")
-        {
-            node.type = SLACK;
-            if (!(sstream >> node.v))
-                throw NetworkLoaderError("Invalid slack node voltage");
-        }
-        else if (type == "l")
-        {
-            node.type = LOAD;
-            if (!(sstream >> node.s))
-                throw NetworkLoaderError("Invalid load node power");
-            node.s = -node.s; // OBS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        }
-        else
-            throw NetworkLoaderError("Invalid node type");
+        grid.nodes.at(nodeIdx).type = NodeType::LOAD;
     }
     if (line != "%")
         throw NetworkLoaderError("Missing end-of-list indicator");
-
-    // Get edges
-    while (getNextLine(line))
-    {
-        if (line == "%") // End of edges list
-            break;
-        std::stringstream sstream(line);
-        GridEdge edge;
-        if (!(sstream >> edge.parent) || edge.parent < 0 || edge.parent >= grid.nodes.size())
-            throw NetworkLoaderError("Invalid edge parent index");
-        if (!(sstream >> edge.child) || edge.child < 0 || edge.child >= grid.nodes.size() || edge.child == edge.parent)
-            throw NetworkLoaderError("Invalid edge child index");
-        if (!(sstream >> edge.z_c)) // Check for zero impedance??
-            throw NetworkLoaderError("Invalid edge impedance");
-        int edgeIdx = grid.edges.size();
-        grid.nodes.at(edge.parent).edges.push_back(edgeIdx);
-        grid.nodes.at(edge.child).edges.push_back(edgeIdx);
-        grid.edges.push_back(edge);
-    }
-    if (line != "%")
-        throw NetworkLoaderError("Missing end-of-list indicator");
+    
     return grid;
 }
 
@@ -106,13 +91,13 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
             break;
         GridConnection connection;
         std::stringstream sstream(line);
-        if (!(sstream >> connection.slack_grid))
+        if (!(sstream >> connection.slackGrid))
             throw NetworkLoaderError("Invalid slack grid index");
-        if (!(sstream >> connection.slack_node))
+        if (!(sstream >> connection.slackNode))
             throw NetworkLoaderError("Invalid slack node index");
-        if (!(sstream >> connection.pq_grid))
+        if (!(sstream >> connection.pqGrid))
             throw NetworkLoaderError("Invalid PQ grid index");
-        if (!(sstream >> connection.pq_node))
+        if (!(sstream >> connection.pqNode))
             throw NetworkLoaderError("Invalid PQ node index");
         connections.push_back(connection);
     }
