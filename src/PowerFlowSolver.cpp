@@ -41,7 +41,6 @@ void PowerFlowSolver::createGridSolvers() {
             std::cerr << "No suitable solver found!" << std::endl;
             break;
         }
-
 		// Tillfällig läsning: Skapa en GaussSeidelSolver för varje Grid:
         ++grid_no;
 	}

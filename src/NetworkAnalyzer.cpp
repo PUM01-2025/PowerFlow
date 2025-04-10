@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 #include "powerflow/network.hpp"
-#include <solverEnums.hpp>
+#include "powerflow/SolverTypeEnum.hpp"
 #include <stack>
 #include <unordered_set>
 // using namespace std;

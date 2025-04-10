@@ -8,5 +8,5 @@ enum SolverType
     GAUSSSEIDEL,
 
     BACKWARDFOWARDSWEEP
-}
+};
 #endif
