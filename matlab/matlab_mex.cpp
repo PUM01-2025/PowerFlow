@@ -1,6 +1,7 @@
 #include "mex.hpp"
 #include "mexAdapter.hpp"
 #include <unordered_map>
+#include "powerflow/network.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/NetworkLoader.hpp"
 #include <fstream>
@@ -8,17 +9,18 @@
 #include "MatlabDataArray.hpp"
 //for ostringstream
 #include <sstream>
+#include <memory>
 
 
 
-using matlab::mex::ArgumentList;
+//using matlab::mex::ArgumentList;
 using namespace matlab::data;
 
 class MexFunction : public matlab::mex::Function {
-    std::unordered_map<int, std::unique_ptr<PowerFlowSolver>> solvers;
+    //std::unordered_map<int, std::unique_ptr<PowerFlowSolver>> solvers;
+    std::unique_ptr<PowerFlowSolver> solver;
 
-    std::vector<std::vector<int>> vec;
-
+   
     // Pointer to MATLAB engine
     std::shared_ptr<matlab::engine::MATLABEngine> matlabPtr = getEngine();
 
@@ -32,54 +34,63 @@ public:
     ~MexFunction() {
     }
 
-    void operator()(ArgumentList outputs, ArgumentList inputs) {
-        //checkArguments(outputs, inputs);
-        // N�r fil l�ses in:
-        // 1. Anv�nd NetworkLoader f�r att l�sa in n�tverket.
-        // 2. Skapa sedan en PowerFlowSolver med det inl�sta n�tverket och spara undan i solvers.
-        // 3. Returnera n�gon slags pekare
-        //std::ifstream file{inputs[0]};
-        
-        //NetworkLoader(file);
-        //!inputs[0].isType<MATLABString>() //inputs[0].getType() != matlab::data::MATLABString
-        // Check if the input is a valid file name 
+    void operator()(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs) {
         if (inputs.size() < 1 || inputs[0].getType() != matlab::data::ArrayType::MATLAB_STRING) {
-            std::ostringstream stream;
-            stream << "Not valid file"<<std::endl;
-            displayOnMATLAB(stream);
-            throw std::invalid_argument("Input must be a valid file name.");
+            displayError("Missing first argument string (command)");
+            return;
         }
+        std::string command = inputs[0][0];
 
-        std::string fileName = inputs[0][0];
-        std::ifstream file{fileName};
-        
+        if (command == "load") {
+            if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::MATLAB_STRING) {
+                displayError("Missing file path");
+                return;
+            }
+            std::string filePath = inputs[1][0];
+            loadNetwork(filePath);
+        }
+        else if (command == "solve") {
+            //if (inputs.size() < 2 || inputs[1].getType() != matlab::data::Arra)
+            std::vector<complex_t> S = inputs[1];
+            solve(S);
+        }
+        else {
+            displayError("Invalid command");
+        }
+    }
+private:
+    void loadNetwork(const std::string& filePath) {
+        std::ifstream file(filePath);
+        if (!file) {
+            displayError("Could not open Network file");
+            return;
+        }
         NetworkLoader loader(file);
-        std::shared_ptr<Network> net = loader.loadNetwork();
+        std::shared_ptr<Network> net;
+        try {
+            net = loader.loadNetwork();
+        }
+        catch (...) {
+            displayError("FEL FEL FEL"); // TODO
+        }
+        solver = std::make_unique<PowerFlowSolver>(net);
+    }
 
-        // 2. Skapa en PowerFlowSolver med det inl�sta n�tverket och spara undan i solvers.
-
-        // Convert unique_ptr to shared_ptr (network returns unique Powerflow takes shared)
-       // std::shared_ptr<Network> sharedNet = std::move(net);
-
-        // create a shared pointer to PowerFlowSolver intitialized with net 
-
-        //FRÅGA MALTE
-        //std::shared_ptr<PowerFlowSolver> solver = std::<PowerFlowSolver>(net);
-        std::unique_ptr<PowerFlowSolver> pfs = std::make_unique<PowerFlowSolver>(net);
-      
-
-
-        // 3. Returnera n�gon slags pekare
-
-        std::ostringstream stream;
-        stream << "No of vectors: " << vec.size() << std::endl;
-        displayOnMATLAB(stream);
+    void solve(std::vector<complex_t>& S) {
+        std::vector<complex_t> U = solver->solve(S);
+        displayError("Seems to work...");
     }
 
     void displayOnMATLAB(const std::ostringstream& stream) {
         matlabPtr->feval(u"fprintf", 0,
             std::vector<Array>({ factory.createScalar(stream.str()) }));
     }
+
+    void displayError(std::string errorMessage) {
+      ArrayFactory factory;
+      matlabPtr->feval(u"error", 0, std::vector<Array>({ factory.createScalar(errorMessage) }));
+    }
+    
 
   
 };
