@@ -1,0 +1,50 @@
+# Den här filen utgör ett exempelnät bestående av ett mellanspänningsnät och
+# två lågspänningsnät (se bild).
+
+# Kommandot "grid" indikerar att ett nytt grid skapas.
+grid
+
+# Denna siffra anger hur många noder som finns i detta grid.
+4
+
+# Här följer uppgifter om noderna på formatet: <nodindex> <nodtyp> <noddata>.
+# "Nodtyp" kan antingen vara s (slack) eller l (load). "Mellannoder" utelämnas.
+# Noddata är spänning för slacknoder och effekt för loadnoder.
+# Listan måste avslutas med ett %-tecken.
+0 s (1.00, 0.00)
+%
+
+# Här följer kabeldata på formatet <startnod> <slutnod> <impedans>.
+0 1 (0.05, 0.05)
+1 2 (0.05, 0.05)
+1 3 (0.05, 0.05)
+%
+
+# Första lågspänningsnätet.
+grid
+3
+0 s (1.00, 0.00)
+2 l (0.004, 0.002)
+%
+0 1 (0.02, 0.02)
+1 2 (0.05, 0.03)
+%
+
+# Andra lågspänningsnätet.
+grid
+3
+0 s (1.00, 0.00)
+1 l (0.002, 0.001)
+2 l (0.005, 0.004)
+%
+0 1 (0.02, 0.03)
+0 2 (0.03, 0.03)
+%
+
+# Här anges anslutningarna mellan näten på formatet:
+# <slacknät-nummer> <slacknod-index> <pqnät-nummer> <pqnod-index>
+# Listan måste avslutas med ett %-tecken.
+connections
+0 2 1 0
+0 3 2 0
+%

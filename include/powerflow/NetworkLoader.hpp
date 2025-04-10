@@ -1,5 +1,5 @@
 #ifndef NETWORK_LOADER_H
-#define NEWTORK_LOADER_H
+#define NETWORK_LOADER_H
 
 #include "powerflow/network.hpp"
 #include <memory>
