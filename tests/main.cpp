@@ -4,26 +4,10 @@
 #include "powerflow/NetworkLoader.hpp"
 #include "powerflow/BackwardForwardSweepSolver.hpp"
 #include "powerflow/GaussSeidelSolver.hpp"
+#include "powerflow/PowerFlowSolver.hpp"
 
 #include <fstream>
 #include <string>
-
-int add(int a,int b){
-    return a+b;
-}
-
-
-// TEST_CASE("DEBUG", "[debug]"){
-//     REQUIRE(add(5,5) == 1);
-// }
-
-bool hasEnding (std::string const &fullString, std::string const &ending) {
-    if (fullString.length() >= ending.length()) {
-        return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
-    } else {
-        return false;
-    }
-}
 
 
 //CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
@@ -69,35 +53,136 @@ TEST_CASE("Networkloader input", "[!throws]" ) {
     */
 }
 
+
 TEST_CASE("Compare output of BFS and GS","[validation]"){
-    //Load BFS
-    std::ifstream fileBFS("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt");
-    CHECK_FALSE(fileBFS.fail());
-    NetworkLoader loaderBFS(fileBFS);
-    std::unique_ptr<Network> netBFS = loaderBFS.loadNetwork();
-    std::vector<GridSolver*> solversBFS;
-    solversBFS.push_back(new BackwardForwardSweepSolver(&netBFS->grids.at(0)));
-    for (Grid& grid : netBFS->grids) {
-        solversBFS.push_back(new BackwardForwardSweepSolver(&grid));
-    }
 
-    //Load GS
-    std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt");
-    CHECK_FALSE(file.fail());
-    NetworkLoader loader(file);
-    std::unique_ptr<Network> net = loader.loadNetwork();
-    std::vector<GridSolver*> solvers;
-    for (Grid& grid : net->grids) {
-        solvers.push_back(new GaussSeidelSolver(&grid));
-    }
+    SECTION("example_network.txt"){
+        //Load BFS
+        std::ifstream fileBFS("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt");
+        CHECK_FALSE(fileBFS.fail());
+        NetworkLoader loaderBFS(fileBFS);
+        std::unique_ptr<Network> netBFS = loaderBFS.loadNetwork();
+        std::vector<GridSolver*> solversBFS;
+        for (Grid& grid : netBFS->grids) {
+            solversBFS.push_back(new BackwardForwardSweepSolver(&grid));
+        }
 
-    //Compare the result
-    for( unsigned long  i = 0; i < net->grids.size(); i++){
-        for( unsigned long j = 0; j < net->grids[i].nodes.size(); j++){
-            REQUIRE(net->grids[0].nodes[j].v.real() == netBFS->grids[0].nodes[j].v.real());
-            REQUIRE(net->grids[0].nodes[j].v.imag() == netBFS->grids[0].nodes[j].v.imag());
-            REQUIRE(net->grids[0].nodes[j].s.real() == netBFS->grids[0].nodes[j].s.real());
-            REQUIRE(net->grids[0].nodes[j].s.imag() == netBFS->grids[0].nodes[j].s.imag());
+        // 2 l (0.004, 0.002)
+        // 1 l (0.002, 0.001)
+        // 2 l (0.005, 0.004)
+        netBFS->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
+        netBFS->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
+        netBFS->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
+        for (GridSolver* solverBFS : solversBFS) {
+            solverBFS->solve();
+        }
+        
+        //Load GS
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt");
+        CHECK_FALSE(file.fail());
+        NetworkLoader loader(file);
+        std::unique_ptr<Network> net = loader.loadNetwork();
+        std::vector<GridSolver*> solvers;
+        for (Grid& grid : net->grids) {
+            solvers.push_back(new GaussSeidelSolver(&grid));
+        }
+
+        // 2 l (0.004, 0.002)
+        // 1 l (0.002, 0.001)
+        // 2 l (0.005, 0.004)
+        net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
+        net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
+        net->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
+
+        for (GridSolver* solver : solvers) {
+            solver->solve();
+        }
+    
+        //Compare the result
+        for( unsigned long  i = 0; i < net->grids.size(); i++){
+            for( unsigned long j = 0; j < net->grids[i].nodes.size(); j++){
+                if(net->grids[i].nodes[j].type == NodeType::MIDDLE){
+                    continue;
+                }
+                CHECK_THAT(net->grids[i].nodes[j].v.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.real(), 0.000001));
+                CHECK_THAT(net->grids[i].nodes[j].v.imag(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.imag(), 0.000001));
+                CHECK_THAT(net->grids[i].nodes[j].s.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].s.real(), 0.000001));
+                CHECK_THAT(net->grids[i].nodes[j].s.imag(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].s.imag(), 0.000001));
+            }
         }
     }
 }
+
+TEST_CASE("Compare treestructure","[validation]"){
+
+    SECTION("BackwardForwardSweepSolver"){
+        //Load normal network
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");
+        CHECK_FALSE(file.fail());
+        NetworkLoader loader(file);
+        std::unique_ptr<Network> net = loader.loadNetwork();
+        std::vector<GridSolver*> solvers;
+        for (Grid& grid : net->grids) {
+            solvers.push_back(new BackwardForwardSweepSolver(&grid));
+        }
+
+        // 2 l (0.004, 0.002)
+        // 1 l (0.002, 0.001)
+        // 2 l (0.005, 0.004)
+        net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
+        net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
+        net->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
+        for (GridSolver* solverBFS : solvers) {
+            solverBFS->solve();
+            
+        }
+        
+        //Load Single grid
+        std::ifstream fileSG("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_single_grid.txt");
+        CHECK_FALSE(fileSG.fail());
+        NetworkLoader loaderSG(fileSG);
+        std::unique_ptr<Network> netSG = loaderSG.loadNetwork();
+        std::vector<GridSolver*> solversSG;
+        for (Grid& grid : netSG->grids) {
+            solversSG.push_back(new BackwardForwardSweepSolver(&grid));
+        }
+
+        // 2 l (0.004, 0.002)
+        // 1 l (0.002, 0.001)
+        // 2 l (0.005, 0.004)
+        netSG->grids.at(0).nodes.at(3).s = -complex_t(0.004,0.002);
+        netSG->grids.at(0).nodes.at(4).s = -complex_t(0.002,0.001);
+        netSG->grids.at(0).nodes.at(5).s = -complex_t(0.005, 0.004);
+
+        for (GridSolver* solver : solversSG) {
+            solver->solve();
+        }
+
+        // std::cout << "net: " << std::endl;
+        // for (const Grid& grid : net->grids) {
+        //     for (const GridNode& node : grid.nodes) {
+        //         std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
+        //     }
+        // }
+        // std::cout << "SG: " << std::endl;
+        // for (const Grid& grid : netSG->grids) {
+        //     for (const GridNode& node : grid.nodes) {
+        //         std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
+        //     }
+        // }
+    
+        //Compare the result
+        for( unsigned long  i = 0; i < netSG->grids.size(); i++){
+            for( unsigned long j = 0; j < netSG->grids[i].nodes.size(); j++){
+                if(netSG->grids[i].nodes[j].type == NodeType::MIDDLE){
+                    continue;
+                }
+                CHECK_THAT(netSG->grids[i].nodes[j].v.real(), Catch::Matchers::WithinAbs(net->grids[i].nodes[j].v.real(), 0.000001));
+                CHECK_THAT(netSG->grids[i].nodes[j].v.imag(), Catch::Matchers::WithinAbs(net->grids[i].nodes[j].v.imag(), 0.000001));
+                CHECK_THAT(netSG->grids[i].nodes[j].s.real(), Catch::Matchers::WithinAbs(net->grids[i].nodes[j].s.real(), 0.000001));
+                CHECK_THAT(netSG->grids[i].nodes[j].s.imag(), Catch::Matchers::WithinAbs(net->grids[i].nodes[j].s.imag(), 0.000001));
+            }
+        }
+    }
+}  
+   
