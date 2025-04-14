@@ -1,8 +1,8 @@
 clear
 
 fprintf('Loading grid data... \n');
-%grid_directory = '+data/';
-grid_directory = '';
+grid_directory = '+data/';
+%grid_directory = '';
 %grid_file      = 'S433_Ekangen_Validation';
 grid_file      = 'S495_Linghem_Validation';
 
@@ -13,7 +13,7 @@ grid_data = load([grid_directory, grid_file]);
 
 %open file
 
-fd = fopen("output.txt", "w");
+fd = fopen("graph.txt", "w");
 
 
 % Now we have the whole structure and can generate the network:
@@ -58,6 +58,37 @@ fprintf(fd, "connections\n");
 
 % put %
 fprintf(fd, "%%");
-fprintf("Data converted! \n");
+fprintf("Graph converted! \n");
+
+fclose(fd);
+
+fprintf("Gathering variables...\n")
+fd = fopen("variables.txt", "w");
+
+
+U_bus = grid_data.U_bus;
+S_bus = grid_data.S_bus;
+
+
+fprintf(fd, "SBase: %f\n", grid_data.TransformerData.S_base);
+fprintf(fd, "UBase ( prim, sec): %f %f\n", grid_data.TransformerData.U_prim_base, grid_data.TransformerData.U_sec_base);
+fprintf(fd, "ZBase ( prim, sec): %f %f\n", grid_data.TransformerData.Z_prim_base, grid_data.TransformerData.Z_sec_base);
+fprintf(fd, "IBase ( prim, sec): %f %f\n", grid_data.TransformerData.I_prim_base, grid_data.TransformerData.I_sec_base);
+
+fprintf(fd, "U_bus\n");
+for n = 1:size(U_bus,1)
+    for m = 1:size(U_bus,2)
+        fprintf(fd,"%f ",U_bus(n,m));
+    end
+    fprintf(fd,"\n");
+end
+
+fprintf(fd, "S_bus\n");
+for n = 1:size(S_bus,1)
+    for m = 1:size(S_bus,2)
+        fprintf(fd,"%f ",S_bus(n,m));
+    end
+    fprintf(fd,"\n");
+end
 
 fclose(fd);
