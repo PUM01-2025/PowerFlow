@@ -58,26 +58,29 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
 
     SECTION("example_network.txt"){
         //Load BFS
-        std::ifstream fileBFS("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt");
-        CHECK_FALSE(fileBFS.fail());
-        NetworkLoader loaderBFS(fileBFS);
-        std::unique_ptr<Network> netBFS = loaderBFS.loadNetwork();
-        std::vector<GridSolver*> solversBFS;
-        for (Grid& grid : netBFS->grids) {
+        std::ifstream fileBFS("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt"); //Ladda in testfil
+        CHECK_FALSE(fileBFS.fail());                                            //Kommer ge en varning att om det blir fel i filinläsningen
+        NetworkLoader loaderBFS(fileBFS);                                       //Skapa en loader
+        std::unique_ptr<Network> netBFS = loaderBFS.loadNetwork();              //Ladda in nätveket
+        std::vector<GridSolver*> solversBFS;                                    //Vector att spara läsarna i
+        for (Grid& grid : netBFS->grids) {                                      //Loopa igenom nätet och lätt till en lösare för varje subnät
             solversBFS.push_back(new BackwardForwardSweepSolver(&grid));
         }
 
+        //Ladda in effektbelastningar
         // 2 l (0.004, 0.002)
         // 1 l (0.002, 0.001)
         // 2 l (0.005, 0.004)
         netBFS->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
         netBFS->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
         netBFS->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
+
+        //Loopa över alla lösare och kör dem
         for (GridSolver* solverBFS : solversBFS) {
             solverBFS->solve();
         }
         
-        //Load GS
+        //Load GS //Samma som ovan men för GaussSeidel
         std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt");
         CHECK_FALSE(file.fail());
         NetworkLoader loader(file);
@@ -104,6 +107,7 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
                 if(net->grids[i].nodes[j].type == NodeType::MIDDLE){
                     continue;
                 }
+                //Kollar att GS svaret är inom 0.000001 av BFS svaret med hjälp av en catch2 matcher
                 CHECK_THAT(net->grids[i].nodes[j].v.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.real(), 0.000001));
                 CHECK_THAT(net->grids[i].nodes[j].v.imag(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.imag(), 0.000001));
                 CHECK_THAT(net->grids[i].nodes[j].s.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].s.real(), 0.000001));
