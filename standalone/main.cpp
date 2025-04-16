@@ -9,10 +9,15 @@
 
 int main(int argc, char* argv[])
 {
-    std::ifstream file("../examples/example_network_single_grid.txt");
+    //std::ifstream file("../examples/example_network_single_grid.txt");
+    std::ifstream file("C:/Users/melvi/Kandidat01/examples/example_network_single_grid.txt");
+    if (!file) {
+        return -1;
+    }
     NetworkLoader loader(file);
     std::shared_ptr<Network> net = loader.loadNetwork();
     for (const Grid& grid : net->grids) {
+        std::cout << "Base " << grid.sBase << " " << grid.vBase << std::endl;
         for (const GridNode& node : grid.nodes) {
             std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
         }

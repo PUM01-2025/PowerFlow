@@ -13,7 +13,12 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-find_package(Matlab COMPONENTS MX MEX)
+
+add_subdirectory(src)
+add_subdirectory(standalone)
+add_subdirectory(tests)
+ 
+find_package(Matlab)
 
 if(Matlab_FOUND)
     message(STATUS "Matlab found: Adding matlab subdirectory.")
@@ -21,9 +26,3 @@ if(Matlab_FOUND)
 else()
     message(WARNING "Matlab not found: Skipping matlab subdirectory.")
 endif()
-
-
-add_subdirectory(src)
-add_subdirectory(standalone)
-add_subdirectory(tests)
- 
