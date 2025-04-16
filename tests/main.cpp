@@ -5,6 +5,7 @@
 #include "powerflow/BackwardForwardSweepSolver.hpp"
 #include "powerflow/GaussSeidelSolver.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
+#include "powerflow/NetworkAnalyzer.hpp"
 
 #include <fstream>
 #include <string>
@@ -189,4 +190,30 @@ TEST_CASE("Compare treestructure","[validation]"){
         }
     }
 }  
+//AUTHOR: Brenner      
+TEST_CASE("Choose solver", "[validation]"){
+    SECTION("NetworkAnalyzer"){
+
+    std::ifstream tree_file("../examples/test_network");                        //Ladda in exempelnätverk med trädstruktur
+    CHECK_FALSE(tree_file.fail());                                              //Säkerställ att filen kunde laddas in
+    NetworkLoader tree_loader(tree_file);                                       //Skapa en loader
+    std::unique_ptr<Network> tree_network = tree_loader.loadNetwork();          //Spara som nätverk
+    
+    for(int i = 0; tree_network->grids.size(); i++){
+        
+        REQUIRE(determine_solver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
+    }
    
+    std::ifstream cycle_file("../examples/test_network_cycle");                 //Ladda in exempelnätverk med cykel
+    CHECK_FALSE(cycle_file.fail());                                             //Säkerställ att filen kunde laddas in
+    NetworkLoader cycle_loader(cycle_file);                                     //Skapa en loader
+    std::unique_ptr<Network> cycle_network = cycle_loader.loadNetwork();        //Spara som nätverk
+    bool containsCycle = false;                                                 //Blir sann om det finns åtminstone en cykel
+    for(int i = 0; tree_network->grids.size(); i++){
+        if(determine_solver(tree_network->grids[i]) == GAUSSSEIDEL){
+            containsCycle = true;
+        }
+    }
+    REQUIRE(containsCycle);
+    }
+}
