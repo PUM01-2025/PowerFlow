@@ -17,7 +17,8 @@ grid
 0 1 (0.02, 0.03)
 0 2 (0.03, 0.03)
 %
-1
+# an invalid no index 5
+5
 2
 %
 connections

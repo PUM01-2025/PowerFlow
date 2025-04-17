@@ -4,6 +4,9 @@
 # Kommandot "grid" indikerar att ett nytt grid skapas.
 grid
 
+# Här anges baser.
+X 1 
+
 # Här följer kabeldata på formatet <startnod> <slutnod> <impedans>.
 # Listan måste med ett %-tecken.
 0 1 (0.05, 0.05)
@@ -17,7 +20,8 @@ grid
 %
 
 # Första lågspänningsnätet.
-gridd
+grid
+1 1
 0 1 (0.02, 0.02)
 1 2 (0.05, 0.03)
 %
@@ -26,6 +30,7 @@ gridd
 
 # Andra lågspänningsnätet.
 grid
+1 1
 0 1 (0.02, 0.03)
 0 2 (0.03, 0.03)
 %

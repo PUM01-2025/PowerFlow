@@ -12,48 +12,48 @@
 
 
 //CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
+
 TEST_CASE("Networkloader input", "[!throws]" ) {
-    
-    SECTION("Invalid command"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_command_network.txt");
+    SECTION("Invalid S base"){
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_S.txt");
         CHECK_FALSE(file.fail()); 
         NetworkLoader loader(file);
-        REQUIRE_THROWS_AS(loader.loadNetwork() , std::runtime_error);
+        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid S base"));
+    }
+    SECTION("Invalid V base"){
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_V.txt");
+        CHECK_FALSE(file.fail()); 
+        NetworkLoader loader(file);
+        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid V base"));
+    }
+    SECTION("Invalid S base"){
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_command.txt");
+        CHECK_FALSE(file.fail()); 
+        NetworkLoader loader(file);
         REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid command"));
     }
-   
-    // SECTION("Invalid edge parent index"){
-    //     std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_node_index.txt");
-    //     CHECK_FALSE(file.fail());
-    //     NetworkLoader loader(file);
-    //     REQUIRE_THROWS_AS(loader.loadNetwork() , std::runtime_error);
-    //     REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid node index"));
-    // }
-    /*
-    #These tests are deprecated as the cover cases that can't be reached
-
-    SECTION("Invalid node count"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/invalid_node_count_network.txt");
+    SECTION("Empty grid"){
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/empty_grid.txt");
         CHECK_FALSE(file.fail()); 
         NetworkLoader loader(file);
-        loader.loadNetwork();
-
-        REQUIRE_THROWS_AS(loader.loadNetwork() , std::runtime_error);
-        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid node count"));
+        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Empty grid"));
     }
-
-    SECTION("Missing end of list (%)"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/missing_end_list_network.txt");
+    SECTION("Invalid node index"){
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_node_index.txt");
         CHECK_FALSE(file.fail()); 
         NetworkLoader loader(file);
-        loader.loadNetwork();
-
-        REQUIRE_THROWS_AS(loader.loadNetwork() , std::runtime_error);
-        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Missing end-of-list indicator"));
+        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid node index"));
     }
-    */
+
+    SECTION("Invalid end of list"){ //This does not work, check the test file to see what error messeges you get instead
+        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_end_of_list.txt");
+        CHECK_FALSE(file.fail()); 
+        NetworkLoader loader(file);
+        //REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Missing end-of-list indicator"));
+    }
+
+    
 }
-
 
 TEST_CASE("Compare output of BFS and GS","[validation]"){
 
@@ -69,9 +69,6 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
         }
 
         //Ladda in effektbelastningar
-        // 2 l (0.004, 0.002)
-        // 1 l (0.002, 0.001)
-        // 2 l (0.005, 0.004)
         netBFS->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
         netBFS->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
         netBFS->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
@@ -90,14 +87,9 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
         for (Grid& grid : net->grids) {
             solvers.push_back(new GaussSeidelSolver(&grid));
         }
-
-        // 2 l (0.004, 0.002)
-        // 1 l (0.002, 0.001)
-        // 2 l (0.005, 0.004)
         net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
         net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
         net->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
-
         for (GridSolver* solver : solvers) {
             solver->solve();
         }
@@ -119,175 +111,69 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
 }
 
 TEST_CASE("Compare treestructure","[validation]"){
+    std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");
+    CHECK_FALSE(file.fail()); 
+    NetworkLoader loader(file);
+    std::shared_ptr<Network> net = loader.loadNetwork();
+    PowerFlowSolver pfs(net);
+    std::vector<complex_t> P = {
+        {0.002, 0.001},
+        {0.005, 0.004},
+        {0.004, 0.002}
+    };  
+    std::vector<complex_t> U = pfs.solve(P);
 
-    SECTION("BackwardForwardSweepSolver"){
-        //Load normal network
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");
-        CHECK_FALSE(file.fail());
-        NetworkLoader loader(file);
-        std::unique_ptr<Network> net = loader.loadNetwork();
-        std::vector<GridSolver*> solvers;
-        for (Grid& grid : net->grids) {
-            solvers.push_back(new BackwardForwardSweepSolver(&grid));
-        }
+    std::ifstream fileSingle("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_single_grid.txt");
+    CHECK_FALSE(fileSingle.fail()); 
+    NetworkLoader loaderSingle(fileSingle);
+    std::shared_ptr<Network> netSingle = loaderSingle.loadNetwork();
+    PowerFlowSolver pfsSingle(netSingle);
+    std::vector<complex_t> PSingle = {
+        {0.005, 0.004},
+        {0.004, 0.002},
+        {0.002, 0.001}
+    };
+    std::vector<complex_t> USingle = pfsSingle.solve(PSingle);
 
-        // 2 l (0.004, 0.002)
-        // 1 l (0.002, 0.001)
-        // 2 l (0.005, 0.004)
-        net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
-        net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
-        net->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
-        for (GridSolver* solverBFS : solvers) {
-            solverBFS->solve();
-            
-        }
-        
-        //Load Single grid
-        std::ifstream fileSG("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_single_grid.txt");
-        CHECK_FALSE(fileSG.fail());
-        NetworkLoader loaderSG(fileSG);
-        std::unique_ptr<Network> netSG = loaderSG.loadNetwork();
-        std::vector<GridSolver*> solversSG;
-        for (Grid& grid : netSG->grids) {
-            solversSG.push_back(new BackwardForwardSweepSolver(&grid));
-        }
+    CHECK_THAT(netSingle->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[3].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[4].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.real(), 0.000001));
 
-        // 2 l (0.004, 0.002)
-        // 1 l (0.002, 0.001)
-        // 2 l (0.005, 0.004)
-        netSG->grids.at(0).nodes.at(7).s = -complex_t(0.004,0.002);
-        netSG->grids.at(0).nodes.at(5).s = -complex_t(0.002,0.001);
-        netSG->grids.at(0).nodes.at(6).s = -complex_t(0.005, 0.004);
+    CHECK_THAT(netSingle->grids[0].nodes[1].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[2].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[3].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[4].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[5].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[6].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[7].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.imag(), 0.000001));
 
-        for (GridSolver* solver : solversSG) {
-            solver->solve();
-        }
+    CHECK_THAT(netSingle->grids[0].nodes[1].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[2].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[3].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[4].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[5].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[6].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[7].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.real(), 0.000001));
 
-        std::cout << "net: " << std::endl;
-        for (const Grid& grid : net->grids) {
-            for (const GridNode& node : grid.nodes) {
-                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-            }
-        }
-
-        std::cout << "SG: " << std::endl;
-        for (const Grid& grid : netSG->grids) {
-            for (const GridNode& node : grid.nodes) {
-                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-            }
-        }
+    CHECK_THAT(netSingle->grids[0].nodes[1].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[2].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[3].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[4].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[5].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[6].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[7].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.imag(), 0.000001));
     
-        //Compare the result real
-        CHECK_THAT(netSG->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[3].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[4].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.real(), 0.000001));
-
-        CHECK_THAT(netSG->grids[0].nodes[1].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[2].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[3].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[4].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[5].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[6].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[7].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.imag(), 0.000001));
-
-        CHECK_THAT(netSG->grids[0].nodes[1].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[2].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[3].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[4].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[5].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[6].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[7].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.real(), 0.000001));
-
-        CHECK_THAT(netSG->grids[0].nodes[1].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[2].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[3].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[4].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[5].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[6].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.imag(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[7].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.imag(), 0.000001));
-        
-    }
-
-    SECTION("GaussSeidel"){
-        return;
-        //Load normal network
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");
-        CHECK_FALSE(file.fail());
-        NetworkLoader loader(file);
-        std::unique_ptr<Network> net = loader.loadNetwork();
-        std::vector<GridSolver*> solvers;
-        for (Grid& grid : net->grids) {
-            solvers.push_back(new GaussSeidelSolver(&grid));
-        }
-
-        // 2 l (0.004, 0.002)
-        // 1 l (0.002, 0.001)
-        // 2 l (0.005, 0.004)
-        net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
-        net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
-        net->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
-        for (GridSolver* solverBFS : solvers) {
-            solverBFS->solve();
-            
-        }
-        
-        //Load Single grid
-        std::ifstream fileSG("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_single_grid.txt");
-        CHECK_FALSE(fileSG.fail());
-        NetworkLoader loaderSG(fileSG);
-        std::unique_ptr<Network> netSG = loaderSG.loadNetwork();
-        std::vector<GridSolver*> solversSG;
-        for (Grid& grid : netSG->grids) {
-            solversSG.push_back(new GaussSeidelSolver(&grid));
-        }
-
-        // 2 l (0.004, 0.002)
-        // 1 l (0.002, 0.001)
-        // 2 l (0.005, 0.004)
-        netSG->grids.at(0).nodes.at(7).s = -complex_t(0.004,0.002);
-        netSG->grids.at(0).nodes.at(5).s = -complex_t(0.002,0.001);
-        netSG->grids.at(0).nodes.at(6).s = -complex_t(0.005, 0.004);
-
-        for (GridSolver* solver : solversSG) {
-            solver->solve();
-        }
-
-        std::cout << "net: " << std::endl;
-        for (const Grid& grid : net->grids) {
-            for (const GridNode& node : grid.nodes) {
-                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-            }
-        }
-
-        std::cout << "SG: " << std::endl;
-        for (const Grid& grid : netSG->grids) {
-            for (const GridNode& node : grid.nodes) {
-                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-            }
-        }
-    
-        //Compare the result
-        CHECK_THAT(netSG->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[3].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[4].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.real(), 0.000001));
-        CHECK_THAT(netSG->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.real(), 0.000001));
-        
-    }
-}  
-
+}
 
 //AUTHOR: Brenner   
    TEST_CASE("Choose solver", "[validation]"){
     SECTION("NetworkAnalyzer"){
 
-    std::ifstream tree_file("../examples/test_network");                        //Ladda in exempelnätverk med trädstruktur
+    std::ifstream tree_file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");                        //Ladda in exempelnätverk med trädstruktur
     CHECK_FALSE(tree_file.fail());                                              //Säkerställ att filen kunde laddas in
     NetworkLoader tree_loader(tree_file);                                       //Skapa en loader
     std::unique_ptr<Network> tree_network = tree_loader.loadNetwork();          //Spara som nätverk
@@ -297,7 +183,7 @@ TEST_CASE("Compare treestructure","[validation]"){
         REQUIRE(determine_solver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
     }
    
-    std::ifstream cycle_file("../examples/test_network_cycle");                 //Ladda in exempelnätverk med cykel
+    std::ifstream cycle_file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_cycle.txt");                 //Ladda in exempelnätverk med cykel
     CHECK_FALSE(cycle_file.fail());                                             //Säkerställ att filen kunde laddas in
     NetworkLoader cycle_loader(cycle_file);                                     //Skapa en loader
     std::unique_ptr<Network> cycle_network = cycle_loader.loadNetwork();        //Spara som nätverk

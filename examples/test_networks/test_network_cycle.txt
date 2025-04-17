@@ -3,6 +3,9 @@
 # Kommandot "grid" indikerar att ett nytt grid skapas.
 grid
 
+# Här anges baser.
+1 1
+
 # H�r f�ljer kabeldata p� formatet <startnod> <slutnod> <impedans>.
 # Listan m�ste med ett %-tecken.
 0 1 (0.05, 0.05)
