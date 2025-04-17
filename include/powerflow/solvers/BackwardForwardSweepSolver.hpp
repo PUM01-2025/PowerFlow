@@ -1,7 +1,7 @@
 #ifndef BACKWARD_FORWARD_SWEEP_H
 #define BACKWARD_FORWARD_SWEEP_H
 
-#include "powerflow/GridSolver.hpp"
+#include "powerflow/solvers/GridSolver.hpp"
 
 class BackwardForwardSweepSolver : public GridSolver {
 public:

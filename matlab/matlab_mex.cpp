@@ -39,15 +39,18 @@ public:
         }
         else if (command == "solve") {
             if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::COMPLEX_DOUBLE)
-                throw std::invalid_argument("Missing P vector");
+                throw std::invalid_argument("Missing S vector");
+            if (inputs.size() < 3 || inputs[2].getType() != matlab::data::ArrayType::COMPLEX_DOUBLE)
+                throw std::invalid_argument("Missing V vector");
 
             matlab::data::TypedArray<complex_t> matlabS = inputs[1];
-            std::vector<complex_t> P(matlabS.begin(), matlabS.end());
+            matlab::data::TypedArray<complex_t> matlabV = inputs[2];
+            std::vector<complex_t> S(matlabS.begin(), matlabS.end());
+            std::vector<complex_t> V(matlabV.begin(), matlabV.end());
 
-            std::vector<complex_t> U = solver->solve(P);
+            std::vector<complex_t> Vres = solver->solve(S, V);
             matlab::data::ArrayFactory factory;
-            outputs[0] = factory.createArray({ 1, U.size() }, U.begin(), U.end());
-            
+            outputs[0] = factory.createArray({ 1, Vres.size() }, Vres.begin(), Vres.end());
         }
         else
             throw std::invalid_argument("Invalid command");

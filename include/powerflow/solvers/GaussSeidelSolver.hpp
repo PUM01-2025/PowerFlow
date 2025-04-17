@@ -1,7 +1,7 @@
 #ifndef GAUSS_SEIDEL_SOLVER_H
 #define GAUSS_SEIDEL_SOLVER_H
 
-#include "powerflow/GridSolver.hpp"
+#include "powerflow/solvers/GridSolver.hpp"
 
 class GaussSeidelSolver : public GridSolver {
 public:

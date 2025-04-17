@@ -1,6 +1,6 @@
 #include "powerflow/NetworkLoader.hpp"
-#include "powerflow/GaussSeidelSolver.hpp"
-#include "powerflow/BackwardForwardSweepSolver.hpp"
+#include "powerflow/solvers/GaussSeidelSolver.hpp"
+#include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/logger/CppLogger.hpp"
 #include <iostream>
@@ -29,7 +29,8 @@ int main(int argc, char* argv[])
         {0.005, 0.004},
         {0.004, 0.002}
     };
-    std::vector<complex_t> U = pfs.solve(P);
+    std::vector<complex_t> V = { {1, 0} };
+    std::vector<complex_t> U = pfs.solve(P, V);
 
     for (const Grid& grid : net->grids) {
         for (const GridNode& node : grid.nodes) {

@@ -1,11 +1,17 @@
-#include "powerflow/BackwardForwardSweepSolver.hpp"
+#include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 
 static const double SQRT3 = 1.73205080757;
 static const int MAX_ITER = 10000;
 static const double PRECISION = 1e-10;
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid, Logger* logger) :
-	GridSolver(grid, logger) { }
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid, Logger* const logger) :
+	GridSolver(grid, logger) {
+	/*for (int i = 0; )
+		if (node.type == SLACK) {
+			rootIdx = 0;
+		}
+	}*/
+}
 
 int BackwardForwardSweepSolver::solve() {
 	int iter = 0;
