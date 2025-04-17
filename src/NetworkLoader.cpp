@@ -30,6 +30,14 @@ Grid NetworkLoader::loadGrid()
 {
     Grid grid;
     std::string line;
+
+    getNextLine(line);
+    std::stringstream sstream(line); // Dum syntax, eftersom troligen tolkar första edge som basvärden!!!! Lägg till prefix "base" eller motsv.??
+    if (!(sstream >> grid.sBase) || grid.sBase == 0)
+        throw NetworkLoaderError("Invalid S base");
+    if (!(sstream >> grid.vBase) || grid.vBase == 0)
+        throw NetworkLoaderError("Invalid V base");
+
     int nodeCount = 0; // Number of nodes in the grid
 
     // Get edges.
@@ -45,6 +53,8 @@ Grid NetworkLoader::loadGrid()
             throw NetworkLoaderError("Invalid edge child index");
         if (!(sstream >> edge.z_c) || edge.z_c == (complex_t)0)
             throw NetworkLoaderError("Invalid edge impedance");
+
+        edge.z_c = edge.z_c / ((grid.vBase * grid.vBase) / grid.sBase); // Convert to per-unit
         
         grid.edges.push_back(edge);
         nodeCount = std::max(nodeCount, std::max(edge.parent + 1, edge.child + 1));
@@ -56,6 +66,8 @@ Grid NetworkLoader::loadGrid()
 
     grid.nodes.resize(nodeCount);
     grid.nodes.at(0).type = NodeType::SLACK;
+    //grid.nodes.at(0).v = { 1.001074218750000, 0 };
+    grid.nodes.at(0).v = { 1, 0 };
 
     for (size_t edgeIdx = 0; edgeIdx < grid.edges.size(); ++edgeIdx) {
         GridEdge& edge = grid.edges[edgeIdx];
@@ -75,9 +87,6 @@ Grid NetworkLoader::loadGrid()
             throw NetworkLoaderError("Invalid node index");
         grid.nodes.at(nodeIdx).type = NodeType::LOAD;
     }
-    if (line != "%")
-        throw NetworkLoaderError("Missing end-of-list indicator");
-    
     return grid;
 }
 
@@ -101,8 +110,6 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
             throw NetworkLoaderError("Invalid PQ node index");
         connections.push_back(connection);
     }
-    if (line != "%")
-        throw NetworkLoaderError("Missing end-of-list indicator");
     return connections;
 }
 

@@ -91,4 +91,6 @@ for n = 1:size(S_bus,1)
     fprintf(fd,"\n");
 end
 
+fprintf(fd, "Variables gathered!");
+
 fclose(fd);
