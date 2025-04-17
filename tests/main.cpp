@@ -13,47 +13,36 @@
 
 //CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
 
+bool test_input_error_message(std::string errorMessage, std::string filePath){
+    std::ifstream file(filePath);
+    CHECK_FALSE(file.fail()); 
+    NetworkLoader loader(file);
+    REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains(errorMessage)); //should fail and halt so true is not returned
+    return true;
+}
+
 TEST_CASE("Networkloader input", "[!throws]" ) {
-    SECTION("Invalid S base"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_S.txt");
-        CHECK_FALSE(file.fail()); 
-        NetworkLoader loader(file);
-        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid S base"));
-    }
-    SECTION("Invalid V base"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_V.txt");
-        CHECK_FALSE(file.fail()); 
-        NetworkLoader loader(file);
-        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid V base"));
-    }
-    SECTION("Invalid S base"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_command.txt");
-        CHECK_FALSE(file.fail()); 
-        NetworkLoader loader(file);
-        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid command"));
-    }
-    SECTION("Empty grid"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/empty_grid.txt");
-        CHECK_FALSE(file.fail()); 
-        NetworkLoader loader(file);
-        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Empty grid"));
-    }
-    SECTION("Invalid node index"){
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_node_index.txt");
-        CHECK_FALSE(file.fail()); 
-        NetworkLoader loader(file);
-        REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Invalid node index"));
-    }
+    REQUIRE(test_input_error_message("Invalid S base", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_S.txt"));
+    REQUIRE(test_input_error_message("Invalid V base", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_V.txt"));
+    REQUIRE(test_input_error_message("Invalid command", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_command.txt"));
+    REQUIRE(test_input_error_message("Invalid node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_node_index.txt"));
+    REQUIRE(test_input_error_message("Empty grid", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/empty_grid.txt"));
+    REQUIRE(test_input_error_message("Invalid edge parent index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_edge_parent_index.txt"));
+    REQUIRE(test_input_error_message("Invalid edge child index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_edge_child_index.txt"));
+    REQUIRE(test_input_error_message("Invalid edge impedance", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_edge_impedance_index.txt"));
+    REQUIRE(test_input_error_message("Invalid slack grid index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_slack_grid_index.txt"));
+    REQUIRE(test_input_error_message("Invalid slack node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_slack_node_index.txt"));
+    REQUIRE(test_input_error_message("Invalid PQ grid index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_PQ_grid_index.txt"));
+    REQUIRE(test_input_error_message("Invalid PQ node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_PQ_node_index.txt"));
 
-    SECTION("Invalid end of list"){ //This does not work, check the test file to see what error messeges you get instead
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_end_of_list.txt");
-        CHECK_FALSE(file.fail()); 
-        NetworkLoader loader(file);
-        //REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Missing end-of-list indicator"));
-    }
-
+    //This does not work, check the test file to see what error messeges you get instead
+    std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_end_of_list.txt");
+    CHECK_FALSE(file.fail()); 
+    NetworkLoader loader(file);
+    //REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Missing end-of-list indicator"));
     
 }
+
 
 TEST_CASE("Compare output of BFS and GS","[validation]"){
 
