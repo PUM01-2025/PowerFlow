@@ -10,7 +10,8 @@
 #include <fstream>
 #include <string>
 
-
+//std::string localPath = "/Users/simonhansson/U3/Kandidat01/";
+std::string localPath = "";
 //CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
 
 bool test_input_error_message(std::string errorMessage, std::string filePath){
@@ -22,21 +23,21 @@ bool test_input_error_message(std::string errorMessage, std::string filePath){
 }
 
 TEST_CASE("Networkloader input", "[!throws]" ) {
-    REQUIRE(test_input_error_message("Invalid S base", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_S.txt"));
-    REQUIRE(test_input_error_message("Invalid V base", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_base_V.txt"));
-    REQUIRE(test_input_error_message("Invalid command", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_command.txt"));
-    REQUIRE(test_input_error_message("Invalid node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_node_index.txt"));
-    REQUIRE(test_input_error_message("Empty grid", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/empty_grid.txt"));
-    REQUIRE(test_input_error_message("Invalid edge parent index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_edge_parent_index.txt"));
-    REQUIRE(test_input_error_message("Invalid edge child index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_edge_child_index.txt"));
-    REQUIRE(test_input_error_message("Invalid edge impedance", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_edge_impedance_index.txt"));
-    REQUIRE(test_input_error_message("Invalid slack grid index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_slack_grid_index.txt"));
-    REQUIRE(test_input_error_message("Invalid slack node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_slack_node_index.txt"));
-    REQUIRE(test_input_error_message("Invalid PQ grid index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_PQ_grid_index.txt"));
-    REQUIRE(test_input_error_message("Invalid PQ node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_PQ_node_index.txt"));
+    REQUIRE(test_input_error_message("Invalid S base", localPath + "examples/test_networks/invalid_base_S.txt"));
+    REQUIRE(test_input_error_message("Invalid V base", localPath + "examples/test_networks/invalid_base_V.txt"));
+    REQUIRE(test_input_error_message("Invalid command", localPath + "examples/test_networks/invalid_command.txt"));
+    REQUIRE(test_input_error_message("Invalid node index", localPath + "examples/test_networks/invalid_node_index.txt"));
+    REQUIRE(test_input_error_message("Empty grid", localPath +  "examples/test_networks/empty_grid.txt"));
+    REQUIRE(test_input_error_message("Invalid edge parent index", localPath + "examples/test_networks/invalid_edge_parent_index.txt"));
+    REQUIRE(test_input_error_message("Invalid edge child index", localPath + "examples/test_networks/invalid_edge_child_index.txt"));
+    REQUIRE(test_input_error_message("Invalid edge impedance", localPath + "examples/test_networks/invalid_edge_impedance_index.txt"));
+    REQUIRE(test_input_error_message("Invalid slack grid index", localPath + "examples/test_networks/invalid_slack_grid_index.txt"));
+    REQUIRE(test_input_error_message("Invalid slack node index", localPath + "examples/test_networks/invalid_slack_node_index.txt"));
+    REQUIRE(test_input_error_message("Invalid PQ grid index", localPath + "examples/test_networks/invalid_PQ_grid_index.txt"));
+    REQUIRE(test_input_error_message("Invalid PQ node index", localPath + "examples/test_networks/invalid_PQ_node_index.txt"));
 
     //This does not work, check the test file to see what error messeges you get instead
-    std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_end_of_list.txt");
+    std::ifstream file(localPath + "examples/test_networks/invalid_end_of_list.txt");
     CHECK_FALSE(file.fail()); 
     NetworkLoader loader(file);
     //REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Missing end-of-list indicator"));
@@ -47,7 +48,7 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
 
     SECTION("example_network.txt"){
         //Load BFS
-        std::ifstream fileBFS("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt"); //Ladda in testfil
+        std::ifstream fileBFS(localPath + "examples/example_network.txt"); //Ladda in testfil
         CHECK_FALSE(fileBFS.fail());                                            //Kommer ge en varning att om det blir fel i filinläsningen
         NetworkLoader loaderBFS(fileBFS);                                       //Skapa en loader
         std::unique_ptr<Network> netBFS = loaderBFS.loadNetwork();              //Ladda in nätveket
@@ -67,7 +68,7 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
         }
         
         //Load GS //Samma som ovan men för GaussSeidel
-        std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/example_network.txt");
+        std::ifstream file(localPath + "examples/example_network.txt");
         CHECK_FALSE(file.fail());
         NetworkLoader loader(file);
         std::unique_ptr<Network> net = loader.loadNetwork();
@@ -99,7 +100,7 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
 }
 
 TEST_CASE("Compare treestructure","[validation]"){
-    std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");
+    std::ifstream file(localPath + "examples/test_networks/test_network.txt");
     CHECK_FALSE(file.fail()); 
     NetworkLoader loader(file);
     std::shared_ptr<Network> net = loader.loadNetwork();
@@ -111,7 +112,7 @@ TEST_CASE("Compare treestructure","[validation]"){
     };  
     std::vector<complex_t> U = pfs.solve(P);
 
-    std::ifstream fileSingle("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_single_grid.txt");
+    std::ifstream fileSingle(localPath + "examples/test_networks/test_network_single_grid.txt");
     CHECK_FALSE(fileSingle.fail()); 
     NetworkLoader loaderSingle(fileSingle);
     std::shared_ptr<Network> netSingle = loaderSingle.loadNetwork();
