@@ -34,7 +34,7 @@ TEST_CASE("Networkloader input", "[!throws]" ) {
     REQUIRE(test_input_error_message("Invalid slack node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_slack_node_index.txt"));
     REQUIRE(test_input_error_message("Invalid PQ grid index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_PQ_grid_index.txt"));
     REQUIRE(test_input_error_message("Invalid PQ node index", "/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_PQ_node_index.txt"));
-
+    
     //This does not work, check the test file to see what error messeges you get instead
     std::ifstream file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/invalid_end_of_list.txt");
     CHECK_FALSE(file.fail()); 
