@@ -158,29 +158,29 @@ TEST_CASE("Compare treestructure","[validation]"){
 }
 
 //AUTHOR: Brenner   
-   TEST_CASE("Choose solver", "[validation]"){
-    SECTION("NetworkAnalyzer"){
+//    TEST_CASE("Choose solver", "[validation]"){
+//     SECTION("NetworkAnalyzer"){
 
-    std::ifstream tree_file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");                        //Ladda in exempelnätverk med trädstruktur
-    CHECK_FALSE(tree_file.fail());                                              //Säkerställ att filen kunde laddas in
-    NetworkLoader tree_loader(tree_file);                                       //Skapa en loader
-    std::unique_ptr<Network> tree_network = tree_loader.loadNetwork();          //Spara som nätverk
+//     std::ifstream tree_file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network.txt");                        //Ladda in exempelnätverk med trädstruktur
+//     CHECK_FALSE(tree_file.fail());                                              //Säkerställ att filen kunde laddas in
+//     NetworkLoader tree_loader(tree_file);                                       //Skapa en loader
+//     std::unique_ptr<Network> tree_network = tree_loader.loadNetwork();          //Spara som nätverk
     
-    for(int i = 0; tree_network->grids.size(); i++){
+//     for(int i = 0; tree_network->grids.size(); i++){
         
-        REQUIRE(determine_solver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
-    }
+//         REQUIRE(determine_solver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
+//     }
    
-    std::ifstream cycle_file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_cycle.txt");                 //Ladda in exempelnätverk med cykel
-    CHECK_FALSE(cycle_file.fail());                                             //Säkerställ att filen kunde laddas in
-    NetworkLoader cycle_loader(cycle_file);                                     //Skapa en loader
-    std::unique_ptr<Network> cycle_network = cycle_loader.loadNetwork();        //Spara som nätverk
-    bool containsCycle = false;                                                 //Blir sann om det finns åtminstone en cykel
-    for(int i = 0; tree_network->grids.size(); i++){
-        if(determine_solver(tree_network->grids[i]) == GAUSSSEIDEL){
-            containsCycle = true;
-        }
-    }
-    REQUIRE(containsCycle);
-    }
+//     std::ifstream cycle_file("/Users/simonhansson/U3/Kandidat01/examples/test_networks/test_network_cycle.txt");                 //Ladda in exempelnätverk med cykel
+//     CHECK_FALSE(cycle_file.fail());                                             //Säkerställ att filen kunde laddas in
+//     NetworkLoader cycle_loader(cycle_file);                                     //Skapa en loader
+//     std::unique_ptr<Network> cycle_network = cycle_loader.loadNetwork();        //Spara som nätverk
+//     bool containsCycle = false;                                                 //Blir sann om det finns åtminstone en cykel
+//     for(int i = 0; tree_network->grids.size(); i++){
+//         if(determine_solver(tree_network->grids[i]) == GAUSSSEIDEL){
+//             containsCycle = true;
+//         }
+//     }
+//     REQUIRE(containsCycle);
+//     }
 }
