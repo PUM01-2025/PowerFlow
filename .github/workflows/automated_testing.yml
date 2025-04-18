@@ -22,3 +22,9 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build
+
+      - name: Show test log on failure
+        if: failure()
+        run: |
+          echo "===== LastTest.log ====="
+          cat build/Testing/Temporary/LastTest.log || echo "Log file not found"
