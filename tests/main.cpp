@@ -18,7 +18,7 @@
 // std::filesystem::path p = "examples/test_networks";
 std::string Path = std::filesystem::current_path();
 size_t position = Path.find("Kandidat01");   
-std::string localPath = Path.erase(position+11, std::string::npos);
+std::string localPath = Path.erase(position+11, std::string::npos) + "Kandidat01";
 
 
 
