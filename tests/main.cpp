@@ -11,17 +11,13 @@
 #include <string>
 #include <filesystem>
 
-//std::string localPath = "/Users/simonhansson/U3/Kandidat01/";
-//std::string localPath = "/home/runner/work/Kandidat01/Kandidat01/";
-//std::string localPath = "../";
-//CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
-// std::filesystem::path p = "examples/test_networks";
-std::string Path = std::filesystem::current_path();
+std::string Path = std::filesystem::current_path().string();
 size_t position = Path.find("Kandidat01");   
-std::string localPath = Path.erase(position+11, std::string::npos) + "Kandidat01/";
+std::string localPath = Path.erase(position+11, std::string::npos) + "Kandidat01/";  //github vm has an extra Kandidat01 folder
+//std::string localPath = Path.erase(position+11, std::string::npos);
 
 
-
+//CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
 bool test_input_error_message(std::string errorMessage, std::string filePath){
     std::ifstream file(filePath);
     CHECK_FALSE(file.fail()); 
