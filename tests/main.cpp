@@ -11,7 +11,7 @@
 #include <string>
 
 //std::string localPath = "/Users/simonhansson/U3/Kandidat01/";
-std::string localPath = "";
+std::string localPath = "./";
 //CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
 
 bool test_input_error_message(std::string errorMessage, std::string filePath){
