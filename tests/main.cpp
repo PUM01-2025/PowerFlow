@@ -31,6 +31,7 @@ bool test_input_error_message(std::string errorMessage, std::string filePath){
 }
 
 TEST_CASE("Networkloader input", "[!throws]" ) {
+    std::cout << "LOCALPATH: " << localPath << std::endl;
     REQUIRE(test_input_error_message("Invalid S base", localPath + "examples/test_networks/invalid_base_S.txt"));
     REQUIRE(test_input_error_message("Invalid V base", localPath + "examples/test_networks/invalid_base_V.txt"));
     REQUIRE(test_input_error_message("Invalid command", localPath + "examples/test_networks/invalid_command.txt"));
