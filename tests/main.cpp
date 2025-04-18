@@ -9,11 +9,18 @@
 
 #include <fstream>
 #include <string>
+#include <filesystem>
 
 //std::string localPath = "/Users/simonhansson/U3/Kandidat01/";
 //std::string localPath = "/home/runner/work/Kandidat01/Kandidat01/";
-std::string localPath = "../";
+//std::string localPath = "../";
 //CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
+// std::filesystem::path p = "examples/test_networks";
+std::string Path = std::filesystem::current_path();
+size_t position = Path.find("Kandidat01");   
+std::string localPath = Path.erase(position+11, std::string::npos);
+
+
 
 bool test_input_error_message(std::string errorMessage, std::string filePath){
     std::ifstream file(filePath);
