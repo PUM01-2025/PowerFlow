@@ -19,13 +19,13 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Configure project
-        run: cmake -S . -B build 
+        run: cmake -S . -B build -DGITHUB_VM=ON
 
       - name: Build project
         run: cmake --build build
 
       - name: Run tests
-        run: ctest --test-dir build -C Debug -DGITHUB_VM=ON
+        run: ctest --test-dir build -C Debug
  
       - name: Show test log on failure
         if: failure()
