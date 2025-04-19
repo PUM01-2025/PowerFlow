@@ -2,6 +2,8 @@
 
 # Kommandot "grid" indikerar att ett nytt grid skapas.
 grid
+# Här anges baser.
+1 1
 
 # Här följer kabeldata på formatet <startnod> <slutnod> <impedans>.
 # Listan måste med ett %-tecken.

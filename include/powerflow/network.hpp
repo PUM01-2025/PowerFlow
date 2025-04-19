@@ -40,7 +40,8 @@ struct GridConnection {
 struct Grid {
     std::vector<GridEdge> edges{};
     std::vector<GridNode> nodes{};
-    // Base base;
+    double sBase = 1;
+    double vBase = 1;
 };
 
 // Network of grids with connections between them.
