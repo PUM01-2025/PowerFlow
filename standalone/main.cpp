@@ -2,7 +2,7 @@
 #include "powerflow/GaussSeidelSolver.hpp"
 #include "powerflow/BackwardForwardSweepSolver.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
-
+#include "powerflow/logger/CppLogger.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -22,8 +22,8 @@ int main(int argc, char* argv[])
             std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
         }
     }
-
-    PowerFlowSolver pfs(net);
+	CppLogger logger(std::cout);
+    PowerFlowSolver pfs(net, &logger);
     std::vector<complex_t> P = {
         {0.002, 0.001},
         {0.005, 0.004},

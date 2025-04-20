@@ -1,7 +1,7 @@
 #ifndef CPP_LOGGER_H
 #define CPP_LOGGER_H
 
-#include "logger/Logger.hpp"
+#include "powerflow/logger/Logger.hpp"
 
 class CppLogger : public Logger
 {

@@ -5,7 +5,7 @@
 
 class BackwardForwardSweepSolver : public GridSolver {
 public:
-	BackwardForwardSweepSolver(Grid* grid);
+	BackwardForwardSweepSolver(Grid* grid, Logger* logger);
 	int solve();
 private:
 	complex_t sweep(size_t nodeIdx, size_t prevEdgeIdx = -1);
