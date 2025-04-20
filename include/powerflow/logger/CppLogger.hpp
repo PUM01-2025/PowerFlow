@@ -14,6 +14,8 @@ private:
     void flush() override;
 };
 
+CppLogger::CppLogger(std::ostream& os) : os{os} {}
+
 // Det här kan vara 
 void CppLogger::flush()
 {
