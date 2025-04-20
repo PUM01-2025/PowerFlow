@@ -3,8 +3,8 @@
 static const int MAX_ITER = 10000;
 static const double PRECISION = 1e-12;
 
-GaussSeidelSolver::GaussSeidelSolver(Grid* grid)
-    : GridSolver(grid), y(grid->edges.size()), ySum(grid->nodes.size()) {
+GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger)
+    : GridSolver(grid, logger), y(grid->edges.size()), ySum(grid->nodes.size()) {
     // Create admittance vector.
     for (size_t edgeIdx = 0; edgeIdx < grid->edges.size(); ++edgeIdx) {
         complex_t z = grid->edges[edgeIdx].z_c;
@@ -29,6 +29,8 @@ GaussSeidelSolver::GaussSeidelSolver(Grid* grid)
 int GaussSeidelSolver::solve() {
     bool converged = false;
     int iter = 0;
+
+    *logger << "Test";
 
     // Update load voltages.
     do {

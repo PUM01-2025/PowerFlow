@@ -5,7 +5,7 @@
 
 class GaussSeidelSolver : public GridSolver {
 public:
-	GaussSeidelSolver(Grid* grid);
+	GaussSeidelSolver(Grid* grid, Logger* const logger);
 	int solve();
 private:
 	std::vector<complex_t> y{}; // Admittances

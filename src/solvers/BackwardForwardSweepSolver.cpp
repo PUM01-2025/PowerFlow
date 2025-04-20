@@ -4,8 +4,8 @@ static const double SQRT3 = 1.73205080757;
 static const int MAX_ITER = 10000;
 static const double PRECISION = 1e-10;
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid) :
-	GridSolver(grid) { }
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid, Logger* logger) :
+	GridSolver(grid, logger) { }
 
 int BackwardForwardSweepSolver::solve() {
 	int iter = 0;

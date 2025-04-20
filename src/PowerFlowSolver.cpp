@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network) : network { network } { }
+PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, Logger* const logger) : network { network }, logger{logger}  { }
 
 std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& P) {
 	if (firstRun) {
@@ -31,11 +31,11 @@ void PowerFlowSolver::createGridSolvers() {
         {
         case GAUSSSEIDEL:
             std::cout << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
-            gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid));
+            gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid, logger));
             break;
         case BACKWARDFOWARDSWEEP:
         std::cout << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
-            gridSolvers.push_back(std::make_unique<BackwardForwardSweepSolver>(&grid));
+            gridSolvers.push_back(std::make_unique<BackwardForwardSweepSolver>(&grid,logger));
             break;
         default:
             std::cerr << "No suitable solver found!" << std::endl;
