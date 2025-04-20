@@ -3,7 +3,7 @@
 
 #include "logger/Logger.hpp"
 
-class CppLogger : Logger
+class CppLogger : public Logger
 {
 public:
     explicit CppLogger(std::ostream& os = std::cout); 
@@ -17,7 +17,7 @@ private:
 // Det här kan vara 
 void CppLogger::flush()
 {
-    os << ss.str() << std::endl;
+    os << ss.str() << std::flush;
     ss.str("");
     ss.clear();
 }

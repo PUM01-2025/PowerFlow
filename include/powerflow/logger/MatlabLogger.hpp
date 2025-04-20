@@ -2,13 +2,17 @@
 #define MATLAB_LOGGER_H
 
 #include <memory>
+
+#include "mex.hpp"
+#include "mexAdapter.hpp"
 #include "logger/Logger.hpp"
 
-class MatlabLogger : Logger
+class MatlabLogger : public Logger
 {
 public:
     MatlabLogger(std::shared_ptr<matlab::engine::MATLABEngine> matlab_ptr) 
-private : std::shared_ptr<matlab::engine::MATLABEngine> matlab_ptr {};
+private: 
+    std::shared_ptr<matlab::engine::MATLABEngine> matlab_ptr {};
     void flush() override;
 };
 
