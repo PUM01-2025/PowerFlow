@@ -22,6 +22,14 @@ else()
     message(WARNING "Matlab not found: Skipping matlab subdirectory.")
 endif()
 
+find_package(pybind11)
+
+if(pybind11_FOUND)
+    message(STATUS "Pybind found: Adding python subdirectory.")
+    add_subdirectory(python)
+else()
+    message(WARNING "Pybind11 not found: skipping python subdirectory")
+endif()
 
 add_subdirectory(src)
 add_subdirectory(standalone)
