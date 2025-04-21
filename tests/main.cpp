@@ -2,10 +2,11 @@
 
 #include "catch.hpp"
 #include "powerflow/NetworkLoader.hpp"
-#include "powerflow/BackwardForwardSweepSolver.hpp"
-#include "powerflow/GaussSeidelSolver.hpp"
+#include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
+#include "powerflow/solvers/GaussSeidelSolver.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/NetworkAnalyzer.hpp"
+#include "powerflow/logger/CppLogger.hpp"
 
 #include <fstream>
 #include <string>
@@ -54,15 +55,16 @@ TEST_CASE("Networkloader input", "[!throws]" ) {
 
 TEST_CASE("Compare output of BFS and GS","[validation]"){
 
-    SECTION("example_network.txt"){
+    SECTION("test_network.txt"){
         //Load BFS
         std::ifstream fileBFS(localPath + "examples/test_networks/test_network.txt"); //Ladda in testfil
         CHECK_FALSE(fileBFS.fail());                                            //Kommer ge en varning att om det blir fel i filinläsningen
         NetworkLoader loaderBFS(fileBFS);                                       //Skapa en loader
         std::unique_ptr<Network> netBFS = loaderBFS.loadNetwork();              //Ladda in nätveket
         std::vector<GridSolver*> solversBFS;                                    //Vector att spara läsarna i
+        CppLogger logger(std::cout);
         for (Grid& grid : netBFS->grids) {                                      //Loopa igenom nätet och lätt till en lösare för varje subnät
-            solversBFS.push_back(new BackwardForwardSweepSolver(&grid));
+            solversBFS.push_back(new BackwardForwardSweepSolver(&grid, &logger));
         }
 
         //Ladda in effektbelastningar
@@ -82,13 +84,24 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
         std::unique_ptr<Network> net = loader.loadNetwork();
         std::vector<GridSolver*> solvers;
         for (Grid& grid : net->grids) {
-            solvers.push_back(new GaussSeidelSolver(&grid));
+            solvers.push_back(new GaussSeidelSolver(&grid, &logger));
         }
         net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
         net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
         net->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
         for (GridSolver* solver : solvers) {
             solver->solve();
+        }
+
+        for (const Grid& grid : net->grids) {
+            for (const GridNode& node : grid.nodes) {
+                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
+            }
+        }
+        for (const Grid& grid : netBFS->grids) {
+            for (const GridNode& node : grid.nodes) {
+                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
+            }
         }
     
         //Compare the result
@@ -112,25 +125,28 @@ TEST_CASE("Compare treestructure","[validation]"){
     CHECK_FALSE(file.fail()); 
     NetworkLoader loader(file);
     std::shared_ptr<Network> net = loader.loadNetwork();
-    PowerFlowSolver pfs(net);
+    CppLogger logger(std::cout);
+    PowerFlowSolver pfs(net, &logger);
     std::vector<complex_t> P = {
         {0.002, 0.001},
         {0.005, 0.004},
         {0.004, 0.002}
     };  
-    std::vector<complex_t> U = pfs.solve(P);
+    std::vector<complex_t> V = {};
+    std::vector<complex_t> U = pfs.solve(P, V);
 
     std::ifstream fileSingle(localPath + "examples/test_networks/test_network_single_grid.txt");
     CHECK_FALSE(fileSingle.fail()); 
     NetworkLoader loaderSingle(fileSingle);
     std::shared_ptr<Network> netSingle = loaderSingle.loadNetwork();
-    PowerFlowSolver pfsSingle(netSingle);
+    PowerFlowSolver pfsSingle(netSingle, &logger);
     std::vector<complex_t> PSingle = {
         {0.005, 0.004},
         {0.004, 0.002},
         {0.002, 0.001}
     };
-    std::vector<complex_t> USingle = pfsSingle.solve(PSingle);
+    std::vector<complex_t> VSingle = { {1, 0} };
+    std::vector<complex_t> USingle = pfsSingle.solve(PSingle, VSingle);
 
     CHECK_THAT(netSingle->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 0.000001));
     CHECK_THAT(netSingle->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 0.000001));
