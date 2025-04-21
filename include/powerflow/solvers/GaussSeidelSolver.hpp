@@ -1,11 +1,11 @@
 #ifndef GAUSS_SEIDEL_SOLVER_H
 #define GAUSS_SEIDEL_SOLVER_H
 
-#include "powerflow/GridSolver.hpp"
+#include "powerflow/solvers/GridSolver.hpp"
 
 class GaussSeidelSolver : public GridSolver {
 public:
-	GaussSeidelSolver(Grid* grid);
+	GaussSeidelSolver(Grid* grid, Logger* const logger);
 	int solve();
 private:
 	std::vector<complex_t> y{}; // Admittances

@@ -1,11 +1,11 @@
 #ifndef BACKWARD_FORWARD_SWEEP_H
 #define BACKWARD_FORWARD_SWEEP_H
 
-#include "powerflow/GridSolver.hpp"
+#include "powerflow/solvers/GridSolver.hpp"
 
 class BackwardForwardSweepSolver : public GridSolver {
 public:
-	BackwardForwardSweepSolver(Grid* grid);
+	BackwardForwardSweepSolver(Grid* grid, Logger* logger);
 	int solve();
 private:
 	complex_t sweep(size_t nodeIdx, size_t prevEdgeIdx = -1);

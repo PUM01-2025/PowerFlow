@@ -16,6 +16,7 @@ struct GridEdge {
 
 // Possible node types.
 enum NodeType {
+    SLACK_EXTERNAL,
     SLACK,
     MIDDLE,
     LOAD
