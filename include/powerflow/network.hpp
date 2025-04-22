@@ -5,11 +5,14 @@
 #include <complex>
 
 using complex_t = std::complex<double>;
+using node_idx_t = int;
+using grid_idx_t = int;
+using edge_idx_t = int;
 
 // Graph edge struct.
 struct GridEdge {
-    int parent;
-    int child;
+    node_idx_t parent;
+    node_idx_t child;
     complex_t z_c{ 1 };
     complex_t i{}; // Ta bort?
 };
@@ -27,15 +30,15 @@ struct GridNode {
     NodeType type = NodeType::MIDDLE;
     complex_t v = 1;
     complex_t s = 0;
-    std::vector<int> edges{};
+    std::vector<node_idx_t> edges{};
 };
 
 // Edge between two grids.
 struct GridConnection {
-    int slackGrid{};
-    int pqGrid{};
-    int slackNode{};
-    int pqNode{};
+    grid_idx_t slackGrid{};
+    grid_idx_t pqGrid{};
+    node_idx_t slackNode{};
+    node_idx_t pqNode{};
 };
 
 struct Grid {

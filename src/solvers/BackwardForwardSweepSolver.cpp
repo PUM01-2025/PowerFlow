@@ -1,71 +1,71 @@
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
+#include "powerflow/network.hpp"
 
 static const double SQRT3 = 1.73205080757;
 static const int MAX_ITER = 10000;
 static const double PRECISION = 1e-10;
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid, Logger* const logger) :
-	GridSolver(grid, logger) {
-	/*for (int i = 0; )
-		if (node.type == SLACK) {
-			rootIdx = 0;
-		}
-	}*/
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, Logger *const logger) : GridSolver(grid, logger) {}
+
+int BackwardForwardSweepSolver::solve()
+{
+    int iter = 0;
+    do
+    {
+        converged = true;
+        sweep(0, -1); // TA REDA Pï¿½ ROOT-INDEX!!!!!!!! Ej nï¿½dvï¿½ndigtvis 0!!
+
+    } while (!converged && iter++ < MAX_ITER);
+    grid->nodes[0].s = -grid->nodes[0].s;
+    return iter;
 }
 
-int BackwardForwardSweepSolver::solve() {
-	int iter = 0;
-	do {
-		converged = true;
-		sweep(0, -1); // TA REDA PÅ ROOT-INDEX!!!!!!!! Ej nödvändigtvis 0!!
+complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
+                                            node_idx_t prevEdgeIdx)
+{
+    GridNode &node = grid->nodes[nodeIdx];
 
-	} while (!converged && iter++ < MAX_ITER);
-	grid->nodes[0].s = -grid->nodes[0].s;
-	return iter;
-}
+    bool isRoot = prevEdgeIdx == -1;
 
-complex_t BackwardForwardSweepSolver::sweep(size_t nodeIdx,
-	size_t prevEdgeIdx) {
-	GridNode& node = grid->nodes[nodeIdx];
+    if (!isRoot)
+    {
+        GridEdge &prevEdge = grid->edges[prevEdgeIdx];
+        size_t prevNodeIdx = prevEdge.parent == nodeIdx ? prevEdge.child : prevEdge.parent;
+        GridNode &prevNode = grid->nodes[prevNodeIdx];
 
-	bool isRoot = prevEdgeIdx == -1;
+        prevEdge.i = std::conj((-node.s) / (SQRT3 * node.v));
+        node.v = prevNode.v - SQRT3 * prevEdge.i * prevEdge.z_c;
+    }
 
-	if (!isRoot) {
-		GridEdge& prevEdge = grid->edges[prevEdgeIdx];
-		size_t prevNodeIdx = prevEdge.parent == nodeIdx ? prevEdge.child : 
-			prevEdge.parent;
-		GridNode& prevNode = grid->nodes[prevNodeIdx];
+    bool isLeaf = true;
+    complex_t s = 0;
 
-		prevEdge.i = std::conj((-node.s) / (SQRT3 * node.v));
-		node.v = prevNode.v - SQRT3 * prevEdge.i * prevEdge.z_c;
-	}
+    for (size_t edgeIdx : node.edges)
+    {
+        if (edgeIdx == prevEdgeIdx)
+            continue;
 
-	bool isLeaf = true;
-	complex_t s = 0;
+        GridEdge &edge = grid->edges[edgeIdx];
+        size_t nextIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
 
-	for (size_t edgeIdx : node.edges) {
-		if (edgeIdx == prevEdgeIdx)
-			continue;
+        isLeaf = false;
+        s += sweep(nextIdx, edgeIdx);
+    }
 
-		GridEdge& edge = grid->edges[edgeIdx];
-		size_t nextIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
+    if (!isLeaf)
+    {
+        if (std::abs(node.s - s) > PRECISION)
+            converged = false;
+        node.s = s;
+    }
 
-		isLeaf = false;
-		s += sweep(nextIdx, edgeIdx);
-	}
+    if (!isRoot)
+    {
+        GridEdge &prevEdge = grid->edges[prevEdgeIdx];
 
-	if (!isLeaf) {
-		if (std::abs(node.s - s) > PRECISION)
-			converged = false;
-		node.s = s;
-	}
-
-	if (!isRoot) {
-		GridEdge& prevEdge = grid->edges[prevEdgeIdx];
-
-		return node.s - 3.0 * prevEdge.z_c * prevEdge.i *
-			std::conj(prevEdge.i);
-	}
-	else
-		return (0.0);
+        return node.s - 3.0 * prevEdge.z_c * prevEdge.i *
+                            std::conj(prevEdge.i);
+    }
+    else
+        return (0.0);
 }

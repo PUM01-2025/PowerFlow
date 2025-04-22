@@ -46,7 +46,7 @@ int GaussSeidelSolver::solve() {
 
             for (size_t edgeIdx : node.edges) {
                 GridEdge& edge = grid->edges[edgeIdx];
-                int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent; // DUMT MED NAMN "CHILD" OCH "PARENT"?
+                int neighborIdx = static_cast<size_t>(edge.parent) == nodeIdx ? edge.child : edge.parent; // DUMT MED NAMN "CHILD" OCH "PARENT"?
                 GridNode& neighbor = grid->nodes[neighborIdx];
 
                 i += neighbor.v * y[edgeIdx];
@@ -68,11 +68,11 @@ int GaussSeidelSolver::solve() {
         if (node.type != NodeType::SLACK && node.type != NodeType::SLACK_EXTERNAL)
             continue;
 
-        complex_t i = (0, 0);
+        complex_t i{0, 0};
 
         for (size_t edgeIdx : node.edges) {
             GridEdge& edge = grid->edges[edgeIdx];
-            int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
+            int neighborIdx = static_cast<size_t>(edge.parent) == nodeIdx ? edge.child : edge.parent;
             GridNode& neighbor = grid->nodes[neighborIdx];
 
             i += neighbor.v * y[edgeIdx];

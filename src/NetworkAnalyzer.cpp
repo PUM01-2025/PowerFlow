@@ -22,15 +22,12 @@
 // 3.If an adjacent vertex is already visited and is not the parent of the current vertex, a cycle is detected, and True is returned.
 // 4. If DFS traversal is done on all vertices and no cycles are detected, False is returned.
 
-using node_id_t = int;
-using edge_id_t = int;
-
 bool has_cycles(Grid const &grid)
 {
     // Returns true if the Grid contains a cycle
-    std::stack<node_id_t> todo_list{};
-    std::unordered_set<node_id_t> visited_nodes{};
-    std::unordered_set<edge_id_t> visited_edges{};
+    std::stack<node_idx_t> todo_list{};
+    std::unordered_set<node_idx_t> visited_nodes{};
+    std::unordered_set<edge_idx_t> visited_edges{};
 
     // Push root node
     todo_list.push(0);
@@ -38,7 +35,7 @@ bool has_cycles(Grid const &grid)
     while (!todo_list.empty())
     {
         // Get current node
-        node_id_t current_node = todo_list.top();
+        node_idx_t current_node = todo_list.top();
         todo_list.pop();
 
         // Insert as visited, if not successful we have already visited, cycle!
@@ -53,7 +50,7 @@ bool has_cycles(Grid const &grid)
         GridNode current_grid_node = grid.nodes[current_node];
 
         // for all edges of current node, add neighbours to stack
-        for (edge_id_t id : current_grid_node.edges)
+        for (edge_idx_t id : current_grid_node.edges)
         {
 
             // If edge exists in visited, we shall not go there again
@@ -62,8 +59,8 @@ bool has_cycles(Grid const &grid)
                 continue;
             }
 
-            node_id_t parent{grid.edges[id].parent};
-            node_id_t child{grid.edges[id].child};
+            node_idx_t parent{grid.edges[id].parent};
+            node_idx_t child{grid.edges[id].child};
             // If node is child --> push parent to stack
             if (parent != current_node)
             {

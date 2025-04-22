@@ -30,7 +30,7 @@ Grid NetworkLoader::loadGrid() {
     std::string line;
 
     getNextLine(line);
-    std::stringstream sstream(line); // Dum syntax, eftersom troligen tolkar första edge som basvärden!!!! Lägg till prefix "base" eller motsv.??
+    std::stringstream sstream(line); // Dum syntax, eftersom troligen tolkar fï¿½rsta edge som basvï¿½rden!!!! Lï¿½gg till prefix "base" eller motsv.??
     if (!(sstream >> grid.sBase) || grid.sBase == 0)
         throw NetworkLoaderError("Invalid S base");
     if (!(sstream >> grid.vBase) || grid.vBase == 0)
@@ -85,7 +85,7 @@ Grid NetworkLoader::loadGrid() {
         int nodeIdx = 0;
         std::string type;
 
-        if (!(sstream >> nodeIdx) || nodeIdx < 0 || nodeIdx >= grid.nodes.size()) {
+        if (!(sstream >> nodeIdx) || nodeIdx < 0 || static_cast<typename std::vector<GridNode>::size_type>(nodeIdx) >= grid.nodes.size()) {
             throw NetworkLoaderError("Invalid node index");
         }
         if (!(sstream >> type)) {
