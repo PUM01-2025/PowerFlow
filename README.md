@@ -8,7 +8,7 @@ Version 1.0 of PowerFlow was written in 2025 by a group of eight students as par
 
 To build PowerFlow for your platform, you need [CMake](https://cmake.org/) and a suitable C++17 compiler:
 
-- Windows: MSVC, shipped alongside [Visual Studio 2022](https://visualstudio.microsoft.com/).
+- Windows: MSVC ([Visual Studio >= 2022](https://visualstudio.microsoft.com/)).
 - Linux: g++ version >= ?.
 - Mac: clang version >= ?.
 
@@ -16,7 +16,7 @@ In addition to CMake and a compiler, you may need additional software depending 
 
 ### Matlab
 
-PowerFlow can be compiled into a Matlab executable (MEX) that can then be used like any other Matlab function. PowerFlow has been tested to work with Matlab version R2024b.
+PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. PowerFlow has been tested to work with Matlab version R2024b.
 
 To be able to compile and run the MEX file, Matlab must be installed on your computer.
 
