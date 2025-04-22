@@ -14,6 +14,8 @@ class MexFunction : public matlab::mex::Function {
     std::unique_ptr<PowerFlowSolver> solver;
 
     // Pointer to MATLAB engine
+    std::shared_ptr<matlab::engine::MATLABEngine> matlabPtr = getEngine();
+
     MatlabLogger logger{getEngine(), LogLevel::DEBUG};
 
 public:
@@ -22,8 +24,11 @@ public:
 
     ~MexFunction() {
     }
+    /*Takes input from matlab and executes the powerflow simulation with it*/
 
     void operator()(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs) {
+        matlab::data::ArrayFactory factory;
+
         if (inputs.size() < 1 || inputs[0].getType() != matlab::data::ArrayType::MATLAB_STRING)
             throw std::invalid_argument("Missing first argument: command");
 
@@ -38,18 +43,39 @@ public:
             loadNetwork(filePath);
         }
         else if (command == "solve") {
+            int maxIter = 1000;
             if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::COMPLEX_DOUBLE)
                 throw std::invalid_argument("Missing S vector");
-            if (inputs.size() < 3 || inputs[2].getType() != matlab::data::ArrayType::COMPLEX_DOUBLE)
+            if (inputs.size() < 3 || inputs[2].getType() != matlab::data::ArrayType::COMPLEX_DOUBLE && !inputs[2].isEmpty())
                 throw std::invalid_argument("Missing V vector");
+            if (inputs.size() == 4 && inputs[3].getType() != matlab::data::ArrayType::DOUBLE)
+                throw std::invalid_argument("Max iterations must be a postive integer");
+            if (inputs.size() == 4 && inputs[3].getType() == matlab::data::ArrayType::DOUBLE) {
+                matlab::data::TypedArray<double> maxIterArray = inputs[3]; //TODO
+                maxIter = static_cast<int>(maxIterArray[0]);
 
+            }
+
+         
             matlab::data::TypedArray<complex_t> matlabS = inputs[1];
-            matlab::data::TypedArray<complex_t> matlabV = inputs[2];
+            matlab::data::TypedArray<complex_t> matlabV = factory.createArray<complex_t>({ 0,0 });
+            if (!inputs[2].isEmpty()) { 
+                matlabV = inputs[2];
+            }
+          
             std::vector<complex_t> S(matlabS.begin(), matlabS.end());
             std::vector<complex_t> V(matlabV.begin(), matlabV.end());
 
-            std::vector<complex_t> Vres = solver->solve(S, V);
-            matlab::data::ArrayFactory factory;
+            std::tuple< std::vector<complex_t>, int> Vres_iter = solver->solve(S, V, maxIter);
+            std::vector<complex_t> Vres = std::get<0>(Vres_iter);
+            int iter = std::get<1>(Vres_iter);
+
+            if (iter == maxIter) {
+                
+                matlabPtr->feval(u"fprintf", 0, std::vector<matlab::data::Array>({ factory.createScalar("\nPowerFlowSolver did not converge before  " + std::to_string(iter) + " iterations, \n " +
+                    +"which was the maximum amount amount of iterations, consider running with more iterations ") }));
+            }
+
             outputs[0] = factory.createArray({ 1, Vres.size() }, Vres.begin(), Vres.end());
         }
         else

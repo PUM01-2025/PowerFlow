@@ -8,7 +8,7 @@
 
 PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, Logger* const logger) : network { network }, logger{logger}  { }
 
-std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& S, std::vector<complex_t>& V) {
+std::tuple <std::vector<complex_t>, int> PowerFlowSolver::solve(std::vector<complex_t>& S, std::vector<complex_t>& V, int maxIter) {
 	if (firstRun) {
 		// TODO: Analysera ev felaktigheter i nätverket
 
@@ -17,8 +17,8 @@ std::vector<complex_t> PowerFlowSolver::solve(std::vector<complex_t>& S, std::ve
 	}
 	updateLoads(S);
 	updateExternalVoltages(V);
-	runGridSolvers();
-	return getLoadVoltages();
+	int iter = runGridSolvers(maxIter);
+	return make_tuple(getLoadVoltages(),iter);
 }
 
 void PowerFlowSolver::createGridSolvers() {
@@ -82,10 +82,10 @@ void PowerFlowSolver::updateExternalVoltages(std::vector<complex_t>& V) {
 	}
 }
 
-void PowerFlowSolver::runGridSolvers() {
+int PowerFlowSolver::runGridSolvers(int maxIter) {
 	// TODO: Parallellisering
 
-	static const int MAX_ITER = 100;
+	
 	int iter = 0;
 	int maxGridIter = 0;
 
@@ -106,7 +106,8 @@ void PowerFlowSolver::runGridSolvers() {
 				pqNode.v = slackNode.v;
 			}
 		}
-	} while (maxGridIter > 1 && iter++ < MAX_ITER);
+	} while (maxGridIter > 1 && iter++ < (maxIter-1));
+	return iter;
 }
 
 std::vector<complex_t> PowerFlowSolver::getLoadVoltages() {

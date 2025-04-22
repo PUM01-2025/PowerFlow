@@ -5,12 +5,14 @@
 #include "powerflow/solvers/GridSolver.hpp"
 #include "powerflow/logger/Logger.hpp"
 #include <memory>
+#include <tuple>
 
 class PowerFlowSolver {
 public:
 	PowerFlowSolver(std::shared_ptr<Network> network, Logger* const logger);
-
-	std::vector<complex_t> solve(std::vector<complex_t>& P, std::vector<complex_t>& V);
+	
+	std::tuple < std::vector<complex_t>, int>  solve(std::vector<complex_t>& P, std::vector<complex_t>& V, int maxIter);
+	
 private:
 	std::shared_ptr<Network> network;
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;
@@ -19,7 +21,7 @@ private:
 	void createGridSolvers();
 	void updateLoads(std::vector<complex_t>& P);
 	void updateExternalVoltages(std::vector<complex_t>& V);
-	void runGridSolvers();
+	int runGridSolvers(int maxIter);
 	std::vector<complex_t> getLoadVoltages();
 };
 
