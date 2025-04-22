@@ -1,20 +1,50 @@
 #include <pybind11/pybind11.h>
-#include "python_wrappers.hpp"
-#include <unordered_map>
-// #include "powerflow/network.hpp"
-// #include "powerflow/PowerFlowSolver.hpp"
-// #include "powerflow/NetworkLoader.hpp"
-#include <fstream>
-#include <memory>
+#include <pybind11/stl.h>
 
-float pybind11_add(float a, float b)
+#include <memory>
+#include <complex>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <stdexcept>
+
+#include "powerflow/network.hpp"
+#include "powerflow/NetworkLoader.hpp"
+#include "powerflow/PowerFlowSolver.hpp"
+
+class PowerFlowWrapper
 {
-    return a + b;
-}
+public:
+    PowerFlowWrapper(const std::string &filePath)
+    {
+        file = std::make_shared<std::ifstream>(filePath);
+        if (!file->is_open())
+        {
+            throw std::runtime_error("Could not open file: " + filePath);
+        }
+
+        loader = std::make_unique<NetworkLoader>(*file);
+        network = loader->loadNetwork();
+        solver = std::make_unique<PowerFlowSolver>(network);
+    }
+
+    std::vector<std::complex<double>> solve(std::vector<std::complex<double>> &P)
+    {
+        return solver->solve(P);
+    }
+
+private:
+    std::shared_ptr<std::ifstream> file;
+    std::unique_ptr<NetworkLoader> loader;
+    std::shared_ptr<Network> network;
+    std::unique_ptr<PowerFlowSolver> solver;
+};
 
 PYBIND11_MODULE(python_wrappers, m)
 {
-    m.doc() = "Docstring for pybind11 module ============= ";
-    m.def("pybind11_add", &pybind11_add, "Addition funtion",
-          pybind11::arg("a"), pybind11::arg("b"));
+    m.doc() = "Power Flow binding for Python interface";
+
+    pybind11::class_<PowerFlowWrapper>(m, "PowerFlowWrapper")
+        .def(pybind11::init<const std::string &>(), pybind11::arg("filepath"))
+        .def("solve", &PowerFlowWrapper::solve, pybind11::arg("P"), "Solve the power flow problem");
 }
