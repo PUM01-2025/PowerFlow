@@ -9,8 +9,9 @@
 #include "mexAdapter.hpp"
 #include "mex.hpp"
 
-class MexFunction : public matlab::mex::Function {
-    //std::unordered_map<int, std::unique_ptr<PowerFlowSolver>> solvers;
+class MexFunction : public matlab::mex::Function
+{
+    // std::unordered_map<int, std::unique_ptr<PowerFlowSolver>> solvers;
     std::unique_ptr<PowerFlowSolver> solver;
 
     // Pointer to MATLAB engine
@@ -19,10 +20,12 @@ class MexFunction : public matlab::mex::Function {
     MatlabLogger logger{getEngine(), LogLevel::DEBUG};
 
 public:
-    MexFunction() {
+    MexFunction()
+    {
     }
 
-    ~MexFunction() {
+    ~MexFunction()
+    {
     }
     /*Takes input from matlab and executes the powerflow simulation with it*/
 
@@ -33,9 +36,9 @@ public:
             throw std::invalid_argument("Missing first argument: command");
 
         std::string command = inputs[0][0];
-        
 
-        if (command == "load") {
+        if (command == "load")
+        {
             if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::MATLAB_STRING)
                 throw std::invalid_argument("Missing file path");
 
@@ -85,12 +88,14 @@ public:
         else
             throw std::invalid_argument("Invalid command");
     }
+
 private:
-    void loadNetwork(const std::string& filePath) {
+    void loadNetwork(const std::string &filePath)
+    {
         std::ifstream file(filePath);
         if (!file)
             throw std::runtime_error("Could not open Network file");
-        
+
         NetworkLoader loader(file);
         std::shared_ptr<Network> net;
 
