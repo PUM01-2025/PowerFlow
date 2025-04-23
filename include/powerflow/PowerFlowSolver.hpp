@@ -14,8 +14,8 @@ public:
 private:
 	std::shared_ptr<Network> network;
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;
-	bool firstRun = true;
-    Logger* const logger{nullptr};
+	bool firstRun{ true };
+    Logger* const logger{ nullptr };
 	void createGridSolvers();
 	void updateLoads(std::vector<complex_t>& P);
 	void updateExternalVoltages(std::vector<complex_t>& V);

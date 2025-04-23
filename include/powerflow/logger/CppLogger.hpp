@@ -2,6 +2,8 @@
 #define CPP_LOGGER_H
 
 #include "powerflow/logger/Logger.hpp"
+#include <iostream>
+#include <sstream>
 
 class CppLogger : public Logger
 {
