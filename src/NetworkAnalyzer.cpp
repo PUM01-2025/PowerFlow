@@ -22,7 +22,7 @@
 // 3.If an adjacent vertex is already visited and is not the parent of the current vertex, a cycle is detected, and True is returned.
 // 4. If DFS traversal is done on all vertices and no cycles are detected, False is returned.
 
-bool has_cycles(Grid const &grid)
+bool has_cycles(Grid const& grid)
 {
     // Returns true if the Grid contains a cycle
     std::stack<node_idx_t> todo_list{};
@@ -59,8 +59,8 @@ bool has_cycles(Grid const &grid)
                 continue;
             }
 
-            node_idx_t parent{grid.edges[id].parent};
-            node_idx_t child{grid.edges[id].child};
+            node_idx_t parent{ grid.edges[id].parent };
+            node_idx_t child{ grid.edges[id].child };
             // If node is child --> push parent to stack
             if (parent != current_node)
             {
@@ -82,7 +82,7 @@ bool has_cycles(Grid const &grid)
     return false;
 }
 
-SolverType determine_solver(Grid const &grid)
+SolverType determine_solver(Grid const& grid)
 {
     // Returns Solvertype Enum depending on grid structure
     if (has_cycles(grid))

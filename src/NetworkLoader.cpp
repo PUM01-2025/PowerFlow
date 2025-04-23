@@ -1,6 +1,6 @@
 #include "powerflow/NetworkLoader.hpp"
 
-NetworkLoader::NetworkLoader(std::istream &file) : file{file} {}
+NetworkLoader::NetworkLoader(std::istream& file) : file{ file } {}
 
 std::unique_ptr<Network> NetworkLoader::loadNetwork()
 {
@@ -26,19 +26,19 @@ std::unique_ptr<Network> NetworkLoader::loadNetwork()
         }
         return network;
     }
-    catch (NetworkLoaderError &e)
-    {
+    catch (NetworkLoaderError& e) {
         throw NetworkLoaderError("Error on line " + std::to_string(currentLine) + ": " + e.what());
     }
 }
 
-Grid NetworkLoader::loadGrid()
-{
+// Help function for one grid;
+Grid NetworkLoader::loadGrid() {
     Grid grid;
     std::string line;
+    std::stringstream sstream{};
 
     getNextLine(line);
-    std::stringstream sstream(line); // Dum syntax, eftersom troligen tolkar f�rsta edge som basv�rden!!!! L�gg till prefix "base" eller motsv.??
+    sstream << line;
     if (!(sstream >> grid.sBase) || grid.sBase == 0)
         throw NetworkLoaderError("Invalid S base");
     if (!(sstream >> grid.vBase) || grid.vBase == 0)
@@ -46,13 +46,16 @@ Grid NetworkLoader::loadGrid()
 
     int nodeCount = 0; // Number of nodes in the grid
 
+    // Clear stringstream
+    sstream.str("");
+
     // Get edges.
-    while (getNextLine(line))
-    {
-        if (line == "%") // End of edges list
+    while (getNextLine(line)) {
+        if (line == "%")
+            // End of edges list
             break;
 
-        std::stringstream sstream(line);
+        sstream << line;
         GridEdge edge;
         if (!(sstream >> edge.parent) || edge.parent < 0)
         {
@@ -71,24 +74,26 @@ Grid NetworkLoader::loadGrid()
 
         grid.edges.push_back(edge);
         nodeCount = std::max(nodeCount, std::max(edge.parent + 1, edge.child + 1));
+        // Clear the stringstream for the next line
+        sstream.str("");
     }
-    if (nodeCount == 0)
-    {
+
+    // Clear the stringstream
+    sstream.str("");
+
+    if (nodeCount == 0) {
         throw NetworkLoaderError("Empty grid");
     }
 
     grid.nodes.resize(nodeCount);
-    // grid.nodes.at(0).type = NodeType::SLACK;
-    // grid.nodes.at(0).v = { 1.001074218750000, 0 };
-    // grid.nodes.at(0).v = { 1, 0 };
 
-    for (size_t edgeIdx = 0; edgeIdx < grid.edges.size(); ++edgeIdx)
-    {
-        GridEdge &edge = grid.edges[edgeIdx];
+    for (node_idx_t edgeIdx = 0; edgeIdx < grid.edges.size(); ++edgeIdx) {
+        GridEdge& edge = grid.edges[edgeIdx];
 
         grid.nodes.at(edge.parent).edges.push_back(edgeIdx);
         grid.nodes.at(edge.child).edges.push_back(edgeIdx);
     }
+
 
     // Get load/slack nodes
     while (getNextLine(line))
@@ -96,7 +101,7 @@ Grid NetworkLoader::loadGrid()
         if (line == "%") // End of node list
             break;
 
-        std::stringstream sstream(line);
+        sstream << line;
         int nodeIdx = 0;
         std::string type;
 
@@ -124,6 +129,8 @@ Grid NetworkLoader::loadGrid()
         {
             throw NetworkLoaderError("Invalid node type");
         }
+        // Clear the stringstream for the next line
+        sstream.str("");
     }
     return grid;
 }
@@ -132,6 +139,8 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
 {
     std::vector<GridConnection> connections;
     std::string line;
+    std::stringstream sstream{};
+
 
     while (getNextLine(line))
     {
@@ -139,7 +148,7 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
             break;
 
         GridConnection connection;
-        std::stringstream sstream(line);
+        sstream << line;
 
         if (!(sstream >> connection.slackGrid))
         {
@@ -158,14 +167,16 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
             throw NetworkLoaderError("Invalid PQ node index");
         }
         connections.push_back(connection);
+
+        // Clear the stringstream for the next line
+        sstream.str("");
+
     }
     return connections;
 }
 
-bool NetworkLoader::getNextLine(std::string &line)
-{
-    while (std::getline(file, line))
-    {
+bool NetworkLoader::getNextLine(std::string& line) {
+    while (std::getline(file, line)) {
         ++currentLine;
         if (!line.empty() && line.at(0) != '#')
         {

@@ -43,20 +43,18 @@ int GaussSeidelSolver::solve()
     {
         converged = true; // Until proven otherwise
 
-        for (size_t nodeIdx = 0; nodeIdx < grid->nodes.size(); ++nodeIdx)
-        { // For each node
-            GridNode &node = grid->nodes[nodeIdx];
+        for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx) { // For each node
+            GridNode& node = grid->nodes[nodeIdx];
 
             if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
                 continue; // Slack node voltage is already known
 
-            complex_t i = std::conj(node.s) / std::conj(node.v); // Om node.v == 0 ????
+            complex_t i = std::conj(node.s) / std::conj(node.v);
 
-            for (size_t edgeIdx : node.edges)
-            {
-                GridEdge &edge = grid->edges[edgeIdx];
-                int neighborIdx = static_cast<size_t>(edge.parent) == nodeIdx ? edge.child : edge.parent; // DUMT MED NAMN "CHILD" OCH "PARENT"?
-                GridNode &neighbor = grid->nodes[neighborIdx];
+            for (size_t edgeIdx : node.edges) {
+                GridEdge& edge = grid->edges[edgeIdx];
+                int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
+                GridNode& neighbor = grid->nodes[neighborIdx];
 
                 i += neighbor.v * y[edgeIdx];
             }
@@ -72,20 +70,18 @@ int GaussSeidelSolver::solve()
     } while (!converged && iter++ < MAX_ITER);
 
     // Update slack power.
-    for (size_t nodeIdx = 0; nodeIdx < grid->nodes.size(); ++nodeIdx)
-    {
-        GridNode &node = grid->nodes[nodeIdx];
+    for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx) {
+        GridNode& node = grid->nodes[nodeIdx];
 
         if (node.type != NodeType::SLACK && node.type != NodeType::SLACK_EXTERNAL)
             continue;
 
         complex_t i{0, 0};
 
-        for (size_t edgeIdx : node.edges)
-        {
-            GridEdge &edge = grid->edges[edgeIdx];
-            int neighborIdx = static_cast<size_t>(edge.parent) == nodeIdx ? edge.child : edge.parent;
-            GridNode &neighbor = grid->nodes[neighborIdx];
+        for (edge_idx_t edgeIdx : node.edges) {
+            GridEdge& edge = grid->edges[edgeIdx];
+            int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
+            GridNode& neighbor = grid->nodes[neighborIdx];
 
             i += neighbor.v * y[edgeIdx];
         }

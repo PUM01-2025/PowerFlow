@@ -30,7 +30,7 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
     if (!isRoot)
     {
         GridEdge &prevEdge = grid->edges[prevEdgeIdx];
-        size_t prevNodeIdx = prevEdge.parent == nodeIdx ? prevEdge.child : prevEdge.parent;
+        node_idx_t prevNodeIdx = prevEdge.parent == nodeIdx ? prevEdge.child : prevEdge.parent;
         GridNode &prevNode = grid->nodes[prevNodeIdx];
 
         prevEdge.i = std::conj((-node.s) / (SQRT3 * node.v));
@@ -40,13 +40,13 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
     bool isLeaf = true;
     complex_t s = 0;
 
-    for (size_t edgeIdx : node.edges)
+    for (node_idx_t edgeIdx : node.edges)
     {
         if (edgeIdx == prevEdgeIdx)
             continue;
 
         GridEdge &edge = grid->edges[edgeIdx];
-        size_t nextIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
+        node_idx_t nextIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
 
         isLeaf = false;
         s += sweep(nextIdx, edgeIdx);

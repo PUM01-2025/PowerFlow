@@ -4,6 +4,7 @@
 #include <vector>
 #include <complex>
 
+// Type definitions for the project
 using complex_t = std::complex<double>;
 using node_idx_t = int;
 using grid_idx_t = int;
