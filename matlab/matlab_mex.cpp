@@ -70,10 +70,14 @@ public:
             std::vector<complex_t> Vres = std::get<0>(Vres_iter);
             int iter = std::get<1>(Vres_iter);
 
+            std::ostringstream oss;
             if (iter == maxIter) {
-                
-                matlabPtr->feval(u"fprintf", 0, std::vector<matlab::data::Array>({ factory.createScalar("\nPowerFlowSolver did not converge before  " + std::to_string(iter) + " iterations, \n " +
-                    +"which was the maximum amount amount of iterations, consider running with more iterations ") }));
+                oss << "\nReached max iterations (" + std::to_string(iter) + " iterations) without converging consider rerunning with \n higher number of iterations";
+                printToMatlab(oss);
+            }
+            else {
+                oss << "\nConverged after (" + std::to_string(iter) + " iterations)";
+                printToMatlab(oss);
             }
 
             outputs[0] = factory.createArray({ 1, Vres.size() }, Vres.begin(), Vres.end());
@@ -93,5 +97,12 @@ private:
         net = loader.loadNetwork();
         solver = std::make_unique<PowerFlowSolver>(net, &logger);
     }
+
+    void printToMatlab(const std::ostringstream& message) {
+        matlab::data::ArrayFactory factory;
+        matlabPtr->feval(u"fprintf", 0, std::vector<matlab::data::Array>({ factory.createScalar(message.str()) }));
+    }
+
+    
 
 };
