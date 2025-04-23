@@ -48,6 +48,7 @@ Grid NetworkLoader::loadGrid() {
 
     // Clear stringstream
     sstream.str("");
+    sstream.clear();
 
     // Get edges.
     while (getNextLine(line)) {
@@ -76,10 +77,12 @@ Grid NetworkLoader::loadGrid() {
         nodeCount = std::max(nodeCount, std::max(edge.parent + 1, edge.child + 1));
         // Clear the stringstream for the next line
         sstream.str("");
+        sstream.clear();
     }
 
     // Clear the stringstream
     sstream.str("");
+    sstream.clear();
 
     if (nodeCount == 0) {
         throw NetworkLoaderError("Empty grid");
@@ -131,6 +134,7 @@ Grid NetworkLoader::loadGrid() {
         }
         // Clear the stringstream for the next line
         sstream.str("");
+        sstream.clear();
     }
     return grid;
 }
@@ -170,6 +174,7 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
 
         // Clear the stringstream for the next line
         sstream.str("");
+        sstream.clear();
 
     }
     return connections;
