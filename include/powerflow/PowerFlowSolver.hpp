@@ -12,7 +12,7 @@ class PowerFlowSolver
 public:
 	PowerFlowSolver(std::shared_ptr<Network> network, Logger* const logger);
 	
-	std::tuple < std::vector<complex_t>, int>  solve(std::vector<complex_t>& P, std::vector<complex_t>& V, int maxIter);
+	std::tuple < std::vector<complex_t>, int>  solve(std::vector<complex_t>& P, std::vector<complex_t>& V, int maxIter=1000);
 	
 private:
 	std::shared_ptr<Network> network;
