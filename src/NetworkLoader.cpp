@@ -1,6 +1,6 @@
 #include "powerflow/NetworkLoader.hpp"
 
-NetworkLoader::NetworkLoader(std::istream &file) : file{file} {}
+NetworkLoader::NetworkLoader(std::istream& file) : file{ file } {}
 
 // Loads a whole network from the file
 std::unique_ptr<Network> NetworkLoader::loadNetwork() {
@@ -21,7 +21,7 @@ std::unique_ptr<Network> NetworkLoader::loadNetwork() {
         }
         return network;
     }
-    catch (NetworkLoaderError &e) {
+    catch (NetworkLoaderError& e) {
         throw NetworkLoaderError("Error on line " + std::to_string(currentLine) + ": " + e.what());
     }
 }
@@ -41,12 +41,12 @@ Grid NetworkLoader::loadGrid() {
 
     int nodeCount = 0; // Number of nodes in the grid
 
-	// Clear stringstream
-	sstream.str("");
+    // Clear stringstream
+    sstream.str("");
 
     // Get edges.
     while (getNextLine(line)) {
-        if (line == "%") 
+        if (line == "%")
             // End of edges list
             break;
 
@@ -63,15 +63,15 @@ Grid NetworkLoader::loadGrid() {
         }
 
         // edge.z_c = edge.z_c / ((grid.vBase * grid.vBase) / grid.sBase); // Convert to per-unit
-        
+
         grid.edges.push_back(edge);
         nodeCount = std::max(nodeCount, std::max(edge.parent + 1, edge.child + 1));
         // Clear the stringstream for the next line
-        sstream.str(""); 
+        sstream.str("");
     }
 
     // Clear the stringstream
-	sstream.str("");
+    sstream.str("");
 
     if (nodeCount == 0) {
         throw NetworkLoaderError("Empty grid");
@@ -114,8 +114,8 @@ Grid NetworkLoader::loadGrid() {
         else {
             throw NetworkLoaderError("Invalid node type");
         }
-		// Clear the stringstream for the next line
-		sstream.str("");
+        // Clear the stringstream for the next line
+        sstream.str("");
     }
     return grid;
 }
@@ -123,8 +123,8 @@ Grid NetworkLoader::loadGrid() {
 std::vector<GridConnection> NetworkLoader::loadConnections() {
     std::vector<GridConnection> connections;
     std::string line;
-	std::stringstream sstream{};
-	
+    std::stringstream sstream{};
+
 
     while (getNextLine(line)) {
         if (line == "%") // End of connections list
@@ -147,14 +147,14 @@ std::vector<GridConnection> NetworkLoader::loadConnections() {
         }
         connections.push_back(connection);
 
-		// Clear the stringstream for the next line
-		sstream.str("");
+        // Clear the stringstream for the next line
+        sstream.str("");
 
     }
     return connections;
 }
 
-bool NetworkLoader::getNextLine(std::string &line) {
+bool NetworkLoader::getNextLine(std::string& line) {
     while (std::getline(file, line)) {
         ++currentLine;
         if (!line.empty() && line.at(0) != '#') {
