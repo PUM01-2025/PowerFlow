@@ -3,13 +3,15 @@
 
 #include "powerflow/solvers/GridSolver.hpp"
 
-class GaussSeidelSolver : public GridSolver {
+class GaussSeidelSolver : public GridSolver
+{
 public:
-	GaussSeidelSolver(Grid* grid, Logger* const logger);
-	int solve();
+    GaussSeidelSolver(Grid *grid, Logger *const logger);
+    int solve();
+
 private:
-	std::vector<complex_t> y{}; // Admittances
-	std::vector<complex_t> ySum{}; // "Self-admittances" (diagonal elements in admittance matrix)
+    std::vector<complex_t> y{};    // Admittances
+    std::vector<complex_t> ySum{}; // "Self-admittances" (diagonal elements in admittance matrix)
 };
 
 #endif

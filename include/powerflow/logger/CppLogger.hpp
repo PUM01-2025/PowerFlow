@@ -6,17 +6,17 @@
 class CppLogger : public Logger
 {
 public:
-    explicit CppLogger(std::ostream& os = std::cout); 
+    explicit CppLogger(std::ostream &os = std::cout);
     ~CppLogger() = default;
 
 private:
-    std::ostream& os;
+    std::ostream &os;
     void flush() override;
 };
 
-CppLogger::CppLogger(std::ostream& os) : os{os} {}
+CppLogger::CppLogger(std::ostream &os) : os{os} {}
 
-// Det här kan vara 
+// Det här kan vara
 void CppLogger::flush()
 {
     os << ss.str() << std::flush;
