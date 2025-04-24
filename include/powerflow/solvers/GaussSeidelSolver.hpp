@@ -1,12 +1,13 @@
-#ifndef GAUSS_SEIDEL_SOLVER_H
-#define GAUSS_SEIDEL_SOLVER_H
+#ifndef POWERFLOW_GAUSS_SEIDEL_SOLVER_H
+#define POWERFLOW_GAUSS_SEIDEL_SOLVER_H
 
 #include "powerflow/solvers/GridSolver.hpp"
 
+// GridSolver implementing the Gauss-Seidel algorithm.
 class GaussSeidelSolver : public GridSolver
 {
 public:
-    GaussSeidelSolver(Grid *grid, Logger *const logger);
+    GaussSeidelSolver(Grid* grid, Logger* const logger);
     int solve();
 
 private:

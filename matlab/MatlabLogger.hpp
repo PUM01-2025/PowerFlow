@@ -1,5 +1,5 @@
-#ifndef MATLAB_LOGGER_H
-#define MATLAB_LOGGER_H
+#ifndef POWERFLOW_MATLAB_LOGGER_H
+#define POWERFLOW_MATLAB_LOGGER_H
 
 #include <memory>
 
@@ -7,6 +7,7 @@
 #include "mexAdapter.hpp"
 #include "powerflow/logger/Logger.hpp"
 
+// Logger that prints to the Matlab console.
 class MatlabLogger : public Logger
 {
 public:

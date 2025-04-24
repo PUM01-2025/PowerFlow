@@ -21,7 +21,7 @@ int BackwardForwardSweepSolver::solve()
 }
 
 complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
-                                            node_idx_t prevEdgeIdx)
+                                            edge_idx_t prevEdgeIdx)
 {
     GridNode &node = grid->nodes[nodeIdx];
 

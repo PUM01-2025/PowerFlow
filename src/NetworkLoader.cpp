@@ -1,57 +1,44 @@
 #include "powerflow/NetworkLoader.hpp"
+#include "powerflow/NetworkLoaderError.hpp"
 
-NetworkLoader::NetworkLoader(std::istream& file) : file{ file } {}
+NetworkLoader::NetworkLoader(std::istream& file) : file{ file } { }
 
 std::unique_ptr<Network> NetworkLoader::loadNetwork()
 {
-    try
-    {
-        std::unique_ptr<Network> network = std::make_unique<Network>();
-        std::string line;
+    std::unique_ptr<Network> network = std::make_unique<Network>();
+    std::string line;
 
-        while (getNextLine(line))
+    while (getNextLine(line))
+    {
+        if (line == "grid")
         {
-            if (line == "grid")
-            {
-                network->grids.push_back(loadGrid());
-            }
-            else if (line == "connections")
-            {
-                network->connections = loadConnections();
-            }
-            else
-            {
-                throw NetworkLoaderError("Invalid command");
-            }
+            network->grids.push_back(loadGrid());
         }
-        return network;
+        else if (line == "connections")
+        {
+            network->connections = loadConnections();
+        }
+        else
+        {
+            throw NetworkLoaderError("Invalid command", curLine);
+        }
     }
-    catch (NetworkLoaderError& e) {
-        throw NetworkLoaderError("Error on line " + std::to_string(currentLine) + ": " + e.what());
-    }
+    return network;
 }
 
-// Help function for one grid;
-Grid NetworkLoader::loadGrid() {
+Grid NetworkLoader::loadGrid()
+{
     Grid grid;
+    // Load Grid base.
+    getGridBase(grid);
+
     std::string line;
     std::stringstream sstream{};
-
-    getNextLine(line);
-    sstream << line;
-    if (!(sstream >> grid.sBase) || grid.sBase == 0)
-        throw NetworkLoaderError("Invalid S base");
-    if (!(sstream >> grid.vBase) || grid.vBase == 0)
-        throw NetworkLoaderError("Invalid V base");
-
     int nodeCount = 0; // Number of nodes in the grid
 
-    // Clear stringstream
-    sstream.str("");
-    sstream.clear();
-
     // Get edges.
-    while (getNextLine(line)) {
+    while (getNextLine(line))
+    {
         if (line == "%")
             // End of edges list
             break;
@@ -60,15 +47,15 @@ Grid NetworkLoader::loadGrid() {
         GridEdge edge;
         if (!(sstream >> edge.parent) || edge.parent < 0)
         {
-            throw NetworkLoaderError("Invalid edge parent index");
+            throw NetworkLoaderError("Invalid edge parent index", curLine);
         }
         if (!(sstream >> edge.child) || edge.child < 0 || edge.child == edge.parent)
         {
-            throw NetworkLoaderError("Invalid edge child index");
+            throw NetworkLoaderError("Invalid edge child index", curLine);
         }
         if (!(sstream >> edge.z_c) || edge.z_c == (complex_t)0)
         {
-            throw NetworkLoaderError("Invalid edge impedance");
+            throw NetworkLoaderError("Invalid edge impedance", curLine);
         }
 
         // edge.z_c = edge.z_c / ((grid.vBase * grid.vBase) / grid.sBase); // Convert to per-unit
@@ -84,19 +71,20 @@ Grid NetworkLoader::loadGrid() {
     sstream.str("");
     sstream.clear();
 
-    if (nodeCount == 0) {
-        throw NetworkLoaderError("Empty grid");
+    if (nodeCount == 0)
+    {
+        throw NetworkLoaderError("Empty grid", curLine);
     }
 
     grid.nodes.resize(nodeCount);
 
-    for (node_idx_t edgeIdx = 0; edgeIdx < grid.edges.size(); ++edgeIdx) {
+    for (node_idx_t edgeIdx = 0; edgeIdx < grid.edges.size(); ++edgeIdx)
+    {
         GridEdge& edge = grid.edges[edgeIdx];
 
         grid.nodes.at(edge.parent).edges.push_back(edgeIdx);
         grid.nodes.at(edge.child).edges.push_back(edgeIdx);
     }
-
 
     // Get load/slack nodes
     while (getNextLine(line))
@@ -110,11 +98,11 @@ Grid NetworkLoader::loadGrid() {
 
         if (!(sstream >> nodeIdx) || nodeIdx < 0 || static_cast<typename std::vector<GridNode>::size_type>(nodeIdx) >= grid.nodes.size())
         {
-            throw NetworkLoaderError("Invalid node index");
+            throw NetworkLoaderError("Invalid node index", curLine);
         }
         if (!(sstream >> type))
         {
-            throw NetworkLoaderError("Missing or invalid node type");
+            throw NetworkLoaderError("Missing or invalid node type", curLine);
         }
         if (type == "s")
         {
@@ -130,7 +118,7 @@ Grid NetworkLoader::loadGrid() {
         }
         else
         {
-            throw NetworkLoaderError("Invalid node type");
+            throw NetworkLoaderError("Invalid node type", curLine);
         }
         // Clear the stringstream for the next line
         sstream.str("");
@@ -139,12 +127,35 @@ Grid NetworkLoader::loadGrid() {
     return grid;
 }
 
+void NetworkLoader::getGridBase(Grid& grid)
+{
+    std::string line;
+    std::stringstream sstream{};
+
+    getNextLine(line);
+    sstream << line;
+    if (!(sstream >> grid.sBase) || grid.sBase == 0)
+    {
+        throw NetworkLoaderError("Invalid S base", curLine);
+    }
+    if (!(sstream >> grid.vBase) || grid.vBase == 0)
+    {
+        throw NetworkLoaderError("Invalid V base", curLine);
+    }
+
+    std::string rest;
+    std::getline(sstream, rest);
+    if (rest.find_first_not_of(" ") != std::string::npos)
+    {
+        throw NetworkLoaderError("Invalid base line", curLine);
+    }
+}
+
 std::vector<GridConnection> NetworkLoader::loadConnections()
 {
     std::vector<GridConnection> connections;
     std::string line;
     std::stringstream sstream{};
-
 
     while (getNextLine(line))
     {
@@ -156,33 +167,34 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
 
         if (!(sstream >> connection.slackGrid))
         {
-            throw NetworkLoaderError("Invalid slack grid index");
+            throw NetworkLoaderError("Invalid slack grid index", curLine);
         }
         if (!(sstream >> connection.slackNode))
         {
-            throw NetworkLoaderError("Invalid slack node index");
+            throw NetworkLoaderError("Invalid slack node index", curLine);
         }
         if (!(sstream >> connection.pqGrid))
         {
-            throw NetworkLoaderError("Invalid PQ grid index");
+            throw NetworkLoaderError("Invalid PQ grid index", curLine); // Byt namn till LOAD/MIDDLE??
         }
         if (!(sstream >> connection.pqNode))
         {
-            throw NetworkLoaderError("Invalid PQ node index");
+            throw NetworkLoaderError("Invalid PQ node index", curLine);
         }
         connections.push_back(connection);
 
         // Clear the stringstream for the next line
         sstream.str("");
         sstream.clear();
-
     }
     return connections;
 }
 
-bool NetworkLoader::getNextLine(std::string& line) {
-    while (std::getline(file, line)) {
-        ++currentLine;
+bool NetworkLoader::getNextLine(std::string& line)
+{
+    while (std::getline(file, line))
+    {
+        ++curLine;
         if (!line.empty() && line.at(0) != '#')
         {
             return true;
