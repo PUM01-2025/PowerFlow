@@ -30,7 +30,9 @@ int main(int argc, char* argv[])
         {0.004, 0.002}
     };
     std::vector<complex_t> V = { {1, 0} };
-    std::vector<complex_t> U = pfs.solve(P, V);
+    std::tuple< std::vector<complex_t>, int> Vres_iter = pfs.solve(P, V);
+    std::vector<complex_t> U = std::get<0>(Vres_iter);
+    int iter = std::get<1>(Vres_iter);
 
     for (const Grid& grid : net->grids) {
         for (const GridNode& node : grid.nodes) {

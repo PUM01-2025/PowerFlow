@@ -4,15 +4,16 @@
 #include "powerflow/network.hpp"
 #include "powerflow/logger/Logger.hpp"
 
-class GridSolver {
+class GridSolver
+{
 public:
-	GridSolver(Grid* grid, Logger* const logger) : grid{ grid }, logger{logger} { }
-	virtual ~GridSolver() { };
+    GridSolver(Grid *grid, Logger *const logger) : grid{grid}, logger{logger} {}
+    virtual ~GridSolver() {};
 
-	virtual int solve() = 0; // Returnera antal iterationer
+    virtual int solve() = 0; // Returnera antal iterationer
 protected:
-	Grid* grid{nullptr};
-    Logger* const logger{nullptr};
+    Grid *grid{nullptr};
+    Logger *const logger{nullptr};
 };
 
 #endif
