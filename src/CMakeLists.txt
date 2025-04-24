@@ -1,4 +1,4 @@
-add_library(PowerFlowLib STATIC  NetworkLoader.cpp "NetworkAnalyzer.cpp" "PowerFlowSolver.cpp" "solvers/GaussSeidelSolver.cpp" "solvers/BackwardForwardSweepSolver.cpp" "logger/Logger.cpp")
+add_library(PowerFlowLib STATIC  NetworkLoader.cpp "NetworkAnalyzer.cpp" "PowerFlowSolver.cpp" "solvers/GaussSeidelSolver.cpp" "solvers/BackwardForwardSweepSolver.cpp" "logger/Logger.cpp" "NetworkLoaderError.cpp")
 if(CODE_COVERAGE)
     target_compile_options(PowerFlowLib PRIVATE -O0 -g --coverage -fprofile-arcs -ftest-coverage)
     target_link_options(PowerFlowLib PRIVATE --coverage)
