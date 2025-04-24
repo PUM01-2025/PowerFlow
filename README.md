@@ -156,7 +156,9 @@ SKA DETTA TAS MED?
 
 ### Unit tests
 
-FYLL I HÄR!
+To run the unit test build the project and run ./build/tests/UnitTests
+
+Depending on compiler you can run in to problems with the path to the test networks, if this happens replace the localPath variable with the path to the repository.
 
 ### Project structure
 
