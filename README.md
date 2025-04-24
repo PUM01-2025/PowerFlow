@@ -6,21 +6,38 @@ Version 1.0 of PowerFlow was written in 2025 by a group of eight students as par
 
 ## Building
 
-To build PowerFlow for your platform, you need [CMake](https://cmake.org/) and a suitable C++17 compiler:
+To build PowerFlow for your platform, you need [CMake](https://cmake.org/) and a suitable C++17 compiler. The instructions in this section assume the following compilers are used:
 
 - Windows: MSVC ([Visual Studio >= 2022](https://visualstudio.microsoft.com/)).
 - Linux: g++ version >= ?.
 - Mac: clang version >= ?.
 
-In addition to CMake and a compiler, you may need additional software depending on the build target:
+In addition to CMake and a compiler, you may need additional software depending on the build target.
 
 ### Matlab
 
-PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. PowerFlow has been tested to work with Matlab version R2024b.
+PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. **To be able to compile and run the MEX file, Matlab must be installed on your computer.** PowerFlow has been tested to work with Matlab version R2024b.
 
-To be able to compile and run the MEX file, Matlab must be installed on your computer.
+To compile the MEX file, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
 
-FYLL I CMAKE-KOMMANDON HÄR!
+```
+mkdir build
+cd build
+```
+
+On Linux/macOS, run the following:
+```
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --target PowerFlowMex
+```
+
+On Windows:
+```
+cmake ..
+cmake --build . --target PowerFlowMex --config Release
+```
+
+The MEX file can then be found in `build/Matlab` (`build/Matlab/Release` on Windows). Copy the MEX file to your Matlab project along with the `src/Matlab/PowerFlow.m` file, which provides an interface to the MEX file.
 
 ### Python
 
@@ -60,9 +77,12 @@ Note that:
 
 All calculations are performed using *per-unit* values instead of actual units (Volt, Watt etc.). Per-unit for voltages and powers are defined as:
 
-GÅR DET ATT INFOGA FORMLER I MARKDOWN?
+```
+V_pu = V / V_base
+S_pu = S / S_base
+```
 
-where *S_base* and *V_base* are real-valued scale factors. Each grid in a network has an associated S_base and V_base.
+where *S_base* and *V_base* are positive, real-valued scale factors. Each grid in a network has an associated S_base and V_base.
 
 From the above definitions, it follows that per-unit values for impedances can be calculated as follows:
 
@@ -142,7 +162,23 @@ connections
 
 ***NOTE:** On Ubuntu and possibly other Linux distributions, Matlab may need to be started using a command similar to `LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6 matlab`.*
 
-FYLL I HÄR!
+You need the MEX file as well as the PowerFlow.m script in your Matlab PATH to use PowerFlow from Matlab scripts. See the build instructions on how to acquire those.
+
+To load a network file and run the solver, do the following:
+
+```
+net = PowerFlow("path/to/network.txt");
+V_res = net.solve(S, V);
+```
+
+S, V and V_res are **complex** vectors. The `net` variable is a pointer/handle to the loaded network. The network will be automtically garbage collected once the handle goes out of scope.
+
+#### Thread safety
+
+- It is **NOT** safe to load networks simultaneously on different threads!
+- It is **NOT** safe to execute net.solve() simultaneously on different threads using the same network handle! However, it is safe to simultaneously execute solve() using *different* network handles.
+
+
 
 ### Using PowerFlow in a Python script
 
