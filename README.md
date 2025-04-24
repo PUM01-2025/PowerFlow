@@ -84,12 +84,6 @@ S_pu = S / S_base
 
 where *S_base* and *V_base* are positive, real-valued scale factors. Each grid in a network has an associated S_base and V_base.
 
-From the above definitions, it follows that per-unit values for impedances can be calculated as follows:
-
-FYLL I HÄR!
-
-Note that sqrt(3) ... TREFAS??
-
 #### Solvers
 
 PowerFlow implements two different algorithms (solvers): For grids that have a single SLACK/SLACK_EXTERNAL node, contain no cycles and where the LOAD nodes are located at the "leaves", a *Backward-Forward-Sweep* (BFS) algorithm is used. For other grids, the *Gauss-Seidel* algorithm is used. PowerFlow automatically detects which solver is most suitable for each grid.
