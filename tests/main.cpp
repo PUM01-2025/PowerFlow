@@ -92,17 +92,6 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
         for (GridSolver* solver : solvers) {
             solver->solve();
         }
-
-        for (const Grid& grid : net->grids) {
-            for (const GridNode& node : grid.nodes) {
-                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-            }
-        }
-        for (const Grid& grid : netBFS->grids) {
-            for (const GridNode& node : grid.nodes) {
-                std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-            }
-        }
     
         //Compare the result
         for( unsigned long  i = 0; i < net->grids.size(); i++){
@@ -133,7 +122,7 @@ TEST_CASE("Compare treestructure","[validation]"){
         {0.004, 0.002}
     };  
     std::vector<complex_t> V = {};
-    std::vector<complex_t> U = pfs.solve(P, V);
+    std::tuple< std::vector<complex_t>, int> Vres_iter = pfs.solve(P, V);
 
     std::ifstream fileSingle(localPath + "examples/test_networks/test_network_single_grid.txt");
     CHECK_FALSE(fileSingle.fail()); 
@@ -146,7 +135,7 @@ TEST_CASE("Compare treestructure","[validation]"){
         {0.002, 0.001}
     };
     std::vector<complex_t> VSingle = { {1, 0} };
-    std::vector<complex_t> USingle = pfsSingle.solve(PSingle, VSingle);
+    std::tuple< std::vector<complex_t>, int> Vres_iterSingle = pfsSingle.solve(PSingle, VSingle);
 
     CHECK_THAT(netSingle->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 0.000001));
     CHECK_THAT(netSingle->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 0.000001));
