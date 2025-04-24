@@ -2,7 +2,7 @@ name: AUTO
 
 on:
   push:
-    branches: [ Testing ]
+    branches: [ Testing, main ]
 
 jobs:
   build:
