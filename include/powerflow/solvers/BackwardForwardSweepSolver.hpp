@@ -17,6 +17,7 @@ private:
     // prevEdgeIdx - Index of upstream edge (-1 for root node).
     complex_t sweep(node_idx_t nodeIdx, edge_idx_t prevEdgeIdx = -1);
     bool converged{false};
+    node_idx_t rootIdx = 0;
 };
 
 #endif
