@@ -9,8 +9,8 @@ Version 1.0 of PowerFlow was written in 2025 by a group of eight students as par
 To build PowerFlow for your platform, you need [CMake](https://cmake.org/) and a suitable C++17 compiler. The instructions in this section assume the following compilers are used:
 
 - Windows: MSVC ([Visual Studio >= 2022](https://visualstudio.microsoft.com/)).
-- Linux: g++ version >= ?.
-- Mac: clang version >= ?.
+- Linux: g++.
+- Mac: clang.
 
 In addition to CMake and a compiler, you may need additional software depending on the build target.
 
@@ -55,7 +55,7 @@ It is strongly recommended to read the "General concepts" section below before c
 
 In PowerFlow, an electrical network/power network is referred to as a *network* consisting of one or more interconnected *grids* that each have an associated voltage level. A grid consists of a set of *nodes* connected by *edges*, representing the cables in the grid. A network can thus be depicted as a graph, for example:
 
-INFOGA BILD HÄR!
+<img src="/examples/example_network.png" width="500">
 
 Each edge in the graph has an associated impedance (Z) and each node has an associated quantity depending on its type (see below). *Connections* between grids (the dashed lines in the graph) represent ideal transformers.
 
@@ -112,23 +112,24 @@ A *network file* is a text file that describes a network in a simple format that
 # Since this is the first grid in the file, it will get ID 0.
 grid
 
-# Here, S_base followed by V_base are specified.
+# S_base followed by V_base.
 1000000000 10000
 
-# Här följer kabeldata på formatet <startnod> <slutnod> <impedans>.
+# Grid cables (edges) on the format: <start node> <end node> <impedance>.
 # The % sign marks end of list.
 0 1 (0.05, 0.05)
 1 2 (0.05, 0.05)
 1 3 (0.05, 0.05)
 %
 
-# Här anges de LOAD-noder som studeras. Ett nodindex på varje rad. Listan
-# avslutas med %-tecken.
-# (I det här mellanspänningsnätet är den här listan tom.)
+# Node types on the format: <node> <type>.
+# <type> can be either e (SLACK_EXTERNAL), s (SLACK) or l (LOAD).
+# Nodes not listed here will automatically become MIDDLE nodes.
+# The % sign marks end of list. 
 0 s
 %
 
-# Första lågspänningsnätet.
+# Grid 1.
 grid
 10000000 400
 0 1 (0.02, 0.02)
@@ -138,7 +139,7 @@ grid
 2 l
 %
 
-# Andra lågspänningsnätet.
+# Grid 2.
 grid
 10000000 400
 0 1 (0.02, 0.03)
@@ -149,9 +150,9 @@ grid
 2 l
 %
 
-# Här anges anslutningarna mellan näten på formatet:
-# <slacknät-nummer> <slacknod-index> <pqnät-nummer> <pqnod-index>
-# Listan måste avslutas med ett %-tecken.
+# Connections between grids on the format:
+# <"upper" grid> <MIDDLE node in "upper" grid> <"lower" grid> <SLACK node in "lower" grid>
+# The % sign marks end of list.
 connections
 0 2 1 0
 0 3 2 0
