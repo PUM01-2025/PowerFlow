@@ -13,6 +13,10 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(CODE_COVERAGE)
+    add_compile_options(-O0 -g --coverage -fprofile-arcs -ftest-coverage)
+    add_link_options(--coverage)
+endif()
 
 add_subdirectory(src)
 add_subdirectory(standalone)
