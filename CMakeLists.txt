@@ -41,8 +41,3 @@ if(pybind11_FOUND)
 else()
     message(WARNING "Pybind11 not found: skipping python subdirectory")
 endif()
-
-add_subdirectory(src)
-add_subdirectory(standalone)
-add_subdirectory(tests)
- 
