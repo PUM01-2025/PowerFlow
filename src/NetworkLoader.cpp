@@ -1,5 +1,6 @@
 #include "powerflow/NetworkLoader.hpp"
 #include "powerflow/NetworkLoaderError.hpp"
+#include <set>
 
 NetworkLoader::NetworkLoader(std::istream& file) : file{ file } { }
 
@@ -35,6 +36,8 @@ Grid NetworkLoader::loadGrid()
     std::string line;
     std::stringstream sstream{};
     int nodeCount = 0; // Number of nodes in the grid
+    std::set<std::pair<int, int>> uniqueEdges;
+    
 
     // Get edges.
     while (getNextLine(line))
@@ -56,6 +59,14 @@ Grid NetworkLoader::loadGrid()
         if (!(sstream >> edge.z_c) || edge.z_c == (complex_t)0)
         {
             throw NetworkLoaderError("Invalid edge impedance", curLine);
+        }
+        std::pair newEdge = std::make_pair(edge.parent, edge.child);
+        if (uniqueEdges.find(newEdge) != uniqueEdges.end())
+        {
+            throw NetworkLoaderError("To edges between node " + std::to_string(edge.parent) + " and " + std::to_string(edge.child), curLine);
+        }
+        else {
+            uniqueEdges.insert(newEdge);
         }
 
         // edge.z_c = edge.z_c / ((grid.vBase * grid.vBase) / grid.sBase); // Convert to per-unit
