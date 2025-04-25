@@ -1,16 +1,9 @@
+pybind11_add_module(PowerFlowPython PowerFlowPython.cpp)
 
-find_package(pybind11 REQUIRED)
+target_link_libraries(PowerFlowPython PRIVATE PowerFlowLib)
 
-pybind11_add_module(python_wrappers
-    python_wrappers.cpp
+set_target_properties(PowerFlowPython PROPERTIES
+    OUTPUT_NAME "PowerFlowPython"
 )
 
-target_link_libraries(python_wrappers PRIVATE PowerFlowLib)
-
-set_target_properties(python_wrappers PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/examples
-    OUTPUT_NAME "python_wrappers"
-    SUFFIX ".so"
-)
-
-message(STATUS "Python module target configured: python_wrappers")
+message(STATUS "Python module target configured: PowerFlowPython")

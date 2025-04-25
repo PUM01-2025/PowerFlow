@@ -52,7 +52,7 @@ private:
     CppLogger cpp_logger{};
 };
 
-PYBIND11_MODULE(python_wrappers, m)
+PYBIND11_MODULE(PowerFlowPython, m)
 {
     m.doc() = "Power Flow binding for Python interface";
 
