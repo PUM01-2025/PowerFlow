@@ -12,14 +12,7 @@
 #include <string>
 #include <filesystem>
 
-std::string Path = std::filesystem::current_path().string();
-size_t position = Path.find("Kandidat01");   
-#ifdef GITHUB_VM
-    std::string localPath = Path.erase(position+11, std::string::npos) + "Kandidat01/";  //github vm has an extra Kandidat01 folder
-#else
-    std::string localPath = Path.erase(position+11, std::string::npos); //Kör den har pathen om ni kör lokalt
-#endif
-
+std::string localPath = "";
 
 //CHECK_FALSE(file.fail());  checks that the file can be opened correctly (in most cases it is the wrong filepath)
 bool test_input_error_message(std::string errorMessage, std::string filePath){
