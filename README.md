@@ -45,7 +45,7 @@ FYLL I INSTRUKTIONER HÄR!
 
 ### Standalone?
 
-SKA DETTA TAS MED?
+If you want to use the solvers natively in C++ see the examples of usage in standalone.
 
 ## Usage
 
@@ -92,8 +92,8 @@ PowerFlow implements two different algorithms (solvers): For grids that have a s
 
 Some limitations on the structure of a network are imposed by PowerFlow. It is not possible to:
 
-- INGA DUBBLA KANTER??
-- MER HÄR?
+- have more than one edge between a pair of node
+- have disjointed graphs
 
 ### Network files
 
