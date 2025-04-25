@@ -133,9 +133,9 @@ std::vector<complex_t> PowerFlowSolver::getLoadVoltages()
 {
     std::vector<complex_t> U;
 
-    for (Grid &grid : network->grids)
+    for (Grid const &grid : network->grids)
     {
-        for (GridNode &node : grid.nodes)
+        for (GridNode const &node : grid.nodes)
         {
             if (node.type == NodeType::LOAD)
             {
@@ -149,9 +149,9 @@ std::vector<complex_t> PowerFlowSolver::getVoltages() const
 {
     std::vector<complex_t> result{};
 
-    for (Grid g : network->grids)
+    for (Grid const &g : network->grids)
     {
-        for (GridNode n : g.nodes)
+        for (GridNode const &n : g.nodes)
         {
             result.push_back(n.v);
         }
@@ -162,12 +162,12 @@ std::vector<complex_t> PowerFlowSolver::getCurrents() const
 {
     std::vector<complex_t> result{};
 
-    for (Grid g : network->grids)
+    for (Grid const &g : network->grids)
     {
-        for (GridEdge e : g.edges)
+        for (GridEdge const &e : g.edges)
         {
-            GridNode p{ g.nodes[e.parent] }, c{ g.nodes[e.child] };
-            complex_t current{ e.z_c / (p.v - c.v) };
+            GridNode p{g.nodes[e.parent]}, c{g.nodes[e.child]};
+            complex_t current{e.z_c / (p.v - c.v)};
             result.push_back(current);
         }
     }
@@ -176,5 +176,18 @@ std::vector<complex_t> PowerFlowSolver::getCurrents() const
 }
 std::vector<complex_t> PowerFlowSolver::getPowers() const
 {
-    
+    std::vector<complex_t> result{};
+
+    for (Grid const &g : network->grids)
+    {
+        for (GridNode const &n : g.nodes)
+        {
+            if (n.type == NodeType::SLACK || n.type == NodeType::SLACK_EXTERNAL)
+            {
+                result.push_back(n.s);
+            }
+        }
+    }
+
+    return result;
 }
