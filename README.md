@@ -70,7 +70,7 @@ The resulting Python module file can then be found in `build/python` (`build/pyt
 
 ### Linking to PowerFlow
 
-PowerFlow can also be used in a C++ project by statically linking to the `PowerFlowLib` CMake target. The `standalone` directory contains a commented example.
+It is possible to use PowerFlow as a C++ library by statically linking to the `PowerFlowLib` CMake target. The `standalone` directory contains an example showing how PowerFlow can be used within a C++ program.
 
 ## Usage
 
@@ -80,7 +80,7 @@ It is strongly recommended to read the "General concepts" section below before c
 
 In PowerFlow, an electrical network/power network is referred to as a *network* consisting of one or more interconnected *grids* that each have an associated voltage level. A grid consists of a set of *nodes* connected by *edges*, representing the cables in the grid. A network can thus be depicted as a graph, for example:
 
-<img src="/examples/example_network.png" width="500">
+<img src="./examples/example_network.png" width="500">
 
 Each edge in the graph has an associated impedance (Z) and each node has an associated quantity depending on its type (see below). *Connections* between grids (the dashed lines in the graph) represent ideal transformers.
 
