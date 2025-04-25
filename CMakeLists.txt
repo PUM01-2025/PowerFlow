@@ -13,7 +13,16 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-find_package(Matlab COMPONENTS MX MEX)
+if(CODE_COVERAGE)
+    add_compile_options(-O0 -g --coverage -fprofile-arcs -ftest-coverage)
+    add_link_options(--coverage)
+endif()
+
+add_subdirectory(src)
+add_subdirectory(standalone)
+add_subdirectory(tests)
+ 
+find_package(Matlab)
 
 if(Matlab_FOUND)
     message(STATUS "Matlab found: Adding matlab subdirectory.")
@@ -32,8 +41,3 @@ if(pybind11_FOUND)
 else()
     message(WARNING "Pybind11 not found: skipping python subdirectory")
 endif()
-
-add_subdirectory(src)
-add_subdirectory(standalone)
-add_subdirectory(tests)
- 

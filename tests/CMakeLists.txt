@@ -1,3 +1,6 @@
 add_executable(UnitTests main.cpp)
+if(GITHUB_VM)
+    target_compile_definitions(UnitTests PRIVATE GITHUB_VM)
+endif()
 target_link_libraries(UnitTests PRIVATE PowerFlowLib)
 add_test(NAME UnitTests COMMAND UnitTests)

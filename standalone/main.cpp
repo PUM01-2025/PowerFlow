@@ -1,30 +1,38 @@
 #include "powerflow/NetworkLoader.hpp"
-#include "powerflow/GaussSeidelSolver.hpp"
-#include "powerflow/BackwardForwardSweepSolver.hpp"
+#include "powerflow/solvers/GaussSeidelSolver.hpp"
+#include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
-
+#include "powerflow/logger/CppLogger.hpp"
 #include <iostream>
 #include <fstream>
 
 
 int main(int argc, char* argv[])
 {
-    std::ifstream file("../examples/example_network_single_grid.txt");
+    //std::ifstream file("../examples/example_network_single_grid.txt");
+    std::ifstream file("C:/Users/melvi/Kandidat01/examples/example_network_single_grid.txt");
+    if (!file) {
+        return -1;
+    }
     NetworkLoader loader(file);
     std::shared_ptr<Network> net = loader.loadNetwork();
     for (const Grid& grid : net->grids) {
+        std::cout << "Base " << grid.sBase << " " << grid.vBase << std::endl;
         for (const GridNode& node : grid.nodes) {
             std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
         }
     }
-
-    PowerFlowSolver pfs(net);
+	CppLogger logger(std::cout);
+    PowerFlowSolver pfs(net, &logger);
     std::vector<complex_t> P = {
         {0.002, 0.001},
         {0.005, 0.004},
         {0.004, 0.002}
     };
-    std::vector<complex_t> U = pfs.solve(P);
+    std::vector<complex_t> V = { {1, 0} };
+    std::tuple< std::vector<complex_t>, int> Vres_iter = pfs.solve(P, V);
+    std::vector<complex_t> U = std::get<0>(Vres_iter);
+    int iter = std::get<1>(Vres_iter);
 
     for (const Grid& grid : net->grids) {
         for (const GridNode& node : grid.nodes) {
