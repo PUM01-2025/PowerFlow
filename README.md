@@ -66,7 +66,7 @@ cmake ..
 cmake --build . --target PowerFlowPython --config Release
 ```
 
-The resulting Python module file can then be found in `build/Python` (`build/Python/Release` on Windows). This file can be copied to your Python project.
+The resulting Python module file can then be found in `build/python` (`build/python/Release` on Windows). This file can be copied to your Python project.
 
 ### Linking to PowerFlow
 
