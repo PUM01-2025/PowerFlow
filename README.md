@@ -16,7 +16,7 @@ In addition to CMake and a compiler, you may need additional software depending 
 
 ### Matlab
 
-PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. **To be able to compile and run the MEX file, Matlab must be installed on your computer.** PowerFlow has been tested to work with Matlab version R2024b.
+PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. To be able to compile and run the MEX file, Matlab must be installed on your computer. PowerFlow has been tested to work with Matlab version R2024b.
 
 To compile the MEX file, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
 
@@ -41,11 +41,36 @@ The MEX file can then be found in `build/Matlab` (`build/Matlab/Release` on Wind
 
 ### Python
 
-FYLL I INSTRUKTIONER HÄR!
+PowerFlow can be compiled into a [pybind11 module](https://github.com/pybind/pybind11) that can then be imported into Python 3 scripts. To build and use the Python module, you need Python 3 and pybind11 on your computer.
 
-### Standalone?
+***NOTE:** On Windows, Python must be installed using the official installer (found [here](https://www.python.org/)), **NOT** using the Microsoft Store! During the installation, make sure to select the "Add to PATH" option.*
 
-If you want to use the solvers natively in C++ see the examples of usage in standalone.
+***NOTE:** When installing pybind11 using pip, it may be necessary to select the "global" version.*
+
+To compile the Python module, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
+
+```
+mkdir build
+cd build
+```
+
+On Linux/macOS, run the following:
+```
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --target PowerFlowPython
+```
+
+On Windows:
+```
+cmake ..
+cmake --build . --target PowerFlowPython --config Release
+```
+
+The resulting Python module file can then be found in `build/Python` (`build/Python/Release` on Windows). This file can be copied to your Python project.
+
+### Linking to PowerFlow
+
+PowerFlow can also be used in a C++ project by statically linking to the `PowerFlowLib` CMake target. The `standalone` directory contains a commented example.
 
 ## Usage
 
@@ -173,15 +198,9 @@ S, V and V_res are **complex** vectors. The `net` variable is a pointer/handle t
 - It is **NOT** safe to load networks simultaneously on different threads!
 - It is **NOT** safe to execute net.solve() simultaneously on different threads using the same network handle! However, it is safe to simultaneously execute solve() using *different* network handles.
 
-
-
 ### Using PowerFlow in a Python script
 
 FYLL I HÄR!
-
-### Using the standalone application?
-
-SKA DETTA TAS MED?
 
 ## For developers
 
