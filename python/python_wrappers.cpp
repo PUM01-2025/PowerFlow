@@ -13,10 +13,10 @@
 #include "powerflow/NetworkLoader.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
 
-class PowerFlowWrapper
+class PowerFlow
 {
 public:
-    PowerFlowWrapper(const std::string &filePath)
+    PowerFlow(const std::string &filePath)
     {
         file = std::make_shared<std::ifstream>(filePath);
         if (!file->is_open())
@@ -33,6 +33,15 @@ public:
     {
         return solver->solve(P);
     }
+    std::vector<std::complex<double>> getSlackNodeCurrents() const
+    {
+        return {}; // Ska implenteras om tid finns (Ej prio)
+    }
+
+    std::vector<double> getSlackNodePowers() const
+    {
+        return {}; // Ska implenteras om tid finns (Ej prio)
+    }
 
 private:
     std::shared_ptr<std::ifstream> file;
@@ -45,7 +54,9 @@ PYBIND11_MODULE(python_wrappers, m)
 {
     m.doc() = "Power Flow binding for Python interface";
 
-    pybind11::class_<PowerFlowWrapper>(m, "PowerFlowWrapper")
+    pybind11::class_<PowerFlow>(m, "PowerFlow")
         .def(pybind11::init<const std::string &>(), pybind11::arg("filepath"))
-        .def("solve", &PowerFlowWrapper::solve, pybind11::arg("P"), "Solve the power flow problem");
+        .def("solve", &PowerFlow::solve, pybind11::arg("P"), "Solve the power flow problem")
+        .def("get_slack_node_currents", &PowerFlow::getSlackNodeCurrents, "Get the slack node currents")
+        .def("get_slack_node_powers", &PowerFlow::getSlackNodePowers, "Get the slack node powers");
 }
