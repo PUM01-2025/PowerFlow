@@ -215,6 +215,7 @@ Depending on compiler you can run in to problems with the path to the test netwo
 - `examples/` - Various examples.
 - `include/powerflow/` - Public headers.
 - `matlab/` - Matlab implementation.
+- `scripts/` - Miscellaneous files.
 - `python/` - Python implementation.
 - `src/` - powerflow source code.
 - `standalone/` - Standalone executable.
