@@ -31,7 +31,6 @@ else()
     message(WARNING "Matlab not found: Skipping matlab subdirectory.")
 endif()
 
-
 set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11)
 

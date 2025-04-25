@@ -12,6 +12,7 @@
 #include "powerflow/network.hpp"
 #include "powerflow/NetworkLoader.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
+#include "powerflow/logger/CppLogger.hpp"
 
 class PowerFlow
 {
@@ -26,12 +27,12 @@ public:
 
         loader = std::make_unique<NetworkLoader>(*file);
         network = loader->loadNetwork();
-        solver = std::make_unique<PowerFlowSolver>(network);
+        solver = std::make_unique<PowerFlowSolver>(network, &cpp_logger);
     }
 
-    std::vector<std::complex<double>> solve(std::vector<std::complex<double>> &P)
+    std::vector<std::complex<double>> solve(std::vector<std::complex<double>> &S, std::vector<std::complex<double>> &V)
     {
-        return solver->solve(P);
+        return std::get<0>(solver->solve(S, V));
     }
     std::vector<std::complex<double>> getSlackNodeCurrents() const
     {
@@ -48,6 +49,7 @@ private:
     std::unique_ptr<NetworkLoader> loader;
     std::shared_ptr<Network> network;
     std::unique_ptr<PowerFlowSolver> solver;
+    CppLogger cpp_logger{};
 };
 
 PYBIND11_MODULE(python_wrappers, m)
@@ -56,7 +58,7 @@ PYBIND11_MODULE(python_wrappers, m)
 
     pybind11::class_<PowerFlow>(m, "PowerFlow")
         .def(pybind11::init<const std::string &>(), pybind11::arg("filepath"))
-        .def("solve", &PowerFlow::solve, pybind11::arg("P"), "Solve the power flow problem")
+        .def("solve", &PowerFlow::solve, pybind11::arg("P"), pybind11::arg("V"), "Solve the power flow problem")
         .def("get_slack_node_currents", &PowerFlow::getSlackNodeCurrents, "Get the slack node currents")
         .def("get_slack_node_powers", &PowerFlow::getSlackNodePowers, "Get the slack node powers");
 }
