@@ -12,7 +12,13 @@ public:
     PowerFlowSolver(std::shared_ptr<Network> network, Logger *const logger);
 
     std::vector<complex_t> solve(std::vector<complex_t> &P, std::vector<complex_t> &V);
-
+    
+    // Returns all voltages in the grid
+    std::vector<complex_t> getVoltages() const;
+    // Returns all currents in the grid
+    std::vector<complex_t> getCurrents() const;
+    // Returns all powers in the grid
+    std::vector<complex_t> getPowers() const;
 private:
 	std::shared_ptr<Network> network;
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;
@@ -22,6 +28,7 @@ private:
 	void updateLoads(std::vector<complex_t>& P);
 	void updateExternalVoltages(std::vector<complex_t>& V);
 	void runGridSolvers();
+    
 	std::vector<complex_t> getLoadVoltages();
 };
 
