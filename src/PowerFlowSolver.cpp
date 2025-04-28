@@ -26,15 +26,8 @@ void PowerFlowSolver::createGridSolvers()
 {
     int grid_no{};
 
-<<<<<<< HEAD
-    for (Grid &grid : network->grids)
-    {
-        // TODO: Analysera respektive Grid och välj den Solver som är lämpligast
-
-=======
     for (Grid& grid : network->grids)
     {
->>>>>>> main
         switch (determine_solver(grid))
         {
         case GAUSSSEIDEL:
@@ -52,19 +45,6 @@ void PowerFlowSolver::createGridSolvers()
     }
 }
 
-<<<<<<< HEAD
-void PowerFlowSolver::updateLoads(std::vector<complex_t> &P)
-{
-    size_t pIdx = 0;
-
-    for (Grid &grid : network->grids)
-    {
-        for (GridNode &node : grid.nodes)
-        {
-            if (node.type == NodeType::LOAD)
-            {
-                if (pIdx == P.size())
-=======
 void PowerFlowSolver::updateLoads(const std::vector<complex_t>& S)
 {
     size_t pIdx = 0;
@@ -76,7 +56,6 @@ void PowerFlowSolver::updateLoads(const std::vector<complex_t>& S)
             if (node.type == NodeType::LOAD)
             {
                 if (pIdx == S.size())
->>>>>>> main
                 {
                     throw std::runtime_error("S has too few elements");
                 }
@@ -84,25 +63,12 @@ void PowerFlowSolver::updateLoads(const std::vector<complex_t>& S)
             }
         }
     }
-<<<<<<< HEAD
-    if (pIdx != P.size())
-=======
     if (pIdx != S.size())
->>>>>>> main
     {
         throw std::runtime_error("S is of incorrect size");
     }
 }
 
-<<<<<<< HEAD
-void PowerFlowSolver::updateExternalVoltages(std::vector<complex_t> &V)
-{
-    size_t vIdx = 0;
-
-    for (Grid &grid : network->grids)
-    {
-        for (GridNode &node : grid.nodes)
-=======
 void PowerFlowSolver::updateExternalVoltages(const std::vector<complex_t>& V)
 {
     size_t vIdx = 0;
@@ -110,7 +76,6 @@ void PowerFlowSolver::updateExternalVoltages(const std::vector<complex_t>& V)
     for (Grid& grid : network->grids)
     {
         for (GridNode& node : grid.nodes)
->>>>>>> main
         {
             if (node.type == NodeType::SLACK_EXTERNAL)
             {
