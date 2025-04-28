@@ -5,7 +5,17 @@ static const double SQRT3 = 1.73205080757;
 static const int MAX_ITER = 10000;
 static const double PRECISION = 1e-10;
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, Logger *const logger) : GridSolver(grid, logger) {}
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, Logger *const logger) : GridSolver(grid, logger)
+{
+    for (node_idx_t i = 0; i < grid->nodes.size(); ++i)
+    {
+        if (grid->nodes[i].type == NodeType::SLACK || grid->nodes[i].type == NodeType::SLACK_EXTERNAL)
+        {
+            rootIdx = i;
+            break;
+        }
+    }
+}
 
 int BackwardForwardSweepSolver::solve()
 {
@@ -13,15 +23,15 @@ int BackwardForwardSweepSolver::solve()
     do
     {
         converged = true;
-        sweep(0, -1); // TA REDA P� ROOT-INDEX!!!!!!!! Ej n�dv�ndigtvis 0!!
+        sweep(rootIdx, -1);
 
     } while (!converged && iter++ < MAX_ITER);
-    grid->nodes[0].s = -grid->nodes[0].s;
+    grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
     return iter;
 }
 
 complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
-                                            node_idx_t prevEdgeIdx)
+                                            edge_idx_t prevEdgeIdx)
 {
     GridNode &node = grid->nodes[nodeIdx];
 

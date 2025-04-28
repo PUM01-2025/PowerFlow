@@ -6,29 +6,71 @@ Version 1.0 of PowerFlow was written in 2025 by a group of eight students as par
 
 ## Building
 
-To build PowerFlow for your platform, you need [CMake](https://cmake.org/) and a suitable C++17 compiler:
+To build PowerFlow for your platform, you need [CMake](https://cmake.org/) and a suitable C++17 compiler. The instructions in this section assume the following compilers are used:
 
 - Windows: MSVC ([Visual Studio >= 2022](https://visualstudio.microsoft.com/)).
-- Linux: g++ version >= ?.
-- Mac: clang version >= ?.
+- Linux: g++.
+- Mac: clang.
 
-In addition to CMake and a compiler, you may need additional software depending on the build target:
+In addition to CMake and a compiler, you may need additional software depending on the build target.
 
 ### Matlab
 
-PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. PowerFlow has been tested to work with Matlab version R2024b.
+PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. To be able to compile and run the MEX file, Matlab must be installed on your computer. PowerFlow has been tested to work with Matlab version R2024b.
 
-To be able to compile and run the MEX file, Matlab must be installed on your computer.
+To compile the MEX file, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
 
-FYLL I CMAKE-KOMMANDON HÄR!
+```
+mkdir build
+cd build
+```
+
+On Linux/macOS, run the following:
+```
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --target PowerFlowMex
+```
+
+On Windows:
+```
+cmake ..
+cmake --build . --target PowerFlowMex --config Release
+```
+
+The MEX file can then be found in `build/Matlab` (`build/Matlab/Release` on Windows). Copy the MEX file to your Matlab project along with the `src/Matlab/PowerFlow.m` file, which provides an interface to the MEX file.
 
 ### Python
 
-FYLL I INSTRUKTIONER HÄR!
+PowerFlow can be compiled into a [pybind11 module](https://github.com/pybind/pybind11) that can then be imported into Python 3 scripts. To build and use the Python module, you need Python 3 and pybind11 on your computer.
 
-### Standalone?
+***NOTE:** On Windows, Python must be installed using the official installer (found [here](https://www.python.org/)), **NOT** using the Microsoft Store! During the installation, make sure to select the "Add to PATH" option.*
 
-SKA DETTA TAS MED?
+***NOTE:** When installing pybind11 using pip, it may be necessary to select the "global" version.*
+
+To compile the Python module, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
+
+```
+mkdir build
+cd build
+```
+
+On Linux/macOS, run the following:
+```
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --target PowerFlowPython
+```
+
+On Windows:
+```
+cmake ..
+cmake --build . --target PowerFlowPython --config Release
+```
+
+The resulting Python module file can then be found in `build/python` (`build/python/Release` on Windows). This file can be copied to your Python project.
+
+### Linking to PowerFlow
+
+It is possible to use PowerFlow as a C++ library by statically linking to the `PowerFlowLib` CMake target. The `standalone` directory contains an example showing how PowerFlow can be used within a C++ program.
 
 ## Usage
 
@@ -38,7 +80,7 @@ It is strongly recommended to read the "General concepts" section below before c
 
 In PowerFlow, an electrical network/power network is referred to as a *network* consisting of one or more interconnected *grids* that each have an associated voltage level. A grid consists of a set of *nodes* connected by *edges*, representing the cables in the grid. A network can thus be depicted as a graph, for example:
 
-INFOGA BILD HÄR!
+<img src="./examples/example_network.png" width="500">
 
 Each edge in the graph has an associated impedance (Z) and each node has an associated quantity depending on its type (see below). *Connections* between grids (the dashed lines in the graph) represent ideal transformers.
 
@@ -60,15 +102,12 @@ Note that:
 
 All calculations are performed using *per-unit* values instead of actual units (Volt, Watt etc.). Per-unit for voltages and powers are defined as:
 
-GÅR DET ATT INFOGA FORMLER I MARKDOWN?
+```
+V_pu = V / V_base
+S_pu = S / S_base
+```
 
-where *S_base* and *V_base* are real-valued scale factors. Each grid in a network has an associated S_base and V_base.
-
-From the above definitions, it follows that per-unit values for impedances can be calculated as follows:
-
-FYLL I HÄR!
-
-Note that sqrt(3) ... TREFAS??
+where *S_base* and *V_base* are positive, real-valued scale factors. Each grid in a network has an associated S_base and V_base.
 
 #### Solvers
 
@@ -78,8 +117,8 @@ PowerFlow implements two different algorithms (solvers): For grids that have a s
 
 Some limitations on the structure of a network are imposed by PowerFlow. It is not possible to:
 
-- INGA DUBBLA KANTER??
-- MER HÄR?
+- have more than one edge between a pair of node
+- have disjointed graphs
 
 ### Network files
 
@@ -92,23 +131,24 @@ A *network file* is a text file that describes a network in a simple format that
 # Since this is the first grid in the file, it will get ID 0.
 grid
 
-# Here, S_base followed by V_base are specified.
+# S_base followed by V_base.
 1000000000 10000
 
-# Här följer kabeldata på formatet <startnod> <slutnod> <impedans>.
+# Grid cables (edges) on the format: <start node> <end node> <impedance>.
 # The % sign marks end of list.
 0 1 (0.05, 0.05)
 1 2 (0.05, 0.05)
 1 3 (0.05, 0.05)
 %
 
-# Här anges de LOAD-noder som studeras. Ett nodindex på varje rad. Listan
-# avslutas med %-tecken.
-# (I det här mellanspänningsnätet är den här listan tom.)
+# Node types on the format: <node> <type>.
+# <type> can be either e (SLACK_EXTERNAL), s (SLACK) or l (LOAD).
+# Nodes not listed here will automatically become MIDDLE nodes.
+# The % sign marks end of list. 
 0 s
 %
 
-# Första lågspänningsnätet.
+# Grid 1.
 grid
 10000000 400
 0 1 (0.02, 0.02)
@@ -118,7 +158,7 @@ grid
 2 l
 %
 
-# Andra lågspänningsnätet.
+# Grid 2.
 grid
 10000000 400
 0 1 (0.02, 0.03)
@@ -129,9 +169,9 @@ grid
 2 l
 %
 
-# Här anges anslutningarna mellan näten på formatet:
-# <slacknät-nummer> <slacknod-index> <pqnät-nummer> <pqnod-index>
-# Listan måste avslutas med ett %-tecken.
+# Connections between grids on the format:
+# <"upper" grid> <MIDDLE node in "upper" grid> <"lower" grid> <SLACK node in "lower" grid>
+# The % sign marks end of list.
 connections
 0 2 1 0
 0 3 2 0
@@ -142,27 +182,40 @@ connections
 
 ***NOTE:** On Ubuntu and possibly other Linux distributions, Matlab may need to be started using a command similar to `LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6 matlab`.*
 
-FYLL I HÄR!
+You need the MEX file as well as the PowerFlow.m script in your Matlab PATH to use PowerFlow from Matlab scripts. See the build instructions on how to acquire those.
+
+To load a network file and run the solver, do the following:
+
+```
+net = PowerFlow("path/to/network.txt");
+V_res = net.solve(S, V);
+```
+
+S, V and V_res are **complex** vectors. The `net` variable is a pointer/handle to the loaded network. The network will be automtically garbage collected once the handle goes out of scope.
+
+#### Thread safety
+
+- It is **NOT** safe to load networks simultaneously on different threads!
+- It is **NOT** safe to execute net.solve() simultaneously on different threads using the same network handle! However, it is safe to simultaneously execute solve() using *different* network handles.
 
 ### Using PowerFlow in a Python script
 
 FYLL I HÄR!
 
-### Using the standalone application?
-
-SKA DETTA TAS MED?
-
 ## For developers
 
 ### Unit tests
 
-FYLL I HÄR!
+To run the unit test build the project and run ./build/tests/UnitTests
+
+Depending on compiler you can run in to problems with the path to the test networks, if this happens replace the localPath variable with the path to the repository.
 
 ### Project structure
 
 - `examples/` - Various examples.
 - `include/powerflow/` - Public headers.
 - `matlab/` - Matlab implementation.
+- `scripts/` - Miscellaneous files.
 - `python/` - Python implementation.
 - `src/` - powerflow source code.
 - `standalone/` - Standalone executable.

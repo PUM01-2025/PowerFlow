@@ -1,5 +1,5 @@
-#ifndef CPP_LOGGER_H
-#define CPP_LOGGER_H
+#ifndef POWERFLOW_CPP_LOGGER_H
+#define POWERFLOW_CPP_LOGGER_H
 
 #include "powerflow/logger/Logger.hpp"
 #include <iostream>

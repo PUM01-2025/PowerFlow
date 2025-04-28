@@ -1,9 +1,10 @@
-#ifndef BACKWARD_FORWARD_SWEEP_H
-#define BACKWARD_FORWARD_SWEEP_H
+#ifndef POWERFLOW_BACKWARD_FORWARD_SWEEP_H
+#define POWERFLOW_BACKWARD_FORWARD_SWEEP_H
 
 #include "powerflow/solvers/GridSolver.hpp"
 #include "powerflow/network.hpp"
 
+// GridSolver implementing the Backward-Forward-Sweep algorithm.
 class BackwardForwardSweepSolver : public GridSolver
 {
 public:
@@ -11,8 +12,12 @@ public:
     int solve();
 
 private:
-    complex_t sweep(node_idx_t nodeIdx, node_idx_t prevEdgeIdx = -1);
+    // Recursive function that performs a single Backward-Forward sweep.
+    // nodeIdx - Index of current node in the grid.
+    // prevEdgeIdx - Index of upstream edge (-1 for root node).
+    complex_t sweep(node_idx_t nodeIdx, edge_idx_t prevEdgeIdx = -1);
     bool converged{false};
+    node_idx_t rootIdx = 0;
 };
 
 #endif

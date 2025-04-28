@@ -3,7 +3,7 @@
 static const int MAX_ITER = 10000;
 static const double PRECISION = 1e-12;
 
-GaussSeidelSolver::GaussSeidelSolver(Grid *grid, Logger *const logger)
+GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger)
     : GridSolver(grid, logger), y(grid->edges.size()), ySum(grid->nodes.size())
 {
     // Create admittance vector.
@@ -36,14 +36,13 @@ int GaussSeidelSolver::solve()
     bool converged = false;
     int iter = 0;
 
-    *logger << "Test";
-
     // Update load voltages.
     do
     {
         converged = true; // Until proven otherwise
 
-        for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx) { // For each node
+        for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx) // For each node
+        {
             GridNode& node = grid->nodes[nodeIdx];
 
             if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
@@ -51,7 +50,8 @@ int GaussSeidelSolver::solve()
 
             complex_t i = std::conj(node.s) / std::conj(node.v);
 
-            for (size_t edgeIdx : node.edges) {
+            for (size_t edgeIdx : node.edges)
+            {
                 GridEdge& edge = grid->edges[edgeIdx];
                 int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
                 GridNode& neighbor = grid->nodes[neighborIdx];
@@ -67,10 +67,12 @@ int GaussSeidelSolver::solve()
             }
             node.v = newV; // Update node voltage
         }
-    } while (!converged && iter++ < MAX_ITER);
+    }
+    while (!converged && iter++ < MAX_ITER);
 
     // Update slack power.
-    for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx) {
+    for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx)
+    {
         GridNode& node = grid->nodes[nodeIdx];
 
         if (node.type != NodeType::SLACK && node.type != NodeType::SLACK_EXTERNAL)
@@ -78,7 +80,8 @@ int GaussSeidelSolver::solve()
 
         complex_t i{0, 0};
 
-        for (edge_idx_t edgeIdx : node.edges) {
+        for (edge_idx_t edgeIdx : node.edges)
+        {
             GridEdge& edge = grid->edges[edgeIdx];
             int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
             GridNode& neighbor = grid->nodes[neighborIdx];

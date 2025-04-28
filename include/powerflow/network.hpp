@@ -1,5 +1,5 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef POWERFLOW_NETWORK_H
+#define POWERFLOW_NETWORK_H
 
 #include <vector>
 #include <complex>

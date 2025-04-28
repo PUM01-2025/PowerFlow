@@ -1,5 +1,5 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef POWERFLOW_LOGGER_H
+#define POWERFLOW_LOGGER_H
 
 #include <iostream>
 #include <string>
@@ -12,17 +12,14 @@ enum class LogLevel
     WARNING,
     EXTRA
 };
-/*
 
-Loger base class
-This class is used to create a logger that can be used to log messages to different
-outputs (console, file, etc.). The logger is thread safe and can be used in a multi-threaded
-environment. The logger uses a stringstream to store the messages and a mutex to protect
-the stringstream from concurrent access. The logger uses the operator<< to append messages
-to the stringstream. The logger also uses the flush() function to write the messages to the 
-chosen buffer or way in the derived class.
-
-*/
+// Loger base class.
+// This class is used to create a logger that can be used to log messages to different
+// outputs (console, file, etc.). The logger is thread safe and can be used in a multi-threaded
+// environment. The logger uses a stringstream to store the messages and a mutex to protect
+// the stringstream from concurrent access. The logger uses the operator<< to append messages
+// to the stringstream. The logger also uses the flush() function to write the messages to the 
+// chosen buffer or way in the derived class.
 class Logger
 {
 public:

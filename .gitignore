@@ -1,5 +1,7 @@
 build
 out
 .vs
-CMakePesets.json
+CMakePresets.json
 .vscode
+cov.info
+cov.cleaned.info
