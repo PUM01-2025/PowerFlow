@@ -68,6 +68,11 @@ int GaussSeidelSolver::solve()
         }
     } while (!converged && iter++ < MAX_ITER);
 
+    if (!converged)
+    {
+        throw std::runtime_error("GaussSeidelSolver: The solution did not converge. Maximum number of iterations reached.");
+    }
+
     // Update slack power.
     for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx)
     {

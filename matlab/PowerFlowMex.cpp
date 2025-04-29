@@ -118,20 +118,12 @@ private:
 
         std::tuple< std::vector<complex_t>, int> Vres_iter = solver->solve(S, V, maxIter);
         std::vector<complex_t> Vres = std::get<0>(Vres_iter);
-        int iter = std::get<1>(Vres_iter);
+        // int iter = std::get<1>(Vres_iter);
 
         std::ostringstream oss;
 
-        if (iter == maxIter)
-        {
-            oss << "\nReached max iterations (" + std::to_string(iter) + " iterations) without converging consider rerunning with \n higher number of iterations";
-            printToMatlab(oss);
-        }
-        else
-        {
-            oss << "\nConverged after (" + std::to_string(iter) + " iterations)";
-            printToMatlab(oss);
-        }
+        //oss << "\nConverged after " + std::to_string(iter) + " iterations.";
+        //printToMatlab(oss);
 
         outputs[0] = factory.createArray({ 1, Vres.size() }, Vres.begin(), Vres.end());
     }
