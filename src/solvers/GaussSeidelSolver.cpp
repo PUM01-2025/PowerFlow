@@ -1,7 +1,7 @@
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
 
-static const int MAX_ITER = 10000;
-static const double PRECISION = 1e-12;
+static const int MAX_ITER = 100000;
+static const double PRECISION = 1e-10;
 
 GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger)
     : GridSolver(grid, logger), y(grid->edges.size()), ySum(grid->nodes.size())
@@ -48,7 +48,7 @@ int GaussSeidelSolver::solve()
             if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
                 continue; // Slack node voltage is already known
 
-            complex_t i = std::conj(node.s) / std::conj(node.v);
+            complex_t yv = 0;
 
             for (size_t edgeIdx : node.edges)
             {
@@ -56,19 +56,17 @@ int GaussSeidelSolver::solve()
                 int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
                 GridNode& neighbor = grid->nodes[neighborIdx];
 
-                i += neighbor.v * y[edgeIdx];
+                yv -= neighbor.v * y[edgeIdx];
             }
-            complex_t newV = i / ySum[nodeIdx];
-            complex_t diff = node.v - newV;
+            yv += node.v * ySum[nodeIdx];
+            node.v = node.v - (yv - std::conj(node.s / node.v)) / ySum[nodeIdx];
 
-            if (diff.real() > PRECISION || diff.imag() > PRECISION)
+            if (std::abs(node.v * std::conj(yv) - node.s) > PRECISION)
             {
                 converged = false;
             }
-            node.v = newV; // Update node voltage
         }
-    }
-    while (!converged && iter++ < MAX_ITER);
+    } while (!converged && iter++ < MAX_ITER);
 
     // Update slack power.
     for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx)
@@ -78,7 +76,7 @@ int GaussSeidelSolver::solve()
         if (node.type != NodeType::SLACK && node.type != NodeType::SLACK_EXTERNAL)
             continue;
 
-        complex_t i{0, 0};
+        complex_t yv = 0;
 
         for (edge_idx_t edgeIdx : node.edges)
         {
@@ -86,9 +84,10 @@ int GaussSeidelSolver::solve()
             int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
             GridNode& neighbor = grid->nodes[neighborIdx];
 
-            i += neighbor.v * y[edgeIdx];
+            yv -= neighbor.v * y[edgeIdx];
         }
-        node.s = std::conj(std::conj(node.v) * (node.v * ySum[nodeIdx] - i));
+        yv += node.v * ySum[nodeIdx];
+        node.s = node.v * std::conj(yv);
     }
     return iter;
 }
