@@ -191,7 +191,15 @@ net = PowerFlow("path/to/network.txt");
 V_res = net.solve(S, V);
 ```
 
-S, V and V_res are **complex** vectors. The `net` variable is a pointer/handle to the loaded network. The network will be automtically garbage collected once the handle goes out of scope.
+- The `net` variable is a pointer/handle to the loaded network. The network will be automtically garbage collected once the handle goes out of scope.
+- S, V and V_res are **complex** row vectors. The S vector must contain one complex value per LOAD node in the network.
+- In a network with *n* grids, each containing *m_1* to *m_n* number of LOAD nodes, the first *m_1* values in the S vector correspond to the load nodes in the first grid, the second *m_2* values correspond to the load nodes in the second grid and so on. The LOAD nodes are in turn ordered by their index/ID, i.e., a LOAD node with index/ID 0 comes before LOAD node with index/ID 3 in the S vector.
+- In the same way, V must contain one complex value per SLACK_EXTERNAL node in the network.
+- The V_res vector that is returned by PowerFlow contains the calculated voltages at the LOAD nodes. It has the same format as the S vector.
+
+It is possible to pass additional options to the solver using ... :
+
+FYLL I SETTINGS HÄR!
 
 #### Thread safety
 
