@@ -17,7 +17,7 @@
 class PowerFlow
 {
 public:
-    PowerFlow(const std::string &filePath)
+    PowerFlow(const std::string &filePath, const PowerFlowSolverSettings& settings)
     {
         std::ifstream file(filePath);
 
@@ -28,7 +28,6 @@ public:
 
         NetworkLoader loader(file);
         std::unique_ptr<Network> network = loader.loadNetwork();
-        PowerFlowSolverSettings settings;
         solver = std::make_unique<PowerFlowSolver>(std::move(network), settings, &cpp_logger);
     }
 
@@ -64,8 +63,16 @@ private:
 
 PYBIND11_MODULE(PowerFlowPython, m)
 {
+    pybind11::class_<PowerFlowSolverSettings>(m, "SolverSettings")
+        .def(pybind11::init<>())
+        .def_readwrite("maxCombinedIterations", &PowerFlowSolverSettings::maxCombinedIterations)
+        .def_readwrite("gaussSeidelMaxIterations", &PowerFlowSolverSettings::gaussSeidelMaxIterations)
+        .def_readwrite("gaussSeidelPrecision", &PowerFlowSolverSettings::gaussSeidelPrecision)
+        .def_readwrite("backwardForwardSweepMaxIterations", &PowerFlowSolverSettings::backwardForwardSweepMaxIterations)
+        .def_readwrite("backwardForwardSweepPrecision", &PowerFlowSolverSettings::backwardForwardSweepPrecision);
+
     pybind11::class_<PowerFlow>(m, "PowerFlow")
-        .def(pybind11::init<const std::string&>(), pybind11::arg("filepath"))
+        .def(pybind11::init<const std::string&, const PowerFlowSolverSettings&>(), pybind11::arg("filePath"), pybind11::arg("settings") = PowerFlowSolverSettings())
         .def("solve", &PowerFlow::solve, pybind11::arg("P"), pybind11::arg("V"), "Solve the power flow problem")
         .def("getLoadVoltages", &PowerFlow::getLoadVoltages, "Get the LOAD node voltages")
         .def("getAllVoltages", &PowerFlow::getAllVoltages, "Get all node voltages")

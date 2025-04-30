@@ -7,7 +7,28 @@
 #include <iostream>
 
 PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, PowerFlowSolverSettings settings, Logger* const logger) : 
-    network{ network }, settings{ std::move(settings) }, logger { logger } {}
+    network{ network }, settings{ std::move(settings) }, logger { logger } {
+    if (settings.maxCombinedIterations <= 0)
+    {
+        throw std::invalid_argument("Invalid maxCombinedIterations value");
+    }
+    if (settings.gaussSeidelMaxIterations <= 0)
+    {
+        throw std::invalid_argument("Invalid gaussSeidelMaxIterations value");
+    }
+    if (settings.gaussSeidelPrecision <= 0)
+    {
+        throw std::invalid_argument("Invalid gaussSeidelPrecision value");
+    }
+    if (settings.backwardForwardSweepMaxIterations <= 0)
+    {
+        throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations value");
+    }
+    if (settings.backwardForwardSweepPrecision <= 0)
+    {
+        throw std::invalid_argument("Invalid backwardForwardSweepPrecision value");
+    }
+}
 
 void PowerFlowSolver::solve(const std::vector<complex_t>& S, const std::vector<complex_t>& V)
 {
@@ -169,7 +190,7 @@ std::vector<complex_t> PowerFlowSolver::getCurrents() const
         for (GridEdge const &e : g.edges)
         {
             GridNode p{g.nodes[e.parent]}, c{g.nodes[e.child]};
-            complex_t current{e.z_c / (p.v - c.v)};
+            complex_t current{e.z_c / (p.v - c.v)}; // FEL: Stämmer nog inte i och med att det är komplexa tal + trefas!
             result.push_back(current);
         }
     }

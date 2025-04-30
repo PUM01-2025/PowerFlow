@@ -107,9 +107,7 @@ private:
 
                 if (fieldName == "maxCombinedIterations")
                 {
-                    if (field.getType() != matlab::data::ArrayType::DOUBLE ||
-                        field.getNumberOfElements() != 1 ||
-                        static_cast<int>(field[0]) <= 0)
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid maxCombinedIterations");
                     }
@@ -117,9 +115,7 @@ private:
                 }
                 else if (fieldName == "gaussSeidelMaxIterations")
                 {
-                    if (field.getType() != matlab::data::ArrayType::DOUBLE ||
-                        field.getNumberOfElements() != 1 ||
-                        static_cast<int>(field[0]) <= 0)
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid gaussSeidelMaxIterations");
                     }
@@ -127,9 +123,7 @@ private:
                 }
                 else if (fieldName == "gaussSeidelPrecision")
                 {
-                    if (field.getType() != matlab::data::ArrayType::DOUBLE ||
-                        field.getNumberOfElements() != 1 ||
-                        static_cast<double>(field[0]) <= 0)
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid gaussSeidelPrecision");
                     }
@@ -137,9 +131,7 @@ private:
                 }
                 else if (fieldName == "backwardForwardSweepMaxIterations")
                 {
-                    if (field.getType() != matlab::data::ArrayType::DOUBLE ||
-                        field.getNumberOfElements() != 1 ||
-                        static_cast<int>(field[0]) <= 0)
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations");
                     }
@@ -147,9 +139,7 @@ private:
                 }
                 else if (fieldName == "backwardForwardSweepPrecision")
                 {
-                    if (field.getType() != matlab::data::ArrayType::DOUBLE ||
-                        field.getNumberOfElements() != 1 ||
-                        static_cast<double>(field[0]) <= 0)
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid backwardForwardSweepPrecision");
                     }
