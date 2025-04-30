@@ -19,48 +19,56 @@ class PowerFlow
 public:
     PowerFlow(const std::string &filePath)
     {
-        file = std::make_shared<std::ifstream>(filePath);
-        if (!file->is_open())
+        std::ifstream file(filePath);
+
+        if (!file)
         {
-            throw std::runtime_error("Could not open file: " + filePath);
+            throw std::runtime_error("Could not open Network file: " + filePath);
         }
 
-        loader = std::make_unique<NetworkLoader>(*file);
-        network = loader->loadNetwork();
+        NetworkLoader loader(file);
+        std::unique_ptr<Network> network = loader.loadNetwork();
         PowerFlowSolverSettings settings;
-        solver = std::make_unique<PowerFlowSolver>(network, settings, &cpp_logger);
+        solver = std::make_unique<PowerFlowSolver>(std::move(network), settings, &cpp_logger);
     }
 
-    std::vector<std::complex<double>> solve(std::vector<std::complex<double>> &S, std::vector<std::complex<double>> &V)
+    void solve(std::vector<std::complex<double>> &S, std::vector<std::complex<double>> &V)
     {
         solver->solve(S, V);
-        return solver->getLoadVoltages();
-    }
-    std::vector<std::complex<double>> getSlackNodeCurrents() const
-    {
-        return {}; // Ska implenteras om tid finns (Ej prio)
     }
 
-    std::vector<double> getSlackNodePowers() const
+    std::vector<complex_t> getLoadVoltages() const
     {
-        return {}; // Ska implenteras om tid finns (Ej prio)
+        return solver->getLoadVoltages();
+    }
+
+    std::vector<complex_t> getAllVoltages() const
+    {
+        return solver->getAllVoltages();
+    }
+
+    std::vector<complex_t> getCurrents() const
+    {
+        return solver->getCurrents();
+    }
+
+    std::vector<complex_t> getSlackPowers() const
+    {
+        return solver->getSlackPowers();
     }
 
 private:
-    std::shared_ptr<std::ifstream> file;
-    std::unique_ptr<NetworkLoader> loader;
-    std::shared_ptr<Network> network;
     std::unique_ptr<PowerFlowSolver> solver;
     CppLogger cpp_logger{};
 };
 
 PYBIND11_MODULE(PowerFlowPython, m)
 {
-    m.doc() = "Power Flow binding for Python interface";
-
     pybind11::class_<PowerFlow>(m, "PowerFlow")
-        .def(pybind11::init<const std::string &>(), pybind11::arg("filepath"))
+        .def(pybind11::init<const std::string&>(), pybind11::arg("filepath"))
         .def("solve", &PowerFlow::solve, pybind11::arg("P"), pybind11::arg("V"), "Solve the power flow problem")
-        .def("get_slack_node_currents", &PowerFlow::getSlackNodeCurrents, "Get the slack node currents")
-        .def("get_slack_node_powers", &PowerFlow::getSlackNodePowers, "Get the slack node powers");
+        .def("getLoadVoltages", &PowerFlow::getLoadVoltages, "Get the LOAD node voltages")
+        .def("getAllVoltages", &PowerFlow::getAllVoltages, "Get all node voltages")
+        .def("getCurrents", &PowerFlow::getCurrents, "Get currents")
+        .def("getSlackPowers", &PowerFlow::getSlackPowers, "Get SLACK/SLACK_EXTERNAL powers");
 }
