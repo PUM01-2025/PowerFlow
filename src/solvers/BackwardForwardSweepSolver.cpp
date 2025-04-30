@@ -26,6 +26,12 @@ int BackwardForwardSweepSolver::solve()
         sweep(rootIdx, -1);
 
     } while (!converged && iter++ < MAX_ITER);
+
+    if (!converged)
+    {
+        throw std::runtime_error("BackwardForwardSweepSolver: The solution did not converge. Maximum number of iterations reached.");
+    }
+
     grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
     return iter;
 }
