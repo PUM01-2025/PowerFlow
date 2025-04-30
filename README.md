@@ -182,7 +182,7 @@ connections
 
 ***NOTE:** On Ubuntu and possibly other Linux distributions, Matlab may need to be started using a command similar to `LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6 matlab`.*
 
-You need the MEX file as well as the PowerFlow.m script in your Matlab PATH to use PowerFlow from Matlab scripts. See the build instructions on how to acquire those.
+You need the MEX file as well as the PowerFlow.m script in your Matlab PATH to use PowerFlow in Matlab scripts. See the build instructions on how to acquire those.
 
 #### Loading a network
 
@@ -259,7 +259,19 @@ net = PowerFlow("path/to/network.txt", settings);
 
 ### Using PowerFlow in a Python script
 
-FYLL I HÄR!
+You need to import the PowerFlowPython module to use PowerFlow in Python scripts. See the build instructions on how to acquire the Python module file.
+
+Below is a simple Python script example. For detailed usage instructions, see the Matlab section above.
+
+```
+import PowerFlowPython
+
+settings = PowerFlowPython.SolverSettings()
+net = PowerFlowPython.PowerFlow("path/to/grid.txt", settings)
+
+net.solve(V, S)
+V_loads = net.getLoadVoltages()
+```
 
 ## For developers
 
