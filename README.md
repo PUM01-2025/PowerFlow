@@ -184,22 +184,73 @@ connections
 
 You need the MEX file as well as the PowerFlow.m script in your Matlab PATH to use PowerFlow from Matlab scripts. See the build instructions on how to acquire those.
 
-To load a network file and run the solver, do the following:
+#### Loading a network
 
 ```
-net = PowerFlow("path/to/network.txt");
-V_res = net.solve(S, V);
+net = PowerFlow("path/to/network.txt", []);
+```
+The returned `net` variable is a pointer/handle to the loaded network. The network will be automtically garbage collected once the handle goes out of scope.
+
+#### Solve
+
+```
+net.solve(S, V);
 ```
 
-- The `net` variable is a pointer/handle to the loaded network. The network will be automtically garbage collected once the handle goes out of scope.
-- S, V and V_res are **complex** row vectors. The S vector must contain one complex value per LOAD node in the network.
-- In a network with *n* grids, each containing *m_1* to *m_n* number of LOAD nodes, the first *m_1* values in the S vector correspond to the load nodes in the first grid, the second *m_2* values correspond to the load nodes in the second grid and so on. The LOAD nodes are in turn ordered by their index/ID, i.e., a LOAD node with index/ID 0 comes before LOAD node with index/ID 3 in the S vector.
-- In the same way, V must contain one complex value per SLACK_EXTERNAL node in the network.
-- The V_res vector that is returned by PowerFlow contains the calculated voltages at the LOAD nodes. It has the same format as the S vector.
+`net.solve` performs the power flow calculation. S, V and V_res are **complex** row vectors. The S vector must contain one complex value per LOAD node in the network.
 
-It is possible to pass additional options to the solver using ... :
+In a network with *n* grids, each containing *m_1* to *m_n* number of LOAD nodes, the first *m_1* values in the S vector correspond to the load nodes in the first grid, the second *m_2* values correspond to the load nodes in the second grid and so on. The LOAD nodes are in turn ordered by their ID, i.e., a LOAD node with ID 0 comes before LOAD node with ID 3 in the S vector. In the same way, V must contain one complex value per SLACK_EXTERNAL node in the network.
 
-FYLL I SETTINGS HÄR!
+#### Get LOAD node voltages
+
+```
+V_load = net.getLoadVoltages();
+```
+
+`net.getLoadVoltages` returns the calculated voltages at the LOAD nodes. The V_load vector has the same format as the S vector passed to `net.solve`.
+
+#### Get all node voltages
+
+```
+V_all = net.getAllVoltages();
+```
+
+#### Get edge currents
+
+```
+I = net.getCurrents();
+```
+
+TODO: Fyll i format!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#### Get SLACK/SLACK_EXTERNAL node voltages
+
+```
+S_slack = net.getSlackPowers();
+```
+
+#### Passing solver options
+
+It is possible to pass additional options to the solver using a settings struct:
+
+```
+% Max number of iterations for the entire network.
+settings.maxCombinedIterations = 10000;
+
+% Max number of iterations for the Gauss-Seidel solver.
+settings.gaussSeidelMaxIterations = 100000;
+
+% Precision for the Gauss-Seidel solver.
+settings.gaussSeidelPrecision = 1e-10;
+
+% Max number of iterations for the Backward-Forward-Sweep solver.
+settings.backwardForwardSweepMaxIterations = 10000;
+
+% Precision for the Backward-Forward-Sweep solver.
+settings.backwardForwardSweepPrecision = 1e-10;
+
+net = PowerFlow("path/to/network.txt", settings);
+```
 
 #### Thread safety
 
