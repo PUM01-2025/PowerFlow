@@ -2,10 +2,10 @@
 #include "powerflow/network.hpp"
 
 static const double SQRT3 = 1.73205080757;
-static const int MAX_ITER = 10000;
-static const double PRECISION = 1e-10;
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, Logger *const logger) : GridSolver(grid, logger)
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, 
+    Logger *const logger, int maxIter, double precision) 
+    : GridSolver(grid, logger, maxIter, precision)
 {
     for (node_idx_t i = 0; i < grid->nodes.size(); ++i)
     {
@@ -25,7 +25,7 @@ int BackwardForwardSweepSolver::solve()
         converged = true;
         sweep(rootIdx, -1);
 
-    } while (!converged && iter++ < MAX_ITER);
+    } while (!converged && iter++ < maxIterations);
 
     if (!converged)
     {
@@ -70,7 +70,7 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
 
     if (!isLeaf)
     {
-        if (std::abs(node.s - s) > PRECISION)
+        if (std::abs(node.s - s) > precision)
             converged = false;
         node.s = s;
     }

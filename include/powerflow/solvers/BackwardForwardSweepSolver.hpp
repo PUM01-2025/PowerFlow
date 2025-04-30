@@ -8,7 +8,7 @@
 class BackwardForwardSweepSolver : public GridSolver
 {
 public:
-    BackwardForwardSweepSolver(Grid *grid, Logger *logger);
+    BackwardForwardSweepSolver(Grid *grid, Logger *logger, int maxIter, double precision);
     int solve();
 
 private:

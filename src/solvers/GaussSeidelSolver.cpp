@@ -1,10 +1,11 @@
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
 
-static const int MAX_ITER = 100000;
-static const double PRECISION = 1e-10;
+static const int DEFAULT_MAX_ITER = 100000;
+static const double DEFAULT_PRECISION = 1e-10;
 
-GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger)
-    : GridSolver(grid, logger), y(grid->edges.size()), ySum(grid->nodes.size())
+GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger, 
+    int maxIter, double precision) : GridSolver(grid, logger, maxIter, precision),
+        y(grid->edges.size()), ySum(grid->nodes.size())
 {
     // Create admittance vector.
     for (size_t edgeIdx = 0; edgeIdx < grid->edges.size(); ++edgeIdx)
@@ -61,12 +62,12 @@ int GaussSeidelSolver::solve()
             yv += node.v * ySum[nodeIdx];
             node.v = node.v - (yv - std::conj(node.s / node.v)) / ySum[nodeIdx];
 
-            if (std::abs(node.v * std::conj(yv) - node.s) > PRECISION)
+            if (std::abs(node.v * std::conj(yv) - node.s) > precision)
             {
                 converged = false;
             }
         }
-    } while (!converged && iter++ < MAX_ITER);
+    } while (!converged && iter++ < maxIterations);
 
     if (!converged)
     {

@@ -27,12 +27,14 @@ public:
 
         loader = std::make_unique<NetworkLoader>(*file);
         network = loader->loadNetwork();
-        solver = std::make_unique<PowerFlowSolver>(network, &cpp_logger);
+        PowerFlowSolverSettings settings;
+        solver = std::make_unique<PowerFlowSolver>(network, settings, &cpp_logger);
     }
 
     std::vector<std::complex<double>> solve(std::vector<std::complex<double>> &S, std::vector<std::complex<double>> &V)
     {
-        return std::get<0>(solver->solve(S, V));
+        solver->solve(S, V);
+        return solver->getLoadVoltages();
     }
     std::vector<std::complex<double>> getSlackNodeCurrents() const
     {

@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     // NOTE: Using NetworkLoader to create a Network struct is not mandatory.
     // A Network struct could be created by some other method or even manually.
     NetworkLoader loader(file);
-    std::shared_ptr<Network> net = loader.loadNetwork();
+    std::unique_ptr<Network> net = loader.loadNetwork();
 
     // Create a PowerFlowSolver object and provide it with the network and a
     // logger. In this case, the CppLogger class is used. You can also
@@ -40,7 +40,8 @@ int main(int argc, char* argv[])
     // The Network struct can (should) not be modified by any other code at
     // this point!
     CppLogger logger(std::cout);
-    PowerFlowSolver pfs(net, &logger);
+    PowerFlowSolverSettings settings; // Create a default settings object.
+    PowerFlowSolver pfs(std::move(net), settings, &logger);
 
     // Create S and V vectors for the LOAD and SLACK_EXTERNAL nodes.
     std::vector<complex_t> S = {
@@ -51,13 +52,13 @@ int main(int argc, char* argv[])
     std::vector<complex_t> V = { {1, 0} };
 
     // Run the solver by calling PowerFlowSolver::solve.
-    std::tuple<std::vector<complex_t>, int> Vres_iter = pfs.solve(S, V);
+    pfs.solve(S, V);
 
-    std::vector<complex_t> Vres = std::get<0>(Vres_iter);
-    // int iter = std::get<1>(Vres_iter);
+    // Get the resulting voltages at the LOAD nodes.
+    std::vector<complex_t> loadVoltages = pfs.getLoadVoltages();
 
     // Print the calculated voltages to cout and exit.
-    for (const complex_t v : Vres)
+    for (const complex_t v : loadVoltages)
     {
         std::cout << "(" << v.real() << ", " << v.imag() << ")" << std::endl;
     }

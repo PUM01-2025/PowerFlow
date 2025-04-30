@@ -7,6 +7,21 @@
 #include <memory>
 #include <tuple>
 #include <vector>
+#include <string>
+
+struct PowerFlowSolverSettings
+{
+	// Max number of iterations for the entire network.
+	int maxCombinedIterations = 10000;
+
+	// Gauss-Seidel solver settings.
+	int gaussSeidelMaxIterations = 100000;
+	double gaussSeidelPrecision = 1e-10;
+
+	// Backward-Forward-Sweep solver settings.
+	int backwardForwardSweepMaxIterations = 10000;
+	double backwardForwardSweepPrecision = 1e-10;
+};
 
 // Class responsible for solving an entire Network.
 class PowerFlowSolver
@@ -14,20 +29,26 @@ class PowerFlowSolver
 public:
     // network - The network to solve.
 	// logger - Logger object.    
-    PowerFlowSolver(std::shared_ptr<Network> network, Logger *const logger);
+    PowerFlowSolver(std::shared_ptr<Network> network, PowerFlowSolverSettings settings, Logger *const logger);
 
-    // RETURNERA PowerFlowSolverResult och ta emot PowerFlowSolverSettings ????
-    std::vector<complex_t> solve(std::vector<complex_t> &P, std::vector<complex_t> &V);
+    // Solve network.
+    void solve(const std::vector<complex_t> &P, const std::vector<complex_t> &V);
     
-    // Returns all voltages in the grid
+	// Returns all LOAD voltages in the grid.
+	std::vector<complex_t> getLoadVoltages() const;
+
+    // Returns all voltages in the grid.
     std::vector<complex_t> getVoltages() const;
-    // Returns all currents in the grid
+
+    // Returns all currents in the grid.
     std::vector<complex_t> getCurrents() const;
-    // Returns all powers in the grid
-    std::vector<complex_t> getPowers() const;
+
+    // Returns all SLACK/SLACK_EXTERNAL powers in the grid.
+    std::vector<complex_t> getSlackPowers() const;
 private:
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;
 	std::shared_ptr<Network> network;
+	PowerFlowSolverSettings settings;
 	bool firstRun { true };
     Logger* const logger { nullptr };
 
@@ -41,10 +62,7 @@ private:
 	void updateExternalVoltages(const std::vector<complex_t>& V);
 
 	// Runs the GridSolvers and combines the result.
-	int runGridSolvers(int maxIter);
-
-	// Extracts LOAD node voltages.
-	std::vector<complex_t> getLoadVoltages();
+	void runGridSolvers();
 };
 
 #endif

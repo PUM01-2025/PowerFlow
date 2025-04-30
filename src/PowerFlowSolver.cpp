@@ -6,9 +6,10 @@
 
 #include <iostream>
 
-PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, Logger *const logger) : network{network}, logger{logger} { }
+PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, PowerFlowSolverSettings settings, Logger* const logger) : 
+    network{ network }, settings{ std::move(settings) }, logger { logger } {}
 
-std::tuple<std::vector<complex_t>, int> PowerFlowSolver::solve(const std::vector<complex_t>& S, const std::vector<complex_t>& V, int maxIter)
+void PowerFlowSolver::solve(const std::vector<complex_t>& S, const std::vector<complex_t>& V)
 {
 	if (firstRun)
     {
@@ -18,8 +19,8 @@ std::tuple<std::vector<complex_t>, int> PowerFlowSolver::solve(const std::vector
 	}
 	updateLoads(S);
 	updateExternalVoltages(V);
-	int iter = runGridSolvers(maxIter);
-	return make_tuple(getLoadVoltages(), iter);
+	runGridSolvers();
+	// return make_tuple(getLoadVoltages(), iter);
 }
 
 void PowerFlowSolver::createGridSolvers()
@@ -30,16 +31,24 @@ void PowerFlowSolver::createGridSolvers()
     {
         switch (determine_solver(grid))
         {
-        case GAUSSSEIDEL:
-            *logger << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
-            gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid, logger));
-            break;
-        case BACKWARDFOWARDSWEEP:
-            *logger << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
-            gridSolvers.push_back(std::make_unique<BackwardForwardSweepSolver>(&grid, logger));
-            break;
-        default:
-            throw std::runtime_error("No suitable solver found");
+            case GAUSSSEIDEL:
+            {
+                *logger << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
+                std::unique_ptr<GaussSeidelSolver> gs = std::make_unique<GaussSeidelSolver>(&grid, logger, 
+                    settings.gaussSeidelMaxIterations, settings.gaussSeidelPrecision);
+                gridSolvers.push_back(std::move(gs));
+                break;
+            }
+            case BACKWARDFOWARDSWEEP:
+            {
+                *logger << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
+                std::unique_ptr<BackwardForwardSweepSolver> bfs = std::make_unique<BackwardForwardSweepSolver>(&grid, logger,
+                    settings.backwardForwardSweepMaxIterations, settings.backwardForwardSweepPrecision);
+                gridSolvers.push_back(std::move(bfs));
+                break;
+            }
+            default:
+                throw std::runtime_error("No suitable solver found");
         }
         ++grid_no;
     }
@@ -93,7 +102,7 @@ void PowerFlowSolver::updateExternalVoltages(const std::vector<complex_t>& V)
     }
 }
 
-int PowerFlowSolver::runGridSolvers(int maxIter)
+void PowerFlowSolver::runGridSolvers()
 {
 	int iter = 0;
 	int maxGridIter = 0;
@@ -119,11 +128,10 @@ int PowerFlowSolver::runGridSolvers(int maxIter)
 			}
 		}
 	}
-    while (maxGridIter > 1 && iter++ < (maxIter - 1));
-	return iter;
+    while (maxGridIter > 1 && iter++ < (settings.maxCombinedIterations - 1));
 }
 
-std::vector<complex_t> PowerFlowSolver::getLoadVoltages()
+std::vector<complex_t> PowerFlowSolver::getLoadVoltages() const
 {
     std::vector<complex_t> U;
 
@@ -168,7 +176,7 @@ std::vector<complex_t> PowerFlowSolver::getCurrents() const
 
     return result;
 }
-std::vector<complex_t> PowerFlowSolver::getPowers() const
+std::vector<complex_t> PowerFlowSolver::getSlackPowers() const
 {
     std::vector<complex_t> result{};
 

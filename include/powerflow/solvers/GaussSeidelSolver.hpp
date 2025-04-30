@@ -7,7 +7,7 @@
 class GaussSeidelSolver : public GridSolver
 {
 public:
-    GaussSeidelSolver(Grid* grid, Logger* const logger);
+    GaussSeidelSolver(Grid* grid, Logger* const logger, int maxIter, double precision);
     int solve();
 
 private:

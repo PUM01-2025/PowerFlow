@@ -57,7 +57,7 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
         std::vector<GridSolver*> solversBFS;                                    //Vector att spara läsarna i
         CppLogger logger(std::cout);
         for (Grid& grid : netBFS->grids) {                                      //Loopa igenom nätet och lätt till en lösare för varje subnät
-            solversBFS.push_back(new BackwardForwardSweepSolver(&grid, &logger));
+            solversBFS.push_back(new BackwardForwardSweepSolver(&grid, &logger, 10000, 1e-10));
         }
 
         //Ladda in effektbelastningar
@@ -77,7 +77,7 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
         std::unique_ptr<Network> net = loader.loadNetwork();
         std::vector<GridSolver*> solvers;
         for (Grid& grid : net->grids) {
-            solvers.push_back(new GaussSeidelSolver(&grid, &logger));
+            solvers.push_back(new GaussSeidelSolver(&grid, &logger, 100000, 1e-10));
         }
         net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
         net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
@@ -108,27 +108,28 @@ TEST_CASE("Compare treestructure","[validation]"){
     NetworkLoader loader(file);
     std::shared_ptr<Network> net = loader.loadNetwork();
     CppLogger logger(std::cout);
-    PowerFlowSolver pfs(net, &logger);
+    PowerFlowSolverSettings settings;
+    PowerFlowSolver pfs(net, settings, &logger);
     std::vector<complex_t> P = {
         {0.002, 0.001},
         {0.005, 0.004},
         {0.004, 0.002}
     };  
     std::vector<complex_t> V = {};
-    std::tuple< std::vector<complex_t>, int> Vres_iter = pfs.solve(P, V);
+    pfs.solve(P, V);
 
     std::ifstream fileSingle(localPath + "examples/test_networks/test_network_single_grid.txt");
     CHECK_FALSE(fileSingle.fail()); 
     NetworkLoader loaderSingle(fileSingle);
     std::shared_ptr<Network> netSingle = loaderSingle.loadNetwork();
-    PowerFlowSolver pfsSingle(netSingle, &logger);
+    PowerFlowSolver pfsSingle(netSingle, settings, &logger);
     std::vector<complex_t> PSingle = {
         {0.005, 0.004},
         {0.004, 0.002},
         {0.002, 0.001}
     };
     std::vector<complex_t> VSingle = { {1, 0} };
-    std::tuple< std::vector<complex_t>, int> Vres_iterSingle = pfsSingle.solve(PSingle, VSingle);
+    pfsSingle.solve(PSingle, VSingle);
 
     CHECK_THAT(netSingle->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 0.000001));
     CHECK_THAT(netSingle->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 0.000001));

@@ -66,8 +66,8 @@ private:
 
         NetworkLoader loader(file);
         std::shared_ptr<Network> net = loader.loadNetwork();
-
-        solvers.insert({ handleCounter, std::make_unique<PowerFlowSolver>(net, &logger) });
+        PowerFlowSolverSettings settings;
+        solvers.insert({ handleCounter, std::make_unique<PowerFlowSolver>(net, settings, &logger) });
 
         std::uint64_t handle = handleCounter;
         ++handleCounter;
@@ -116,12 +116,11 @@ private:
         std::vector<complex_t> S(matlabS.begin(), matlabS.end());
         std::vector<complex_t> V(matlabV.begin(), matlabV.end());
 
-        std::tuple< std::vector<complex_t>, int> Vres_iter = solver->solve(S, V, maxIter);
-        std::vector<complex_t> Vres = std::get<0>(Vres_iter);
+        solver->solve(S, V);
+        std::vector<complex_t> Vres = solver->getLoadVoltages();
+
         // int iter = std::get<1>(Vres_iter);
-
-        std::ostringstream oss;
-
+        // std::ostringstream oss;
         //oss << "\nConverged after " + std::to_string(iter) + " iterations.";
         //printToMatlab(oss);
 
