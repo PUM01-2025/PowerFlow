@@ -147,7 +147,7 @@ std::vector<complex_t> PowerFlowSolver::getLoadVoltages() const
     }
     return U;
 }
-std::vector<complex_t> PowerFlowSolver::getVoltages() const
+std::vector<complex_t> PowerFlowSolver::getAllVoltages() const
 {
     std::vector<complex_t> result{};
 
