@@ -9,6 +9,16 @@
 #include <vector>
 #include <string>
 
+struct SolverSettings
+{
+    int max_iterations_gauss{10000};
+    int gauss_decimal_precision{10};
+    int max_iterations_bfs{10000};
+    int bfs_decimal_precision{10};
+    int max_iterations_total{10000};
+};
+
+
 // Class responsible for solving an entire Network.
 class PowerFlowSolver
 {

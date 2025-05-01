@@ -10,16 +10,6 @@ using node_idx_t = int;
 using grid_idx_t = int;
 using edge_idx_t = int;
 
-
-struct SolverSettings
-{
-    int max_iterations_gauss{10000};
-    int gauss_decimal_precision{10};
-    int max_iterations_bfs{10000};
-    int bfs_decimal_precision{10};
-    int max_iterations_total{10000};
-};
-
 // Graph edge struct.
 struct GridEdge
 {
