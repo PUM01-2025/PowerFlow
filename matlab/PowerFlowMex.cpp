@@ -105,43 +105,43 @@ private:
             {
                 const matlab::data::Array field = options[0][fieldName];
 
-                if (fieldName == "maxCombinedIterations")
+                if (fieldName == "max_iterations_total")
                 {
                     if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid maxCombinedIterations");
+                        throw std::invalid_argument("Invalid max_iterations_total");
                     }
                     settings.max_iterations_total = field[0];
                 }
-                else if (fieldName == "gaussSeidelMaxIterations")
+                else if (fieldName == "max_iterations_gauss")
                 {
                     if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid gaussSeidelMaxIterations");
+                        throw std::invalid_argument("Invalid max_iterations_gauss");
                     }
                     settings.max_iterations_gauss = field[0];
                 }
-                else if (fieldName == "gaussSeidelPrecision")
+                else if (fieldName == "gauss_decimal_precision")
                 {
                     if (field.getType() != matlab::data::ArrayType::INT8 || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid gaussSeidelPrecision");
+                        throw std::invalid_argument("Invalid gauss_decimal_precision");
                     }
                     settings.gauss_decimal_precision = field[0];
                 }
-                else if (fieldName == "backwardForwardSweepMaxIterations")
+                else if (fieldName == "max_iterations_bfs")
                 {
                     if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations");
+                        throw std::invalid_argument("Invalid max_iterations_bfs");
                     }
                     settings.max_iterations_bfs = field[0];
                 }
-                else if (fieldName == "backwardForwardSweepPrecision")
+                else if (fieldName == "bfs_decimal_precision")
                 {
                     if (field.getType() != matlab::data::ArrayType::INT8 || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid backwardForwardSweepPrecision");
+                        throw std::invalid_argument("Invalid bfs_decimal_precision");
                     }
                     settings.bfs_decimal_precision = field[0];
                 }

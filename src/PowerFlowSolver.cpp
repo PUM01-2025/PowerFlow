@@ -11,23 +11,23 @@ PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, SolverSetting
     network{ network }, settings{ std::move(settings) }, logger { logger } {
     if (settings.max_iterations_total <= 0)
     {
-        throw std::invalid_argument("Invalid maxCombinedIterations value");
+        throw std::invalid_argument("Invalid max_iterations_total value");
     }
     if (settings.max_iterations_gauss <= 0)
     {
-        throw std::invalid_argument("Invalid gaussSeidelMaxIterations value");
+        throw std::invalid_argument("Invalid max_iterations_gauss value");
     }
     if (settings.gauss_decimal_precision <= 0)
     {
-        throw std::invalid_argument("Invalid gaussSeidelPrecision value");
+        throw std::invalid_argument("Invalid gauss_decimal_precision value");
     }
     if (settings.max_iterations_bfs <= 0)
     {
-        throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations value");
+        throw std::invalid_argument("Invalid max_iterations_bfs value");
     }
     if (settings.bfs_decimal_precision <= 0)
     {
-        throw std::invalid_argument("Invalid backwardForwardSweepPrecision value");
+        throw std::invalid_argument("Invalid bfs_decimal_precision value");
     }
 }
 
