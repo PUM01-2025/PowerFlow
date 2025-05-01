@@ -4,27 +4,28 @@
 #include "powerflow/SolverTypeEnum.hpp"
 #include "powerflow/NetworkAnalyzer.hpp"
 
+#include <cmath>
 #include <iostream>
 
-PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, PowerFlowSolverSettings settings, Logger* const logger) : 
+PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, SolverSettings settings, Logger* const logger) : 
     network{ network }, settings{ std::move(settings) }, logger { logger } {
-    if (settings.maxCombinedIterations <= 0)
+    if (settings.max_iterations_total <= 0)
     {
         throw std::invalid_argument("Invalid maxCombinedIterations value");
     }
-    if (settings.gaussSeidelMaxIterations <= 0)
+    if (settings.max_iterations_gauss <= 0)
     {
         throw std::invalid_argument("Invalid gaussSeidelMaxIterations value");
     }
-    if (settings.gaussSeidelPrecision <= 0)
+    if (settings.gauss_decimal_precision <= 0)
     {
         throw std::invalid_argument("Invalid gaussSeidelPrecision value");
     }
-    if (settings.backwardForwardSweepMaxIterations <= 0)
+    if (settings.max_iterations_bfs <= 0)
     {
         throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations value");
     }
-    if (settings.backwardForwardSweepPrecision <= 0)
+    if (settings.bfs_decimal_precision <= 0)
     {
         throw std::invalid_argument("Invalid backwardForwardSweepPrecision value");
     }
@@ -56,7 +57,7 @@ void PowerFlowSolver::createGridSolvers()
             {
                 *logger << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
                 std::unique_ptr<GaussSeidelSolver> gs = std::make_unique<GaussSeidelSolver>(&grid, logger, 
-                    settings.gaussSeidelMaxIterations, settings.gaussSeidelPrecision);
+                    settings.max_iterations_gauss, pow(10,-settings.gauss_decimal_precision));
                 gridSolvers.push_back(std::move(gs));
                 break;
             }
@@ -64,7 +65,7 @@ void PowerFlowSolver::createGridSolvers()
             {
                 *logger << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
                 std::unique_ptr<BackwardForwardSweepSolver> bfs = std::make_unique<BackwardForwardSweepSolver>(&grid, logger,
-                    settings.backwardForwardSweepMaxIterations, settings.backwardForwardSweepPrecision);
+                    settings.max_iterations_bfs, pow(10,-settings.bfs_decimal_precision));
                 gridSolvers.push_back(std::move(bfs));
                 break;
             }
@@ -149,7 +150,7 @@ void PowerFlowSolver::runGridSolvers()
 			}
 		}
 	}
-    while (maxGridIter > 1 && iter++ < (settings.maxCombinedIterations - 1));
+    while (maxGridIter > 1 && iter++ < (settings.max_iterations_total - 1));
 }
 
 std::vector<complex_t> PowerFlowSolver::getLoadVoltages() const

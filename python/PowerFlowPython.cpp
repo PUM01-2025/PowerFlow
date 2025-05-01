@@ -17,7 +17,7 @@
 class PowerFlow
 {
 public:
-    PowerFlow(const std::string &filePath, const PowerFlowSolverSettings& settings)
+    PowerFlow(const std::string &filePath, const SolverSettings &settings)
     {
         std::ifstream file(filePath);
 
@@ -63,16 +63,16 @@ private:
 
 PYBIND11_MODULE(PowerFlowPython, m)
 {
-    pybind11::class_<PowerFlowSolverSettings>(m, "SolverSettings")
+    pybind11::class_<SolverSettings>(m, "SolverSettings")
         .def(pybind11::init<>())
-        .def_readwrite("maxCombinedIterations", &PowerFlowSolverSettings::maxCombinedIterations)
-        .def_readwrite("gaussSeidelMaxIterations", &PowerFlowSolverSettings::gaussSeidelMaxIterations)
-        .def_readwrite("gaussSeidelPrecision", &PowerFlowSolverSettings::gaussSeidelPrecision)
-        .def_readwrite("backwardForwardSweepMaxIterations", &PowerFlowSolverSettings::backwardForwardSweepMaxIterations)
-        .def_readwrite("backwardForwardSweepPrecision", &PowerFlowSolverSettings::backwardForwardSweepPrecision);
+        .def_readwrite("max_iterations_total", &SolverSettings::max_iterations_total)
+        .def_readwrite("max_iterations_gauss", &SolverSettings::max_iterations_gauss)
+        .def_readwrite("gauss_decimal_precision", &SolverSettings::gauss_decimal_precision)
+        .def_readwrite("max_iterations_bfs", &SolverSettings::max_iterations_bfs)
+        .def_readwrite("bfs_decimal_precision", &SolverSettings::bfs_decimal_precision);
 
     pybind11::class_<PowerFlow>(m, "PowerFlow")
-        .def(pybind11::init<const std::string&, const PowerFlowSolverSettings&>(), pybind11::arg("filePath"), pybind11::arg("settings") = PowerFlowSolverSettings())
+        .def(pybind11::init<const std::string &, const SolverSettings &>(), pybind11::arg("filePath"), pybind11::arg("settings") = SolverSettings())
         .def("solve", &PowerFlow::solve, pybind11::arg("P"), pybind11::arg("V"), "Solve the power flow problem")
         .def("getLoadVoltages", &PowerFlow::getLoadVoltages, "Get the LOAD node voltages")
         .def("getAllVoltages", &PowerFlow::getAllVoltages, "Get all node voltages")

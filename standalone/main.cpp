@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     // The Network struct can (should) not be modified by any other code at
     // this point!
     CppLogger logger(std::cout);
-    PowerFlowSolverSettings settings; // Create a default settings object.
+    SolverSettings settings{}; // Create a default settings object.
     PowerFlowSolver pfs(std::move(net), settings, &logger);
 
     // Create S and V vectors for the LOAD and SLACK_EXTERNAL nodes.

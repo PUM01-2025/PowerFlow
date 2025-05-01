@@ -102,13 +102,13 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
     }
 }
 
-TEST_CASE("Compare treestructure","[validation]"){
+TEST_CASE("Compare treestructure", "[validation]") {
     std::ifstream file(localPath + "examples/test_networks/test_network.txt");
-    CHECK_FALSE(file.fail()); 
+    CHECK_FALSE(file.fail());
     NetworkLoader loader(file);
     std::shared_ptr<Network> net = loader.loadNetwork();
     CppLogger logger(std::cout);
-    PowerFlowSolverSettings settings;
+    SolverSettings settings{};
     PowerFlowSolver pfs(net, settings, &logger);
     std::vector<complex_t> P = {
         {0.002, 0.001},

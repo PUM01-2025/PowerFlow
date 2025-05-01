@@ -9,27 +9,13 @@
 #include <vector>
 #include <string>
 
-struct PowerFlowSolverSettings
-{
-	// Max number of iterations for the entire network.
-	int maxCombinedIterations = 10000;
-
-	// Gauss-Seidel solver settings.
-	int gaussSeidelMaxIterations = 100000;
-	double gaussSeidelPrecision = 1e-10;
-
-	// Backward-Forward-Sweep solver settings.
-	int backwardForwardSweepMaxIterations = 10000;
-	double backwardForwardSweepPrecision = 1e-10;
-};
-
 // Class responsible for solving an entire Network.
 class PowerFlowSolver
 {
 public:
     // network - The network to solve.
 	// logger - Logger object.    
-    PowerFlowSolver(std::shared_ptr<Network> network, PowerFlowSolverSettings settings, Logger *const logger);
+    PowerFlowSolver(std::shared_ptr<Network> network, SolverSettings settings, Logger *const logger);
 
     // Solve network.
     void solve(const std::vector<complex_t> &P, const std::vector<complex_t> &V);
@@ -48,7 +34,7 @@ public:
 private:
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;
 	std::shared_ptr<Network> network;
-	PowerFlowSolverSettings settings;
+	SolverSettings settings;
 	bool firstRun { true };
     Logger* const logger { nullptr };
 
