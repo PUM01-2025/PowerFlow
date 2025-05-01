@@ -89,7 +89,7 @@ private:
             throw std::runtime_error("Could not open Network file");
         }
 
-        SolverSettings settings;
+        SolverSettings settings{};
 
         // Load options struct.
         if (inputs.size() >= 3)
@@ -154,7 +154,6 @@ private:
 
         NetworkLoader loader(file);
         std::shared_ptr<Network> net = loader.loadNetwork();
-        SolverSettings settings{};
         solvers.insert({ handleCounter, std::make_unique<PowerFlowSolver>(net, settings, &logger) });
 
         std::uint64_t handle = handleCounter;
