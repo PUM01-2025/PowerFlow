@@ -20,16 +20,16 @@ public:
     // Solve network.
     void solve(const std::vector<complex_t> &P, const std::vector<complex_t> &V);
     
-	// Returns all LOAD voltages in the grid.
+	// Returns all LOAD voltages in the network.
 	std::vector<complex_t> getLoadVoltages() const;
 
-    // Returns all voltages in the grid.
-    std::vector<complex_t> getVoltages() const;
+    // Returns all voltages in the network.
+    std::vector<complex_t> getAllVoltages() const;
 
-    // Returns all currents in the grid.
+    // Returns all currents in the network.
     std::vector<complex_t> getCurrents() const;
 
-    // Returns all SLACK/SLACK_EXTERNAL powers in the grid.
+    // Returns all SLACK/SLACK_EXTERNAL powers in the network.
     std::vector<complex_t> getSlackPowers() const;
 private:
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;

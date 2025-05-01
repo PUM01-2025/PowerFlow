@@ -1,12 +1,13 @@
-import python_wrappers
+import PowerFlowPython
 from scipy.optimize import minimize
 
-file = "../examples/example_network_single_grid.txt"
-solver = python_wrappers.PowerFlow(file)
+file = "example_network_single_grid.txt"
+solver = PowerFlowPython.PowerFlow(file)
 
 def objective(x):
     S = [complex(x[2*i], x[2*i+1]) for i in range(3)]
-    U = solver.solve(S, V_complex)
+    solver.solve(S, V_complex)
+    U = solver.getLoadVoltages()
     avg_mag = sum(abs(u) for u in U) / len(U)
     return -avg_mag
 
@@ -29,7 +30,8 @@ if __name__ == "__main__":
         S_optimized.append(S_complex)
         print(f"  Node {i}: P = {real:.4f}, Q = {imag:.4f}  V =  {V_complex}")
 
-    U_optimized = solver.solve(S_optimized, V_complex)
+    solver.solve(S_optimized, V_complex)
+    U_optimized = solver.getLoadVoltages()
     print("\nSpänningen med optimerade lastvärden:")
     for i, u in enumerate(U_optimized):
         print(f"  Node {i}: U = {u}")

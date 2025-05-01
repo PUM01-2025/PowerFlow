@@ -7,8 +7,29 @@
 #include <cmath>
 #include <iostream>
 
-PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network,SolverSettings settings, Logger* const logger) : 
-    network{ network }, settings{ std::move(settings) }, logger { logger } {}
+PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, SolverSettings settings, Logger* const logger) : 
+    network{ network }, settings{ std::move(settings) }, logger { logger } {
+    if (settings.max_iterations_total <= 0)
+    {
+        throw std::invalid_argument("Invalid maxCombinedIterations value");
+    }
+    if (settings.max_iterations_gauss <= 0)
+    {
+        throw std::invalid_argument("Invalid gaussSeidelMaxIterations value");
+    }
+    if (settings.gauss_decimal_precision <= 0)
+    {
+        throw std::invalid_argument("Invalid gaussSeidelPrecision value");
+    }
+    if (settings.max_iterations_bfs <= 0)
+    {
+        throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations value");
+    }
+    if (settings.bfs_decimal_precision <= 0)
+    {
+        throw std::invalid_argument("Invalid backwardForwardSweepPrecision value");
+    }
+}
 
 void PowerFlowSolver::solve(const std::vector<complex_t>& S, const std::vector<complex_t>& V)
 {
@@ -148,7 +169,7 @@ std::vector<complex_t> PowerFlowSolver::getLoadVoltages() const
     }
     return U;
 }
-std::vector<complex_t> PowerFlowSolver::getVoltages() const
+std::vector<complex_t> PowerFlowSolver::getAllVoltages() const
 {
     std::vector<complex_t> result{};
 
@@ -170,7 +191,7 @@ std::vector<complex_t> PowerFlowSolver::getCurrents() const
         for (GridEdge const &e : g.edges)
         {
             GridNode p{g.nodes[e.parent]}, c{g.nodes[e.child]};
-            complex_t current{e.z_c / (p.v - c.v)};
+            complex_t current{e.z_c / (p.v - c.v)}; // FEL: Stämmer nog inte i och med att det är komplexa tal + trefas!
             result.push_back(current);
         }
     }

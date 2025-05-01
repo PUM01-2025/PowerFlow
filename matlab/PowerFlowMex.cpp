@@ -38,6 +38,22 @@ public:
         {
             solve(outputs, inputs);
         }
+        else if (command == "getLoadVoltages")
+        {
+            getLoadVoltages(outputs, inputs);
+        }
+        else if (command == "getAllVoltages")
+        {
+            getAllVoltages(outputs, inputs);
+        }
+        else if (command == "getCurrents")
+        {
+            getCurrents(outputs, inputs);
+        }
+        else if (command == "getSlackPowers")
+        {
+            getSlackPowers(outputs, inputs);
+        }
         else if (command == "unload")
         {
             unloadNetwork(outputs, inputs);
@@ -49,6 +65,15 @@ public:
     }
 
 private:
+    std::uint64_t getSolverHandle(matlab::mex::ArgumentList inputs)
+    {
+        if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::UINT64 || inputs[1].getNumberOfElements() != 1)
+        {
+            throw std::invalid_argument("Invalid or missing Network handle");
+        }
+        return inputs[1][0];
+    }
+
     void loadNetwork(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
     {
         if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::MATLAB_STRING)
@@ -64,6 +89,69 @@ private:
             throw std::runtime_error("Could not open Network file");
         }
 
+        PowerFlowSolverSettings settings;
+
+        // Load options struct.
+        if (inputs.size() >= 3)
+        {
+            if (inputs[2].getType() != matlab::data::ArrayType::STRUCT || inputs[2].getNumberOfElements() != 1)
+            {
+                throw std::invalid_argument("Settings not a valid Matlab struct");
+            }
+
+            matlab::data::StructArray options = inputs[2];
+
+            for (std::string fieldName : options.getFieldNames())
+            {
+                const matlab::data::Array field = options[0][fieldName];
+
+                if (fieldName == "maxCombinedIterations")
+                {
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    {
+                        throw std::invalid_argument("Invalid maxCombinedIterations");
+                    }
+                    settings.maxCombinedIterations = field[0];
+                }
+                else if (fieldName == "gaussSeidelMaxIterations")
+                {
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    {
+                        throw std::invalid_argument("Invalid gaussSeidelMaxIterations");
+                    }
+                    settings.gaussSeidelMaxIterations = field[0];
+                }
+                else if (fieldName == "gaussSeidelPrecision")
+                {
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    {
+                        throw std::invalid_argument("Invalid gaussSeidelPrecision");
+                    }
+                    settings.gaussSeidelPrecision = field[0];
+                }
+                else if (fieldName == "backwardForwardSweepMaxIterations")
+                {
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    {
+                        throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations");
+                    }
+                    settings.backwardForwardSweepMaxIterations = field[0];
+                }
+                else if (fieldName == "backwardForwardSweepPrecision")
+                {
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    {
+                        throw std::invalid_argument("Invalid backwardForwardSweepPrecision");
+                    }
+                    settings.backwardForwardSweepPrecision = field[0];
+                }
+                else
+                {
+                    throw std::invalid_argument("Invalid option " + fieldName + " in setting struct");
+                }
+            }
+        }
+
         NetworkLoader loader(file);
         std::shared_ptr<Network> net = loader.loadNetwork();
         SolverSettings settings{};
@@ -77,12 +165,6 @@ private:
 
     void solve(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
     {
-        int maxIter = 1000;
-
-        if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::UINT64 || inputs[1].getNumberOfElements() != 1)
-        {
-            throw std::invalid_argument("Invalid or missing Network handle");
-        }
         if (inputs.size() < 3 || inputs[2].getType() != matlab::data::ArrayType::COMPLEX_DOUBLE)
         {
             throw std::invalid_argument("Missing or invalid S vector");
@@ -91,50 +173,53 @@ private:
         {
             throw std::invalid_argument("Missing or invalid V vector");
         }
-        if (inputs.size() == 5 && inputs[4].getType() != matlab::data::ArrayType::DOUBLE)
-        {
-            throw std::invalid_argument("Max iterations must be a postive integer");
-        }
-        if (inputs.size() == 5 && inputs[4].getType() == matlab::data::ArrayType::DOUBLE)
-        {
-            matlab::data::TypedArray<double> maxIterArray = inputs[3]; //TODO
-            maxIter = static_cast<int>(maxIterArray[0]);
-        }
 
-        std::uint64_t handle = inputs[1][0];
-        std::unique_ptr<PowerFlowSolver>& solver = solvers.at(handle);
-
+        std::unique_ptr<PowerFlowSolver>& solver = solvers.at(getSolverHandle(inputs));
         matlab::data::ArrayFactory factory;
         matlab::data::TypedArray<complex_t> matlabS = inputs[2];
-        matlab::data::TypedArray<complex_t> matlabV = factory.createArray<complex_t>({ 0,0 });
-
-        if (!inputs[3].isEmpty())
-        {
-            matlabV = inputs[3];
-        }
+        matlab::data::TypedArray<complex_t> matlabV = inputs[3];
 
         std::vector<complex_t> S(matlabS.begin(), matlabS.end());
         std::vector<complex_t> V(matlabV.begin(), matlabV.end());
 
         solver->solve(S, V);
-        std::vector<complex_t> Vres = solver->getLoadVoltages();
+    }
 
-        // int iter = std::get<1>(Vres_iter);
-        // std::ostringstream oss;
-        //oss << "\nConverged after " + std::to_string(iter) + " iterations.";
-        //printToMatlab(oss);
+    void getLoadVoltages(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
+    {
+        std::unique_ptr<PowerFlowSolver>& solver = solvers.at(getSolverHandle(inputs));
+        std::vector<complex_t> V = solver->getLoadVoltages();
+        matlab::data::ArrayFactory factory;
+        outputs[0] = factory.createArray({ 1, V.size() }, V.begin(), V.end());
+    }
 
-        outputs[0] = factory.createArray({ 1, Vres.size() }, Vres.begin(), Vres.end());
+    void getAllVoltages(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
+    {
+        std::unique_ptr<PowerFlowSolver>& solver = solvers.at(getSolverHandle(inputs));
+        std::vector<complex_t> V = solver->getAllVoltages();
+        matlab::data::ArrayFactory factory;
+        outputs[0] = factory.createArray({ 1, V.size() }, V.begin(), V.end());
+    }
+
+    void getCurrents(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
+    {
+        std::unique_ptr<PowerFlowSolver>& solver = solvers.at(getSolverHandle(inputs));
+        std::vector<complex_t> I = solver->getCurrents();
+        matlab::data::ArrayFactory factory;
+        outputs[0] = factory.createArray({ 1, I.size() }, I.begin(), I.end());
+    }
+
+    void getSlackPowers(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
+    {
+        std::unique_ptr<PowerFlowSolver>& solver = solvers.at(getSolverHandle(inputs));
+        std::vector<complex_t> S = solver->getSlackPowers();
+        matlab::data::ArrayFactory factory;
+        outputs[0] = factory.createArray({ 1, S.size() }, S.begin(), S.end());
     }
 
     void unloadNetwork(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
     {
-        if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::UINT64 || inputs[1].getNumberOfElements() != 1)
-        {
-            throw std::invalid_argument("Invalid or missing Network handle");
-        }
-
-        std::uint64_t handle = inputs[1][0];
+        std::uint64_t handle = getSolverHandle(inputs);
 
         if (solvers.count(handle) == 0)
         {
@@ -142,7 +227,6 @@ private:
         }
         else
         {
-            //solvers.clear();
             solvers.erase(handle);
         }
     }
