@@ -66,7 +66,7 @@ private:
 
         NetworkLoader loader(file);
         std::shared_ptr<Network> net = loader.loadNetwork();
-        PowerFlowSolverSettings settings;
+        SolverSettings settings{};
         solvers.insert({ handleCounter, std::make_unique<PowerFlowSolver>(net, settings, &logger) });
 
         std::uint64_t handle = handleCounter;
