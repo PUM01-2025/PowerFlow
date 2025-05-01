@@ -235,19 +235,19 @@ It is possible to pass additional options to the solver using a settings struct:
 
 ```
 % Max number of iterations for the entire network.
-settings.maxCombinedIterations = 10000;
+settings.max_iterations_total = 10000;
 
 % Max number of iterations for the Gauss-Seidel solver.
-settings.gaussSeidelMaxIterations = 100000;
+settings.max_iterations_gauss = 100000;
 
 % Precision for the Gauss-Seidel solver.
-settings.gaussSeidelPrecision = 1e-10;
+settings.gauss_decimal_precision = 10;
 
 % Max number of iterations for the Backward-Forward-Sweep solver.
-settings.backwardForwardSweepMaxIterations = 10000;
+settings.max_iterations_bfs = 10000;
 
 % Precision for the Backward-Forward-Sweep solver.
-settings.backwardForwardSweepPrecision = 1e-10;
+settings.bfs_decimal_precision = 10;
 
 net = PowerFlow("path/to/network.txt", settings);
 ```
