@@ -2,10 +2,20 @@
 #include "powerflow/network.hpp"
 
 static const double SQRT3 = 1.73205080757;
-static const int MAX_ITER = 10000;
-static const double PRECISION = 1e-10;
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, Logger *const logger) : GridSolver(grid, logger) {}
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, 
+    Logger *const logger, int maxIter, double precision) 
+    : GridSolver(grid, logger, maxIter, precision)
+{
+    for (node_idx_t i = 0; i < grid->nodes.size(); ++i)
+    {
+        if (grid->nodes[i].type == NodeType::SLACK || grid->nodes[i].type == NodeType::SLACK_EXTERNAL)
+        {
+            rootIdx = i;
+            break;
+        }
+    }
+}
 
 int BackwardForwardSweepSolver::solve()
 {
@@ -13,10 +23,16 @@ int BackwardForwardSweepSolver::solve()
     do
     {
         converged = true;
-        sweep(0, -1); // TA REDA P� ROOT-INDEX!!!!!!!! Ej n�dv�ndigtvis 0!!
+        sweep(rootIdx, -1);
 
-    } while (!converged && iter++ < MAX_ITER);
-    grid->nodes[0].s = -grid->nodes[0].s;
+    } while (!converged && iter++ < maxIterations);
+
+    if (!converged)
+    {
+        throw std::runtime_error("BackwardForwardSweepSolver: The solution did not converge. Maximum number of iterations reached.");
+    }
+
+    grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
     return iter;
 }
 
@@ -54,7 +70,7 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
 
     if (!isLeaf)
     {
-        if (std::abs(node.s - s) > PRECISION)
+        if (std::abs(node.s - s) > precision)
             converged = false;
         node.s = s;
     }

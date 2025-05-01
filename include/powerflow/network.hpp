@@ -10,6 +10,22 @@ using node_idx_t = int;
 using grid_idx_t = int;
 using edge_idx_t = int;
 
+enum class ResultType
+{
+    LOAD_VOLTAGES,
+    ALL_CURRENT,
+    ALL_VOLTAGE,
+    SLACK_POWER,
+};
+
+struct SolverSettings
+{
+    int max_iterations_gauss{10000};
+    int gauss_decimal_precision{15};
+    int max_iterations_bfs{10000};
+    int bfs_decimal_precision{6};
+};
+
 // Graph edge struct.
 struct GridEdge
 {

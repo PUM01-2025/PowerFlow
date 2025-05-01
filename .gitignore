@@ -3,3 +3,5 @@ out
 .vs
 CMakePresets.json
 .vscode
+cov.info
+cov.cleaned.info

@@ -23,6 +23,15 @@
 // 4. If DFS traversal is done on all vertices and no cycles are detected, False is returned.
 
 
+
+//Todo: hitta klickar i grafen. dvs kompletta subgrafer av ordn >= 3 
+//Hur?
+//
+//För varje cykel
+//För varje nod i cykel gäller att 
+//Övriga noder i cykeln är dess grannar
+
+
     
 bool has_multiple_graphs(Grid const& grid)
 {

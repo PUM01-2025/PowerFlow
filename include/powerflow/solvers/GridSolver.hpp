@@ -12,7 +12,10 @@ class GridSolver
 public:
     // grid - The grid to solve. Must outlive this object!
     // logger - Logger object.
-    GridSolver(Grid* grid, Logger* const logger) : grid{grid}, logger{logger} {}
+    // maxIter - Max number of iterations allowed.
+    // precision - Solver precision.
+    GridSolver(Grid* grid, Logger* const logger, int maxIter, double precision) 
+        : grid{ grid }, logger{ logger }, maxIterations { maxIter }, precision { precision } {}
     virtual ~GridSolver() {};
 
     // Runs the GridSolver algorithm. Returns number of iterations.
@@ -20,6 +23,8 @@ public:
 protected:
     Grid* grid{nullptr};
     Logger* const logger{nullptr};
+    int maxIterations = 0;
+    double precision = 0;
 };
 
 #endif

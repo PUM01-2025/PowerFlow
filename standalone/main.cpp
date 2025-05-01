@@ -1,86 +1,65 @@
-#include "powerflow/NetworkLoader.hpp"
-#include "powerflow/solvers/GaussSeidelSolver.hpp"
-#include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
-#include "powerflow/PowerFlowSolver.hpp"
-#include "powerflow/logger/CppLogger.hpp"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
+// Include PowerFlow headers.
+#include "powerflow/NetworkLoader.hpp"
+#include "powerflow/PowerFlowSolver.hpp"
+#include "powerflow/logger/CppLogger.hpp"
 
 int main(int argc, char* argv[])
 {
-    //std::ifstream file("../examples/example_network_single_grid.txt");
-    std::ifstream file("C:/Users/melvi/Kandidat01/examples/example_network_single_grid.txt");
-    if (!file) {
+    // Open the network file using an ifstream.
+    std::ifstream file("example_network_single_grid.txt");
+
+    if (!file)
+    {
+        std::cerr << "Could not open network file" << std::endl;
         return -1;
     }
+
+    // Create a NetworkLoader object and provide it with the file input stream.
+    // Call the loadNetwork() method to load the network file into a Network
+    // struct. In case of errors in the network file, the method will throw a
+    // NetworkLoaderError.
+    //
+    // NOTE: A NetworkLoader object is only meant to be used once. To load
+    // additional network files, it is recommended to create new NetworkLoaders
+    // for each network file to be loaded.
+    // 
+    // NOTE: Using NetworkLoader to create a Network struct is not mandatory.
+    // A Network struct could be created by some other method or even manually.
     NetworkLoader loader(file);
-    std::shared_ptr<Network> net = loader.loadNetwork();
-    for (const Grid& grid : net->grids) {
-        std::cout << "Base " << grid.sBase << " " << grid.vBase << std::endl;
-        for (const GridNode& node : grid.nodes) {
-            std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-        }
-    }
-	CppLogger logger(std::cout);
-    PowerFlowSolver pfs(net, &logger);
-    std::vector<complex_t> P = {
+    std::unique_ptr<Network> net = loader.loadNetwork();
+
+    // Create a PowerFlowSolver object and provide it with the network and a
+    // logger. In this case, the CppLogger class is used. You can also
+    // implement your own logger if it is needed in your environment.
+    // 
+    // IMPORTANT: From here on, the PowerFlowSolver owns the Network struct.
+    // The Network struct can (should) not be modified by any other code at
+    // this point!
+    CppLogger logger(std::cout);
+    PowerFlowSolverSettings settings; // Create a default settings object.
+    PowerFlowSolver pfs(std::move(net), settings, &logger);
+
+    // Create S and V vectors for the LOAD and SLACK_EXTERNAL nodes.
+    std::vector<complex_t> S = {
         {0.002, 0.001},
         {0.005, 0.004},
         {0.004, 0.002}
     };
     std::vector<complex_t> V = { {1, 0} };
-    std::tuple< std::vector<complex_t>, int> Vres_iter = pfs.solve(P, V);
-    std::vector<complex_t> U = std::get<0>(Vres_iter);
-    int iter = std::get<1>(Vres_iter);
 
-    for (const Grid& grid : net->grids) {
-        for (const GridNode& node : grid.nodes) {
-            std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-        }
+    // Run the solver by calling PowerFlowSolver::solve.
+    pfs.solve(S, V);
+
+    // Get the resulting voltages at the LOAD nodes.
+    std::vector<complex_t> loadVoltages = pfs.getLoadVoltages();
+
+    // Print the calculated voltages to cout and exit.
+    for (const complex_t v : loadVoltages)
+    {
+        std::cout << "(" << v.real() << ", " << v.imag() << ")" << std::endl;
     }
 }
-
-//int main(int argc, char* argv[])
-//{
-//    std::ifstream file("C:\\Users\\melvi\\Kandidat01\\examples\\example_network.txt");
-//    NetworkLoader loader(file);
-//    std::unique_ptr<Network> net = loader.loadNetwork();
-//
-//    std::cout << "Loaded" << std::endl;
-//
-//    // 2 l (0.004, 0.002)
-//    net->grids.at(1).nodes.at(2).s = -complex_t(0.004,0.002);
-//    // 1 l (0.002, 0.001)
-//    // 2 l (0.005, 0.004)
-//    net->grids.at(2).nodes.at(1).s = -complex_t(0.002,0.001);
-//    net->grids.at(2).nodes.at(2).s = -complex_t(0.005, 0.004);
-//
-//    std::vector<GridSolver*> solvers;
-//    for (Grid& grid : net->grids) {
-//        solvers.push_back(new BackwardForwardSweepSolver(&grid));
-//    }
-//
-//    
-//
-//    for (int i = 0; i < 100; ++i) {
-//        for (GridSolver* solver : solvers) {
-//            solver->solve();
-//
-//            // Uppdatera connections (l�tsaskablar med 0 impedans).
-//            for (GridConnection& connection : net->connections) {
-//                // OBS teckenbyte f�r s.
-//                net->grids[connection.slackGrid].nodes[connection.slackNode].s = -net->grids[connection.pqGrid].nodes[connection.pqNode].s;
-//                net->grids[connection.pqGrid].nodes[connection.pqNode].v = net->grids[connection.slackGrid].nodes[connection.slackNode].v;
-//            }
-//        }
-//    }
-//
-//    for (const Grid& grid : net->grids) {
-//        for (const GridNode& node : grid.nodes) {
-//            std::cout << node.v.real() << "," << node.v.imag() << "  " << node.s.real() << "," << node.s.imag() << std::endl;
-//        }
-//    }
-//
-//    return 0;
-//}
