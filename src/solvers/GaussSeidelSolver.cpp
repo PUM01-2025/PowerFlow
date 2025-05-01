@@ -1,8 +1,5 @@
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
 
-static const int DEFAULT_MAX_ITER = 100000;
-static const double DEFAULT_PRECISION = 1e-10;
-
 GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger, 
     int maxIter, double precision) : GridSolver(grid, logger, maxIter, precision),
         y(grid->edges.size()), ySum(grid->nodes.size())
