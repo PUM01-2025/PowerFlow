@@ -89,7 +89,7 @@ private:
             throw std::runtime_error("Could not open Network file");
         }
 
-        PowerFlowSolverSettings settings;
+        SolverSettings settings;
 
         // Load options struct.
         if (inputs.size() >= 3)
@@ -111,7 +111,7 @@ private:
                     {
                         throw std::invalid_argument("Invalid maxCombinedIterations");
                     }
-                    settings.maxCombinedIterations = field[0];
+                    settings.max_iterations_total = field[0];
                 }
                 else if (fieldName == "gaussSeidelMaxIterations")
                 {
@@ -119,15 +119,15 @@ private:
                     {
                         throw std::invalid_argument("Invalid gaussSeidelMaxIterations");
                     }
-                    settings.gaussSeidelMaxIterations = field[0];
+                    settings.max_iterations_gauss = field[0];
                 }
                 else if (fieldName == "gaussSeidelPrecision")
                 {
-                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    if (field.getType() != matlab::data::ArrayType::INT8 || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid gaussSeidelPrecision");
                     }
-                    settings.gaussSeidelPrecision = field[0];
+                    settings.gauss_decimal_precision = field[0];
                 }
                 else if (fieldName == "backwardForwardSweepMaxIterations")
                 {
@@ -135,15 +135,15 @@ private:
                     {
                         throw std::invalid_argument("Invalid backwardForwardSweepMaxIterations");
                     }
-                    settings.backwardForwardSweepMaxIterations = field[0];
+                    settings.max_iterations_bfs = field[0];
                 }
                 else if (fieldName == "backwardForwardSweepPrecision")
                 {
-                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    if (field.getType() != matlab::data::ArrayType::INT8 || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid backwardForwardSweepPrecision");
                     }
-                    settings.backwardForwardSweepPrecision = field[0];
+                    settings.bfs_decimal_precision = field[0];
                 }
                 else
                 {
