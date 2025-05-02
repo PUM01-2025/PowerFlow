@@ -22,8 +22,6 @@
 // 3.If an adjacent vertex is already visited and is not the parent of the current vertex, a cycle is detected, and True is returned.
 // 4. If DFS traversal is done on all vertices and no cycles are detected, False is returned.
 
-
-
 //Todo: hitta klickar i grafen. dvs kompletta subgrafer av ordn >= 3 
 //Hur?
 //

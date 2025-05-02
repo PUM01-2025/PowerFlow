@@ -192,3 +192,31 @@ TEST_CASE("Choose solver", "[validation]"){
         REQUIRE(containsCycle);
     }
 }
+
+TEST_CASE("Find multiple graph", "[validation]"){
+    SECTION("NetworkAnalyzer"){
+
+        std::ifstream tree_file( localPath + "examples/test_networks/test_network.txt");                        //Ladda in exempelnätverk med trädstruktur
+        CHECK_FALSE(tree_file.fail());                                              //Säkerställ att filen kunde laddas in
+        NetworkLoader tree_loader(tree_file);                                       //Skapa en loader
+        std::unique_ptr<Network> tree_network = tree_loader.loadNetwork();          //Spara som nätverk
+        
+        for(unsigned long i = 0; i < tree_network->grids.size(); i++){
+            
+            REQUIRE(!has_multiple_graphs(tree_network->grids[i])); //Ingen får vara disjunkt
+        }
+    
+        std::ifstream disjunct_file(localPath + "examples/test_networks/test_network_disjunct.txt");                 //Ladda in exempelnätverk med cykel
+        CHECK_FALSE(disjunct_file.fail());                                             //Säkerställ att filen kunde laddas in
+        NetworkLoader disjunct_loader(disjunct_file);                                     //Skapa en loader
+        std::unique_ptr<Network> disjunct_network = disjunct_loader.loadNetwork();        //Spara som nätverk
+        bool containsdisjunct= false;                                                 //Blir sann om det finns åtminstone en dijunct graf
+        for(unsigned long i = 0; i < disjunct_network->grids.size(); i++){
+            if(has_multiple_graphs(tree_network->grids[i])){
+                containsdisjunct = true;
+            }
+        }
+        REQUIRE(containsdisjunct);
+    }
+}
+
