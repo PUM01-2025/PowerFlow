@@ -249,6 +249,12 @@ settings.max_iterations_bfs = 10000;
 % Precision for the Backward-Forward-Sweep solver.
 settings.bfs_decimal_precision = 10;
 
+% Max number of iterations for the ZBus Jacobi solver.
+settings.max_iterations_zbusjacobi = 10000;
+
+% Precision for the ZBus Jacobi solver.
+settings.zbusjacobi_decimal_precision = 10;
+
 net = PowerFlow("path/to/network.txt", settings);
 ```
 
