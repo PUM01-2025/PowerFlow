@@ -4,6 +4,7 @@
 #include "powerflow/NetworkLoader.hpp"
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
+#include "powerflow/solvers/ZBusJacobiSolver.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/NetworkAnalyzer.hpp"
 #include "powerflow/logger/CppLogger.hpp"
@@ -46,7 +47,7 @@ TEST_CASE("Networkloader input", "[!throws]" ) {
 }
 
 
-TEST_CASE("Compare output of BFS and GS","[validation]"){
+TEST_CASE("Compare output of BFS and GS and zbus jacobi","[validation]"){
 
     SECTION("test_network.txt"){
         //Load BFS
@@ -100,6 +101,50 @@ TEST_CASE("Compare output of BFS and GS","[validation]"){
             }
         }
     }
+}
+
+TEST_CASE("Compare GS and ZBus Jacobi", "[validation]") {
+    CppLogger logger(std::cout);
+
+    // Load Gauss-Seidel
+    std::ifstream file(localPath + "examples/test_networks/test_network_cycle.txt");
+    CHECK_FALSE(file.fail());
+    NetworkLoader loader(file);
+    std::unique_ptr<Network> net = loader.loadNetwork();
+    std::vector<GridSolver*> solvers;
+    for (Grid& grid : net->grids) {
+        solvers.push_back(new GaussSeidelSolver(&grid, &logger, 100000, 1e-10));
+    }
+    net->grids.at(0).nodes.at(7).s = -complex_t(0.004, 0.002);
+    net->grids.at(0).nodes.at(5).s = -complex_t(0.002, 0.001);
+    net->grids.at(0).nodes.at(6).s = -complex_t(0.005, 0.004);
+    for (GridSolver* solver : solvers) {
+        solver->solve();
+    }
+
+    //Load zbus jacobi //Samma som ovan men för ZBus Jacobi
+    std::ifstream file2(localPath + "examples/test_networks/test_network_cycle.txt");
+    CHECK_FALSE(file2.fail());
+    NetworkLoader loader2(file2);
+    std::unique_ptr<Network> net2 = loader2.loadNetwork();
+    std::vector<GridSolver*> solvers2;
+    for (Grid& grid : net2->grids) {
+        solvers2.push_back(new ZBusJacobiSolver(&grid, &logger, 100000, 1e-10));
+    }
+    net2->grids.at(0).nodes.at(7).s = -complex_t(0.004, 0.002);
+    net2->grids.at(0).nodes.at(5).s = -complex_t(0.002, 0.001);
+    net2->grids.at(0).nodes.at(6).s = -complex_t(0.005, 0.004);
+    for (GridSolver* solver : solvers2) {
+        solver->solve();
+    }
+
+    CHECK_THAT(net->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[7].v.real(), 0.000001));
+    CHECK_THAT(net->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[5].v.real(), 0.000001));
+    CHECK_THAT(net->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[6].v.real(), 0.000001));
+
+    CHECK_THAT(net->grids[0].nodes[7].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[7].v.imag(), 0.000001));
+    CHECK_THAT(net->grids[0].nodes[5].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[5].v.imag(), 0.000001));
+    CHECK_THAT(net->grids[0].nodes[6].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[6].v.imag(), 0.000001));
 }
 
 TEST_CASE("Compare treestructure", "[validation]") {
@@ -185,7 +230,7 @@ TEST_CASE("Choose solver", "[validation]"){
         std::unique_ptr<Network> cycle_network = cycle_loader.loadNetwork();        //Spara som nätverk
         bool containsCycle = false;                                                 //Blir sann om det finns åtminstone en cykel
         for(unsigned long i = 0; i < cycle_network->grids.size(); i++){
-            if(determine_solver(cycle_network->grids[i]) == GAUSSSEIDEL){
+            if(determine_solver(cycle_network->grids[i]) != BACKWARDFOWARDSWEEP){
                 containsCycle = true;
             }
         }

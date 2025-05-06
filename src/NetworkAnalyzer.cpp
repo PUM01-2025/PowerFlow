@@ -91,11 +91,29 @@ bool has_cycles(Grid const& grid)
     return false;
 }
 
+bool has_only_one_slack_node(Grid const& grid)
+{
+    int slackNodes = 0;
+
+    for (const GridNode& node : grid.nodes)
+    {
+        if (node.type == SLACK || node.type == SLACK_EXTERNAL)
+        {
+            slackNodes++;
+        }
+    }
+    return slackNodes == 1;
+}
+
 SolverType determine_solver(Grid const& grid)
 {
     // Returns Solvertype Enum depending on grid structure
     if (has_cycles(grid))
     {
+        if (has_only_one_slack_node(grid) && grid.nodes.size() < 10000)
+        {
+            return ZBUSJACOBI;
+        }
         return GAUSSSEIDEL;
     }
 

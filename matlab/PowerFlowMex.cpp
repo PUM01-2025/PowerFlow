@@ -123,7 +123,7 @@ private:
                 }
                 else if (fieldName == "gauss_decimal_precision")
                 {
-                    if (field.getType() != matlab::data::ArrayType::INT8 || field.getNumberOfElements() != 1)
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid gauss_decimal_precision");
                     }
@@ -139,11 +139,27 @@ private:
                 }
                 else if (fieldName == "bfs_decimal_precision")
                 {
-                    if (field.getType() != matlab::data::ArrayType::INT8 || field.getNumberOfElements() != 1)
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
                         throw std::invalid_argument("Invalid bfs_decimal_precision");
                     }
                     settings.bfs_decimal_precision = field[0];
+                }
+                else if (fieldName == "max_iterations_zbusjacobi")
+                {
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    {
+                        throw std::invalid_argument("Invalid max_iterations_zbusjacobi");
+                    }
+                    settings.max_iterations_zbusjacobi = field[0];
+                }
+                else if (fieldName == "zbusjacobi_decimal_precision")
+                {
+                    if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
+                    {
+                        throw std::invalid_argument("Invalid zbusjacobi_decimal_precision");
+                    }
+                    settings.zbusjacobi_decimal_precision = field[0];
                 }
                 else
                 {

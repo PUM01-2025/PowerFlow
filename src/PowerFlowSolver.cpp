@@ -36,14 +36,12 @@ void PowerFlowSolver::solve(const std::vector<complex_t>& S, const std::vector<c
 {
 	if (firstRun)
     {
-		// TODO: Analysera ev felaktigheter i nätverket
 		createGridSolvers();
 		firstRun = false;
 	}
 	updateLoads(S);
 	updateExternalVoltages(V);
 	runGridSolvers();
-	// return make_tuple(getLoadVoltages(), iter);
 }
 
 void PowerFlowSolver::createGridSolvers()
@@ -67,6 +65,14 @@ void PowerFlowSolver::createGridSolvers()
                 *logger << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
                 std::unique_ptr<BackwardForwardSweepSolver> bfs = std::make_unique<BackwardForwardSweepSolver>(&grid, logger,
                     settings.max_iterations_bfs, pow(10,-settings.bfs_decimal_precision));
+                gridSolvers.push_back(std::move(bfs));
+                break;
+            }
+            case ZBUSJACOBI:
+            {
+                *logger << "Found grid number " << grid_no << " suitable for ZBus Jacobi" << std::endl;
+                std::unique_ptr<ZBusJacobiSolver> bfs = std::make_unique<ZBusJacobiSolver>(&grid, logger,
+                    settings.max_iterations_zbusjacobi, pow(10, -settings.zbusjacobi_decimal_precision));
                 gridSolvers.push_back(std::move(bfs));
                 break;
             }
