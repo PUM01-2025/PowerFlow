@@ -1,5 +1,6 @@
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
+#include "powerflow/solvers/ZBusJacobiSolver.hpp"
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/SolverTypeEnum.hpp"
 #include "powerflow/NetworkAnalyzer.hpp"
@@ -56,7 +57,7 @@ void PowerFlowSolver::createGridSolvers()
             case GAUSSSEIDEL:
             {
                 *logger << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
-                std::unique_ptr<GaussSeidelSolver> gs = std::make_unique<GaussSeidelSolver>(&grid, logger, 
+                std::unique_ptr<GaussSeidelSolver> gs = std::make_unique<GaussSeidelSolver>(&grid, logger,
                     settings.max_iterations_gauss, pow(10,-settings.gauss_decimal_precision));
                 gridSolvers.push_back(std::move(gs));
                 break;
