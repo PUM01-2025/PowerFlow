@@ -111,7 +111,7 @@ where *S_base* and *V_base* are positive, real-valued scale factors. Each grid i
 
 #### Solvers
 
-PowerFlow implements two different algorithms (solvers): For grids that have a single SLACK/SLACK_EXTERNAL node, contain no cycles and where the LOAD nodes are located at the "leaves", a *Backward-Forward-Sweep* (BFS) algorithm is used. For other grids, the *Gauss-Seidel* algorithm is used. PowerFlow automatically detects which solver is most suitable for each grid.
+PowerFlow implements three different algorithms (solvers): For grids that have a single SLACK/SLACK_EXTERNAL node, contain no cycles and where the LOAD nodes are located at the "leaves", a *Backward-Forward-Sweep* (BFS) algorithm is used. For other grids, the *ZBus Jacobi* or *Gauss-Seidel* algorithm is used. *ZBus Jacobi* can only be used when a grid contains a single SLACK/SLACK_EXTERNAL node and when the grid doesn't contain too many nodes. PowerFlow automatically detects which solver is most suitable for each grid.
 
 #### Limitations
 
@@ -221,7 +221,7 @@ V_all = net.getAllVoltages();
 I = net.getCurrents();
 ```
 
-TODO: Fyll i format!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+The elements in the I vector are the currents in the edges in the same order they appear in the Network file. In a network with *n* grids, each containing *m_1* to *m_n* number of edges, the first *m_1* values in the I vector correspond to the edges in the first grid, the second *m_2* values correspond to the edges in the second grid and so on.
 
 #### Get SLACK/SLACK_EXTERNAL node voltages
 
