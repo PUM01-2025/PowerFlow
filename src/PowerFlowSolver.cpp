@@ -18,17 +18,25 @@ PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, SolverSetting
     {
         throw std::invalid_argument("Invalid max_iterations_gauss value");
     }
-    if (settings.gauss_decimal_precision <= 0)
+    if (settings.gauss_seidel_precision <= 0)
     {
-        throw std::invalid_argument("Invalid gauss_decimal_precision value");
+        throw std::invalid_argument("Invalid gauss_seidel_precision value");
     }
     if (settings.max_iterations_bfs <= 0)
     {
         throw std::invalid_argument("Invalid max_iterations_bfs value");
     }
-    if (settings.bfs_decimal_precision <= 0)
+    if (settings.bfs_precision <= 0)
     {
-        throw std::invalid_argument("Invalid bfs_decimal_precision value");
+        throw std::invalid_argument("Invalid bfs_precision value");
+    }
+    if (settings.max_iterations_zbusjacobi <= 0)
+    {
+        throw std::invalid_argument("Invalid max_iterations_zbusjacobi value");
+    }
+    if (settings.zbusjacobi_precision <= 0)
+    {
+        throw std::invalid_argument("Invalid zbus_jacobi_precision value");
     }
 }
 
@@ -56,7 +64,7 @@ void PowerFlowSolver::createGridSolvers()
             {
                 *logger << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
                 std::unique_ptr<GaussSeidelSolver> gs = std::make_unique<GaussSeidelSolver>(&grid, logger,
-                    settings.max_iterations_gauss, pow(10,-settings.gauss_decimal_precision));
+                    settings.max_iterations_gauss, settings.gauss_seidel_precision);
                 gridSolvers.push_back(std::move(gs));
                 break;
             }
@@ -64,7 +72,7 @@ void PowerFlowSolver::createGridSolvers()
             {
                 *logger << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
                 std::unique_ptr<BackwardForwardSweepSolver> bfs = std::make_unique<BackwardForwardSweepSolver>(&grid, logger,
-                    settings.max_iterations_bfs, pow(10,-settings.bfs_decimal_precision));
+                    settings.max_iterations_bfs, settings.bfs_precision);
                 gridSolvers.push_back(std::move(bfs));
                 break;
             }
@@ -72,7 +80,7 @@ void PowerFlowSolver::createGridSolvers()
             {
                 *logger << "Found grid number " << grid_no << " suitable for ZBus Jacobi" << std::endl;
                 std::unique_ptr<ZBusJacobiSolver> bfs = std::make_unique<ZBusJacobiSolver>(&grid, logger,
-                    settings.max_iterations_zbusjacobi, pow(10, -settings.zbusjacobi_decimal_precision));
+                    settings.max_iterations_zbusjacobi, settings.zbusjacobi_precision);
                 gridSolvers.push_back(std::move(bfs));
                 break;
             }

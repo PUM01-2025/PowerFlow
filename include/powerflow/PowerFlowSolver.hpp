@@ -12,11 +12,11 @@
 struct SolverSettings
 {
     int max_iterations_gauss{100000};
-    int gauss_decimal_precision{10};
+    double gauss_seidel_precision{1e-10};
     int max_iterations_bfs{10000};
-    int bfs_decimal_precision{10};
+    double bfs_precision{1e-10};
     int max_iterations_zbusjacobi{10000};
-    int zbusjacobi_decimal_precision{10};
+    double zbusjacobi_precision{1e-10};
     int max_iterations_total{10000};
 };
 

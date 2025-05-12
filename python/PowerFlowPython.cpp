@@ -67,11 +67,11 @@ PYBIND11_MODULE(PowerFlowPython, m)
         .def(pybind11::init<>())
         .def_readwrite("max_iterations_total", &SolverSettings::max_iterations_total)
         .def_readwrite("max_iterations_gauss", &SolverSettings::max_iterations_gauss)
-        .def_readwrite("gauss_decimal_precision", &SolverSettings::gauss_decimal_precision)
+        .def_readwrite("gauss_seidel_precision", &SolverSettings::gauss_seidel_precision)
         .def_readwrite("max_iterations_bfs", &SolverSettings::max_iterations_bfs)
-        .def_readwrite("bfs_decimal_precision", &SolverSettings::bfs_decimal_precision)
+        .def_readwrite("bfs_precision", &SolverSettings::bfs_precision)
         .def_readwrite("max_iterations_zbusjacobi", &SolverSettings::max_iterations_zbusjacobi)
-        .def_readwrite("zbusjacobi_decimal_precision", &SolverSettings::zbusjacobi_decimal_precision);
+        .def_readwrite("zbusjacobi_precision", &SolverSettings::zbusjacobi_precision);
 
     pybind11::class_<PowerFlow>(m, "PowerFlow")
         .def(pybind11::init<const std::string &, const SolverSettings &>(), pybind11::arg("filePath"), pybind11::arg("settings") = SolverSettings())

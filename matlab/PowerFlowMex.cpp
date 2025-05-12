@@ -121,13 +121,13 @@ private:
                     }
                     settings.max_iterations_gauss = field[0];
                 }
-                else if (fieldName == "gauss_decimal_precision")
+                else if (fieldName == "gauss_seidel_precision")
                 {
                     if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid gauss_decimal_precision");
+                        throw std::invalid_argument("Invalid gauss_seidel_precision");
                     }
-                    settings.gauss_decimal_precision = field[0];
+                    settings.gauss_seidel_precision = field[0];
                 }
                 else if (fieldName == "max_iterations_bfs")
                 {
@@ -137,13 +137,13 @@ private:
                     }
                     settings.max_iterations_bfs = field[0];
                 }
-                else if (fieldName == "bfs_decimal_precision")
+                else if (fieldName == "bfs_precision")
                 {
                     if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid bfs_decimal_precision");
+                        throw std::invalid_argument("Invalid bfs_precision");
                     }
-                    settings.bfs_decimal_precision = field[0];
+                    settings.bfs_precision = field[0];
                 }
                 else if (fieldName == "max_iterations_zbusjacobi")
                 {
@@ -153,13 +153,13 @@ private:
                     }
                     settings.max_iterations_zbusjacobi = field[0];
                 }
-                else if (fieldName == "zbusjacobi_decimal_precision")
+                else if (fieldName == "zbusjacobi_precision")
                 {
                     if (field.getType() != matlab::data::ArrayType::DOUBLE || field.getNumberOfElements() != 1)
                     {
-                        throw std::invalid_argument("Invalid zbusjacobi_decimal_precision");
+                        throw std::invalid_argument("Invalid zbusjacobi_precision");
                     }
-                    settings.zbusjacobi_decimal_precision = field[0];
+                    settings.zbusjacobi_precision = field[0];
                 }
                 else
                 {
