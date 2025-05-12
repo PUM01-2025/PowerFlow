@@ -109,16 +109,23 @@ S_pu = S / S_base
 
 where *S_base* and *V_base* are positive, real-valued scale factors. Each grid in a network has an associated S_base and V_base.
 
+#### Algorithm description
+
+PowerFlow calculates voltages in each grid separately using different solvers (algorithms) depending on the structure of the grid (see "Solvers" below). Grid solvers are executed sequentially, starting from grid 0. When the voltages in a grid have converged, the voltages and powers are transferred between all grids as specified by the connections in the network. Then, the next grid solver is executed and so on. The algorithm stops when PowerFlow has detected that all grid solutions have converged.
+
+When a network is loaded, all voltages are initially set to (1, 0). Further calculations use the previously calculated voltages as initial guesses.
+
 #### Solvers
 
 PowerFlow implements three different algorithms (solvers): For grids that have a single SLACK/SLACK_EXTERNAL node, contain no cycles and where the LOAD nodes are located at the "leaves", a *Backward-Forward-Sweep* (BFS) algorithm is used. For other grids, the *ZBus Jacobi* or *Gauss-Seidel* algorithm is used. *ZBus Jacobi* can only be used when a grid contains a single SLACK/SLACK_EXTERNAL node and when the grid doesn't contain too many nodes. PowerFlow automatically detects which solver is most suitable for each grid.
 
 #### Limitations
 
-Some limitations on the structure of a network are imposed by PowerFlow. It is not possible to:
+Some limitations on the structure of a network are imposed by PowerFlow:
 
-- have more than one edge between a pair of node
-- have disjointed graphs
+- It is not possible to have more than one edge between the same pair of nodes.
+- It is not possible to have disjointed graphs.
+- When the Backward-Forward-Sweep algorithm is used (i.e., when the grid is a tree), it is possible to specify cables with 0 impedance. This can be used to "simulate" LOAD nodes that are not leaves by creating a LOAD node that connects to a MIDDLE node using an edge with 0 impedance. The other solvers do not allow cables with 0 impedance!
 
 ### Network files
 
