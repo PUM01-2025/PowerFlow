@@ -81,7 +81,7 @@ bool has_cycles(Grid const& grid)
             }
             else
             {
-                std::cerr << "Error! found edge with myself not in it!" << std::endl;
+                std::cerr << "Error! found edge with myself not in it!" << std::endl; // KASTA FEL HÄR?
             }
 
             visited_edges.insert(id);
@@ -108,14 +108,19 @@ bool has_only_one_slack_node(Grid const& grid)
 SolverType determine_solver(Grid const& grid)
 {
     // Returns Solvertype Enum depending on grid structure
-    if (has_cycles(grid))
+
+    bool hasSingleSlackNode = has_only_one_slack_node(grid);
+
+    if (!has_cycles(grid) && hasSingleSlackNode)
     {
-        if (has_only_one_slack_node(grid) && grid.nodes.size() < 10000)
-        {
-            return ZBUSJACOBI;
-        }
+        return BACKWARDFOWARDSWEEP;
+    }
+    else if (hasSingleSlackNode && grid.nodes.size() < 10000) // "MAGISK" KONSTANT!!!!!
+    {
+        return ZBUSJACOBI;
+    }
+    else
+    {
         return GAUSSSEIDEL;
     }
-
-    return BACKWARDFOWARDSWEEP;
 }
