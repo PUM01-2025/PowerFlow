@@ -35,7 +35,7 @@ int GaussSeidelSolver::solve()
     int iter = 0;
 
     // Update load voltages.
-    do
+    while (!converged && iter++ < maxIterations) 
     {
         converged = true; // Until proven otherwise
 
@@ -64,7 +64,7 @@ int GaussSeidelSolver::solve()
                 converged = false;
             }
         }
-    } while (!converged && iter++ < maxIterations);
+    }
 
     if (!converged)
     {

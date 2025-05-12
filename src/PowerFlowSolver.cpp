@@ -165,7 +165,12 @@ void PowerFlowSolver::runGridSolvers()
 			}
 		}
 	}
-    while (maxGridIter > 1 && iter++ < (settings.max_iterations_total - 1));
+    while (maxGridIter > 1 && iter++ < settings.max_iterations_total - 1);
+
+    if (maxGridIter > 1)
+    {
+        throw std::runtime_error("PowerFlowSolver: The solution did not converge. Maximum number of iterations reached.");
+    }
 }
 
 std::vector<complex_t> PowerFlowSolver::getLoadVoltages() const

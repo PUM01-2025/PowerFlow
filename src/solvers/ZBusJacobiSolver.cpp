@@ -83,15 +83,19 @@ int ZBusJacobiSolver::solve()
 	}
 
 	int iter = 0;
-	do
+	bool converged = false;
+	while (iter++ < maxIterations)
 	{
 		I = S.cwiseQuotient(V).conjugate();
 		V = Z * I;
 		double diff = (V.cwiseProduct(I.conjugate()) - S).cwiseAbs().maxCoeff();
 
 		if (diff < precision)
+		{
+			converged = true;
 			break;
-	} while (iter++ < maxIterations); // Fel räkning av iter!! Samma i GS och BFS!!
+		}
+	}
 
 	// Store calculated node voltages.
 	for (node_idx_t nodeIdx = 0; nodeIdx < N; ++nodeIdx)
@@ -102,8 +106,14 @@ int ZBusJacobiSolver::solve()
 		}
 	}
 
+	if (!converged)
+	{
+		throw std::runtime_error("ZBusJacobiSolver: The solution did not converge. Maximum number of iterations reached.");
+	}
+
 	// Update the slack node power.
 	updateSlackPower();
+
 	return iter;
 }
 

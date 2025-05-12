@@ -21,19 +21,24 @@ BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid,
 int BackwardForwardSweepSolver::solve()
 {
     int iter = 0;
-    do
-    {
-        converged = true;
-        sweep(rootIdx, -1);
+    converged = false;
 
-    } while (!converged && iter++ < maxIterations);
+    // SLACK power must be negative in the BFS algorithm.
+    grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
+
+    while (!converged && iter++ < maxIterations) 
+    {
+        converged = true; // Until proven otherwise by sweep
+        sweep(rootIdx, -1);
+    }
+
+    // Change SLACK power to positive value before returning.
+    grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
 
     if (!converged)
     {
         throw std::runtime_error("BackwardForwardSweepSolver: The solution did not converge. Maximum number of iterations reached.");
     }
-
-    grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
     return iter;
 }
 
