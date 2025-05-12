@@ -9,9 +9,9 @@ GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger,
     {
         complex_t z = grid->edges[edgeIdx].z_c;
 
-        if (z == (complex_t)0)
+        if (z == 0.0)
         {
-            throw std::runtime_error("Invalid 0 impedance!");
+            throw std::runtime_error("Invalid 0 impedance detected by GaussSeidelSolver");
         }
         y[edgeIdx] = (complex_t)1 / z;
     }

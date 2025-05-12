@@ -6,6 +6,15 @@
 
 ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter, double precision) : GridSolver(grid, logger, maxIter, precision)
 {
+	// Check impedances.
+	for (GridEdge& edge : grid->edges)
+	{
+		if (edge.z_c == 0.0)
+		{
+			throw std::runtime_error("Invalid 0 impedance detected in ZBusJacobiSolver");
+		}
+	}
+
 	node_idx_t N = grid->nodes.size();
 	Eigen::MatrixXcd ybus = Eigen::MatrixXcd::Zero(N, N);
 
@@ -43,7 +52,7 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 	{
 		for (int col = 0; col < N; ++col)
 		{
-			if (Z(row, col) == (complex_t)0)
+			if (Z(row, col) == 0.0)
 			{
 				zeros++;
 			}
