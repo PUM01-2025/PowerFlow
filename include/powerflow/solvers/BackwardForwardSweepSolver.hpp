@@ -18,6 +18,7 @@ private:
     complex_t sweep(node_idx_t nodeIdx, edge_idx_t prevEdgeIdx = -1);
     bool converged{false};
     node_idx_t rootIdx = 0;
+    std::vector<complex_t> I;
 };
 
 #endif

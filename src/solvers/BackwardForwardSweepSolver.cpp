@@ -11,10 +11,11 @@ BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid,
     {
         if (grid->nodes[i].type == NodeType::SLACK || grid->nodes[i].type == NodeType::SLACK_EXTERNAL)
         {
-            rootIdx = i;
+            rootIdx = i; // Om inte hittar alls???????
             break;
         }
     }
+    I.resize(grid->edges.size(), 0.0);
 }
 
 int BackwardForwardSweepSolver::solve()
@@ -49,8 +50,8 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
         node_idx_t prevNodeIdx = prevEdge.parent == nodeIdx ? prevEdge.child : prevEdge.parent;
         GridNode &prevNode = grid->nodes[prevNodeIdx];
 
-        prevEdge.i = std::conj((-node.s) / (SQRT3 * node.v));
-        node.v = prevNode.v - SQRT3 * prevEdge.i * prevEdge.z_c;
+        I[prevEdgeIdx] = std::conj((-node.s) / (SQRT3 * node.v));
+        node.v = prevNode.v - SQRT3 * I[prevEdgeIdx] * prevEdge.z_c;
     }
 
     bool isLeaf = true;
@@ -79,8 +80,8 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
     {
         GridEdge &prevEdge = grid->edges[prevEdgeIdx];
 
-        return node.s - 3.0 * prevEdge.z_c * prevEdge.i *
-                            std::conj(prevEdge.i);
+        return node.s - 3.0 * prevEdge.z_c * I[prevEdgeIdx] *
+                            std::conj(I[prevEdgeIdx]);
     }
     else
         return (0.0);
