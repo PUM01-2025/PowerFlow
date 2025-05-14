@@ -10,6 +10,8 @@ using node_idx_t = int;
 using grid_idx_t = int;
 using edge_idx_t = int;
 
+static const double SQRT3 = 1.73205080757;
+
 // Graph edge struct.
 struct GridEdge
 {

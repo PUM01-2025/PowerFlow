@@ -1,7 +1,6 @@
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/network.hpp"
 
-static const double SQRT3 = 1.73205080757;
 
 BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, 
     Logger *const logger, int maxIter, double precision) 

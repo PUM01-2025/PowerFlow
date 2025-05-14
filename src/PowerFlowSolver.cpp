@@ -211,7 +211,8 @@ std::vector<complex_t> PowerFlowSolver::getCurrents() const
         for (GridEdge const &e : g.edges)
         {
             GridNode p{g.nodes[e.parent]}, c{g.nodes[e.child]};
-            complex_t current{e.z_c / (p.v - c.v)}; // FEL: Stämmer nog inte i och med att det är komplexa tal + trefas!
+            complex_t impedance = (e.z_c !=  static_cast<complex_t>(0)) ? e.z_c : static_cast<complex_t>(settings.gauss_seidel_precision);
+            complex_t current{(p.v - c.v) / (impedance * SQRT3)};
             result.push_back(current);
         }
     }
