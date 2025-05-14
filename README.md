@@ -248,19 +248,19 @@ settings.max_iterations_total = 10000;
 settings.max_iterations_gauss = 100000;
 
 % Precision for the Gauss-Seidel solver.
-settings.gauss_decimal_precision = 10;
+settings.gauss_seidel_precision = 1e-10;
 
 % Max number of iterations for the Backward-Forward-Sweep solver.
 settings.max_iterations_bfs = 10000;
 
 % Precision for the Backward-Forward-Sweep solver.
-settings.bfs_decimal_precision = 10;
+settings.bfs_precision = 1e-10;
 
 % Max number of iterations for the ZBus Jacobi solver.
 settings.max_iterations_zbusjacobi = 10000;
 
 % Precision for the ZBus Jacobi solver.
-settings.zbusjacobi_decimal_precision = 10;
+settings.zbusjacobi_precision = 1e-10;
 
 net = PowerFlow("path/to/network.txt", settings);
 ```
