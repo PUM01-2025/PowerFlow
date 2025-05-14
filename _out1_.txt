@@ -1,4 +1,0 @@
-LOCALPATH: 
-Found grid number 0 suitable for BFS
-Found grid number 1 suitable for BFS
-Found grid number 2 suitable for BFS
