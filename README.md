@@ -37,7 +37,7 @@ cmake ..
 cmake --build . --target PowerFlowMex --config Release
 ```
 
-The MEX file can then be found in `build/Matlab` (`build/Matlab/Release` on Windows). Copy the MEX file to your Matlab project along with the `matlab/PowerFlow.m` file (in the root directory, not the build directory), which provides an interface to the MEX file.
+The MEX file can then be found in `build/Matlab` (`build/Matlab/Release` on Windows). Copy the MEX file to your Matlab project along with the `PowerFlow.m` file, which provides an interface to the MEX file.
 
 ### Python
 

@@ -15,8 +15,8 @@ static const double SQRT3 = 1.73205080757;
 // Graph edge struct.
 struct GridEdge
 {
-    node_idx_t parent;
-    node_idx_t child;
+    node_idx_t parent = -1;
+    node_idx_t child = -1;
     complex_t z_c{1};
 };
 
