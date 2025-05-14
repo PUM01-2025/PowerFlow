@@ -58,7 +58,7 @@ void PowerFlowSolver::createGridSolvers()
 
     for (Grid& grid : network->grids)
     {
-        switch (determine_solver(grid))
+        switch (determineSolver(grid))
         {
             case GAUSSSEIDEL:
             {

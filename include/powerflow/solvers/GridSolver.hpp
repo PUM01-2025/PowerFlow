@@ -4,7 +4,6 @@
 #include "powerflow/network.hpp"
 #include "powerflow/logger/Logger.hpp"
 
-
 // Base class for grid solvers (BFS, Gauss-Seidel etc.).
 // WARNING: A GridSolver may cache information about the provided grid!
 class GridSolver

@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 
+// Settings that can be passed to the solver.
 struct SolverSettings
 {
     int max_iterations_gauss{100000};

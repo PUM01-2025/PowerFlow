@@ -221,7 +221,7 @@ TEST_CASE("Choose solver", "[validation]"){
         
         for(unsigned long i = 0; i < tree_network->grids.size(); i++){
             
-            REQUIRE(determine_solver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
+            REQUIRE(determineSolver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
         }
     
         std::ifstream cycle_file(localPath + "examples/test_networks/test_network_cycle.txt");                 //Ladda in exempelnätverk med cykel
@@ -230,7 +230,7 @@ TEST_CASE("Choose solver", "[validation]"){
         std::unique_ptr<Network> cycle_network = cycle_loader.loadNetwork();        //Spara som nätverk
         bool containsCycle = false;                                                 //Blir sann om det finns åtminstone en cykel
         for(unsigned long i = 0; i < cycle_network->grids.size(); i++){
-            if(determine_solver(cycle_network->grids[i]) != BACKWARDFOWARDSWEEP){
+            if(determineSolver(cycle_network->grids[i]) != BACKWARDFOWARDSWEEP){
                 containsCycle = true;
             }
         }
