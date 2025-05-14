@@ -65,9 +65,10 @@ Grid NetworkLoader::loadGrid()
         std::pair newEdge = std::make_pair(edge.parent, edge.child);
         if (uniqueEdges.find(newEdge) != uniqueEdges.end())
         {
-            throw NetworkLoaderError("To edges between node " + std::to_string(edge.parent) + " and " + std::to_string(edge.child), curLine);
+            throw NetworkLoaderError("Multiple edges between node " + std::to_string(edge.parent) + " and " + std::to_string(edge.child), curLine);
         }
-        else {
+        else
+        {
             uniqueEdges.insert(newEdge);
         }
 
@@ -196,32 +197,29 @@ std::vector<GridConnection> NetworkLoader::loadConnections(const Network& networ
         }
 
         //Check if the middle grid exists
-        if (network.grids.size() < connection.pqGrid) {
+        if (network.grids.size() < connection.pqGrid)
+        {
             throw NetworkLoaderError("The middle grid " + std::to_string(connection.pqGrid) +
                 " doesn't exist", curLine);
         }
         //Check if the slack node exists
-        if (network.grids.at(connection.pqGrid).nodes.size() < connection.slackNode) {
+        if (network.grids.at(connection.pqGrid).nodes.size() < connection.slackNode)
+        {
             throw NetworkLoaderError("The slack node " + std::to_string(connection.slackNode) +
                 "in the middle grid doesn't exist", curLine);
         }
         //Check if the slack grid exists
-        if (network.grids.size() < connection.slackGrid) {
+        if (network.grids.size() < connection.slackGrid)
+        {
             throw NetworkLoaderError("The middle grid " + std::to_string(connection.slackGrid) +
                 " doesn't exist", curLine);
         }
         //Check if the middle node exists
-        if (network.grids.at(connection.slackGrid).nodes.size() < connection.pqNode) {
+        if (network.grids.at(connection.slackGrid).nodes.size() < connection.pqNode)
+        {
             throw NetworkLoaderError("The slack node " + std::to_string(connection.pqNode) +
                 "in the middle grid doesn't exist", curLine);
         }
-
-
-       
-
-
-
-
 
         connections.push_back(connection);
 
