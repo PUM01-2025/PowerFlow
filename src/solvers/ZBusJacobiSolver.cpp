@@ -4,7 +4,8 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
-ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter, double precision) : GridSolver(grid, logger, maxIter, precision)
+ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter, double precision) 
+	: GridSolver(grid, logger, maxIter, precision)
 {
 	// Check impedances.
 	for (GridEdge& edge : grid->edges)
@@ -17,6 +18,7 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 
 	node_idx_t N = grid->nodes.size();
 	Eigen::MatrixXcd ybus = Eigen::MatrixXcd::Zero(N, N);
+	slackNodeIdx = -1;
 
 	for (node_idx_t nodeIdx = 0; nodeIdx < grid->nodes.size(); ++nodeIdx) // "For each row in admittance matrix"
 	{
@@ -43,6 +45,11 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 				ybus(nodeIdx, nodeIdx) -= y;
 			}
 		}
+	}
+
+	if (slackNodeIdx == -1)
+	{
+		throw std::runtime_error("ZBusJacobiSolver: Could not find SLACK/SLACK_EXTERNAL node");
 	}
 
 	Z = ybus.inverse();

@@ -6,10 +6,31 @@
 #include "powerflow/NetworkLoader.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/network.hpp"
-#include "MatlabLogger.hpp"
+#include "powerflow/logger/Logger.hpp"
+
 #include "mexAdapter.hpp"
 #include "mex.hpp"
 
+// Logger that prints to the Matlab console.
+class MatlabLogger : public Logger
+{
+public:
+    MatlabLogger(std::shared_ptr<matlab::engine::MATLABEngine> matlab_ptr, LogLevel log_level) 
+        : Logger{ log_level }, matlab_ptr{ matlab_ptr } {}
+private:
+    std::shared_ptr<matlab::engine::MATLABEngine> matlab_ptr{};
+
+    void flush() override
+    {
+        matlab::data::ArrayFactory factory;
+        matlab_ptr->feval(u"fprintf", 0,
+            std::vector<matlab::data::Array>({ factory.createScalar(ss.str()) }));
+        ss.str("");
+        ss.clear();
+    }
+};
+
+// PowerFlow Matlab MEX interface.
 class MexFunction : public matlab::mex::Function
 {
     std::unordered_map<std::uint64_t, std::unique_ptr<PowerFlowSolver>> solvers;

@@ -14,6 +14,7 @@
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/logger/CppLogger.hpp"
 
+// PowerFlow Python interface class.
 class PowerFlow
 {
 public:

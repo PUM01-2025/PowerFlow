@@ -1,5 +1,5 @@
-#ifndef SOLVER_TYPE_H
-#define SOLVER_TYPE_H
+#ifndef POWERFLOW_SOLVER_TYPE_H
+#define POWERFLOW_SOLVER_TYPE_H
 
 enum SolverType
 {

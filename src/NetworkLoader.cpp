@@ -2,8 +2,6 @@
 #include "powerflow/NetworkLoaderError.hpp"
 #include <set>
 
-/** Loads a network file, checks if the network is acceptable if it is an 
-unique pointer is returned, if not an error is thrown*/
 NetworkLoader::NetworkLoader(std::istream& file) : file{ file } { }
 
 std::unique_ptr<Network> NetworkLoader::loadNetwork()

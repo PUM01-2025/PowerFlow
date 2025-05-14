@@ -13,7 +13,7 @@ public:
 
 private:
     bool converged = false;
-    node_idx_t rootIdx = 0;
+    node_idx_t rootIdx = -1;
     std::vector<complex_t> I;
 
     // Recursive function that performs a single Backward-Forward sweep.

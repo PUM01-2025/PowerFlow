@@ -1,18 +1,22 @@
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/network.hpp"
 
-
 BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, 
     Logger *const logger, int maxIter, double precision) 
     : GridSolver(grid, logger, maxIter, precision)
 {
+    rootIdx = -1;
     for (node_idx_t i = 0; i < grid->nodes.size(); ++i)
     {
         if (grid->nodes[i].type == NodeType::SLACK || grid->nodes[i].type == NodeType::SLACK_EXTERNAL)
         {
-            rootIdx = i; // Om inte hittar alls???????
+            rootIdx = i;
             break;
         }
+    }
+    if (rootIdx == -1)
+    {
+        throw std::runtime_error("BackwardForwardSweepSolver: Could not find index of root node");
     }
     I.resize(grid->edges.size(), 0.0);
 }

@@ -21,7 +21,6 @@ struct SolverSettings
     int max_iterations_total{10000};
 };
 
-
 // Class responsible for solving an entire Network.
 class PowerFlowSolver
 {

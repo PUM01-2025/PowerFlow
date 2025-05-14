@@ -6,7 +6,7 @@
 #include <unordered_set>
 
 // Checks if the grid has only one SLACK/SLACK_EXTERNAL node.
-static bool hasOnlyOneSlackNode(Grid const& grid)
+static bool hasSingleSlackNode(Grid const& grid)
 {
     int slackNodes = 0;
 
@@ -24,7 +24,7 @@ static bool hasOnlyOneSlackNode(Grid const& grid)
 // - The grid must contain no cycles.
 // - The LOAD nodes must be leaf nodes.
 // - The grid must contain exactly one SLACK/SLACK_EXTERNAL node.
-bool isSuitableForBFS(Grid const& grid)
+static bool isSuitableForBFS(Grid const& grid)
 {
     std::stack<node_idx_t> todo_list{};
     std::unordered_set<node_idx_t> visited_nodes{};
@@ -87,7 +87,7 @@ bool isSuitableForBFS(Grid const& grid)
         }
     }
 
-    return hasOnlyOneSlackNode(grid);
+    return hasSingleSlackNode(grid);
 }
 
 // Returns Solvertype Enum depending on grid structure.
@@ -97,7 +97,7 @@ SolverType determineSolver(Grid const& grid)
     {
         return BACKWARDFOWARDSWEEP;
     }
-    else if (hasOnlyOneSlackNode(grid) && grid.nodes.size() < 10000) // "MAGISK" KONSTANT!!!!!
+    else if (hasSingleSlackNode(grid) && grid.nodes.size() < 10000) // "MAGISK" KONSTANT!!!!!
     {
         return ZBUSJACOBI;
     }
