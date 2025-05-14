@@ -16,7 +16,6 @@ struct GridEdge
     node_idx_t parent;
     node_idx_t child;
     complex_t z_c{1};
-    complex_t i{}; // Ta bort?
 };
 
 // Possible node types.

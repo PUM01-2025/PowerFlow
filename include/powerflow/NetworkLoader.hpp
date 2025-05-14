@@ -1,5 +1,5 @@
 #ifndef POWERFLOW_NETWORK_LOADER_H
-#define POWERFLOW_NEWTORK_LOADER_H
+#define POWERFLOW_NETWORK_LOADER_H
 
 #include <memory>
 #include <istream>
@@ -27,7 +27,7 @@ private:
     Grid loadGrid();
 
     // Loads grid base from the network file into grid.
-    void getGridBase(Grid& grid);
+    void getGridBase(Grid &grid);
 
     // Loads the list of connections from the network file.
     std::vector<GridConnection> loadConnections(const Network& network);

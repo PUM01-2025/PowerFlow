@@ -1,0 +1,34 @@
+name: AUTO
+
+on:
+  push:
+    branches: [ Testing, main ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Configure project
+        run: cmake -S . -B build -DGITHUB_VM=ON
+
+      - name: Build project
+        run: cmake --build build
+
+      - name: Run tests
+        run: ctest --test-dir build -C Debug
+ 
+      - name: Show test log on failure
+        if: failure()
+        run: |
+          echo "===== LastTest.log ====="
+          cat build/Testing/Temporary/LastTest.log || echo "Log file not found"

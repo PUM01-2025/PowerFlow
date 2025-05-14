@@ -1,30 +1,31 @@
-// Syfte: Hitta cykler i graf med DFS
 #include <vector>
 #include <iostream>
 #include "powerflow/network.hpp"
 #include "powerflow/SolverTypeEnum.hpp"
 #include <stack>
 #include <unordered_set>
-// using namespace std;
 
-// DFS för att hitta cykler
-//
-// procedure DFS_cycle(G, v) is
-//     label v as discovered
-//     for all directed edges from v to w that are in G.adjacentEdges(v) do
-//         if vertex w is not labeled as discovered then
-//             recursively call DFS(G, w)
-//         else
-//             return "cycle"
-//      return "no cycle"
-// 1. Start DFS traversal on each unvisited vertex (in case the Graph is not connected).
-// 2. During DFS, mark vertices as visited, and run DFS on the adjacent vertices (recursively).
-// 3.If an adjacent vertex is already visited and is not the parent of the current vertex, a cycle is detected, and True is returned.
-// 4. If DFS traversal is done on all vertices and no cycles are detected, False is returned.
-
-bool has_cycles(Grid const& grid)
+// Checks if the grid has only one SLACK/SLACK_EXTERNAL node.
+static bool hasOnlyOneSlackNode(Grid const& grid)
 {
-    // Returns true if the Grid contains a cycle
+    int slackNodes = 0;
+
+    for (const GridNode& node : grid.nodes)
+    {
+        if (node.type == SLACK || node.type == SLACK_EXTERNAL)
+        {
+            slackNodes++;
+        }
+    }
+    return slackNodes == 1;
+}
+
+// Checks if the grid is suitable for Backward-Forward-Sweep:
+// - The grid must contain no cycles.
+// - The LOAD nodes must be leaf nodes.
+// - The grid must contain exactly one SLACK/SLACK_EXTERNAL node.
+bool isSuitableForBFS(Grid const& grid)
+{
     std::stack<node_idx_t> todo_list{};
     std::unordered_set<node_idx_t> visited_nodes{};
     std::unordered_set<edge_idx_t> visited_edges{};
@@ -43,11 +44,18 @@ bool has_cycles(Grid const& grid)
 
         if (!success)
         {
-            return true;
+            return false;
         }
 
         // add neighbors to stack
         GridNode current_grid_node = grid.nodes[current_node];
+
+        // Verify that LOAD nodes are leaf nodes.
+        if (current_grid_node.type == NodeType::LOAD && 
+            current_grid_node.edges.size() != 1)
+        {
+            return false;
+        }
 
         // for all edges of current node, add neighbours to stack
         for (edge_idx_t id : current_grid_node.edges)
@@ -72,23 +80,29 @@ bool has_cycles(Grid const& grid)
             }
             else
             {
-                std::cerr << "Error! found edge with myself not in it!" << std::endl;
+                std::cerr << "Error! found edge with myself not in it!" << std::endl; // KASTA FEL HÄR?
             }
 
             visited_edges.insert(id);
         }
     }
 
-    return false;
+    return hasOnlyOneSlackNode(grid);
 }
 
-SolverType determine_solver(Grid const& grid)
+// Returns Solvertype Enum depending on grid structure.
+SolverType determineSolver(Grid const& grid)
 {
-    // Returns Solvertype Enum depending on grid structure
-    if (has_cycles(grid))
+    if (isSuitableForBFS(grid))
+    {
+        return BACKWARDFOWARDSWEEP;
+    }
+    else if (hasOnlyOneSlackNode(grid) && grid.nodes.size() < 10000) // "MAGISK" KONSTANT!!!!!
+    {
+        return ZBUSJACOBI;
+    }
+    else
     {
         return GAUSSSEIDEL;
     }
-
-    return BACKWARDFOWARDSWEEP;
 }

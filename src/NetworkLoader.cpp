@@ -58,7 +58,7 @@ Grid NetworkLoader::loadGrid()
         {
             throw NetworkLoaderError("Invalid edge child index", curLine);
         }
-        if (!(sstream >> edge.z_c) || edge.z_c == (complex_t)0)
+        if (!(sstream >> edge.z_c))
         {
             throw NetworkLoaderError("Invalid edge impedance", curLine);
         }

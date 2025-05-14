@@ -5,5 +5,6 @@
 #include "powerflow/network.hpp"
 
 // Determines which solver is suitable for the given grid.
-SolverType determine_solver(Grid const & grid);
+SolverType determineSolver(Grid const & grid);
+
 #endif // !NETWORK_ANALYZER_H

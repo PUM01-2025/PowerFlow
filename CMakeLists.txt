@@ -1,3 +1,4 @@
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -13,6 +14,10 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(CODE_COVERAGE)
+    add_compile_options(-O0 -g --coverage -fprofile-arcs -ftest-coverage)
+    add_link_options(--coverage)
+endif()
 
 add_subdirectory(src)
 add_subdirectory(standalone)
@@ -25,4 +30,14 @@ if(Matlab_FOUND)
     add_subdirectory(matlab)
 else()
     message(WARNING "Matlab not found: Skipping matlab subdirectory.")
+endif()
+
+set(PYBIND11_FINDPYTHON ON)
+find_package(pybind11)
+
+if(pybind11_FOUND)
+    message(STATUS "Pybind found: Adding python subdirectory.")
+    add_subdirectory(python)
+else()
+    message(WARNING "Pybind11 not found: skipping python subdirectory")
 endif()

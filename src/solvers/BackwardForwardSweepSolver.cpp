@@ -2,21 +2,43 @@
 #include "powerflow/network.hpp"
 
 static const double SQRT3 = 1.73205080757;
-static const int MAX_ITER = 10000;
-static const double PRECISION = 1e-10;
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, Logger *const logger) : GridSolver(grid, logger) {}
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, 
+    Logger *const logger, int maxIter, double precision) 
+    : GridSolver(grid, logger, maxIter, precision)
+{
+    for (node_idx_t i = 0; i < grid->nodes.size(); ++i)
+    {
+        if (grid->nodes[i].type == NodeType::SLACK || grid->nodes[i].type == NodeType::SLACK_EXTERNAL)
+        {
+            rootIdx = i; // Om inte hittar alls???????
+            break;
+        }
+    }
+    I.resize(grid->edges.size(), 0.0);
+}
 
 int BackwardForwardSweepSolver::solve()
 {
     int iter = 0;
-    do
-    {
-        converged = true;
-        sweep(0, -1); // TA REDA P� ROOT-INDEX!!!!!!!! Ej n�dv�ndigtvis 0!!
+    converged = false;
 
-    } while (!converged && iter++ < MAX_ITER);
-    grid->nodes[0].s = -grid->nodes[0].s;
+    // SLACK power must be negative in the BFS algorithm.
+    grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
+
+    while (!converged && iter++ < maxIterations) 
+    {
+        converged = true; // Until proven otherwise by sweep
+        sweep(rootIdx, -1);
+    }
+
+    // Change SLACK power to positive value before returning.
+    grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
+
+    if (!converged)
+    {
+        throw std::runtime_error("BackwardForwardSweepSolver: The solution did not converge. Maximum number of iterations reached.");
+    }
     return iter;
 }
 
@@ -33,8 +55,8 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
         node_idx_t prevNodeIdx = prevEdge.parent == nodeIdx ? prevEdge.child : prevEdge.parent;
         GridNode &prevNode = grid->nodes[prevNodeIdx];
 
-        prevEdge.i = std::conj((-node.s) / (SQRT3 * node.v));
-        node.v = prevNode.v - SQRT3 * prevEdge.i * prevEdge.z_c;
+        I[prevEdgeIdx] = std::conj((-node.s) / (SQRT3 * node.v));
+        node.v = prevNode.v - SQRT3 * I[prevEdgeIdx] * prevEdge.z_c;
     }
 
     bool isLeaf = true;
@@ -54,7 +76,7 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
 
     if (!isLeaf)
     {
-        if (std::abs(node.s - s) > PRECISION)
+        if (std::abs(node.s - s) > precision)
             converged = false;
         node.s = s;
     }
@@ -63,8 +85,8 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
     {
         GridEdge &prevEdge = grid->edges[prevEdgeIdx];
 
-        return node.s - 3.0 * prevEdge.z_c * prevEdge.i *
-                            std::conj(prevEdge.i);
+        return node.s - 3.0 * prevEdge.z_c * I[prevEdgeIdx] *
+                            std::conj(I[prevEdgeIdx]);
     }
     else
         return (0.0);

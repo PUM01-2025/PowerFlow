@@ -1,19 +1,17 @@
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
 
-static const int MAX_ITER = 10000;
-static const double PRECISION = 1e-12;
-
-GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger)
-    : GridSolver(grid, logger), y(grid->edges.size()), ySum(grid->nodes.size())
+GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger, 
+    int maxIter, double precision) : GridSolver(grid, logger, maxIter, precision),
+        y(grid->edges.size()), ySum(grid->nodes.size())
 {
     // Create admittance vector.
     for (size_t edgeIdx = 0; edgeIdx < grid->edges.size(); ++edgeIdx)
     {
         complex_t z = grid->edges[edgeIdx].z_c;
 
-        if (z == (complex_t)0)
+        if (z == 0.0)
         {
-            throw std::runtime_error("Invalid 0 impedance!");
+            throw std::runtime_error("Invalid 0 impedance detected by GaussSeidelSolver");
         }
         y[edgeIdx] = (complex_t)1 / z;
     }
@@ -37,7 +35,7 @@ int GaussSeidelSolver::solve()
     int iter = 0;
 
     // Update load voltages.
-    do
+    while (!converged && iter++ < maxIterations) 
     {
         converged = true; // Until proven otherwise
 
@@ -48,7 +46,7 @@ int GaussSeidelSolver::solve()
             if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
                 continue; // Slack node voltage is already known
 
-            complex_t i = std::conj(node.s) / std::conj(node.v);
+            complex_t yv = 0;
 
             for (size_t edgeIdx : node.edges)
             {
@@ -56,19 +54,22 @@ int GaussSeidelSolver::solve()
                 int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
                 GridNode& neighbor = grid->nodes[neighborIdx];
 
-                i += neighbor.v * y[edgeIdx];
+                yv -= neighbor.v * y[edgeIdx];
             }
-            complex_t newV = i / ySum[nodeIdx];
-            complex_t diff = node.v - newV;
+            yv += node.v * ySum[nodeIdx];
+            node.v = node.v - (yv - std::conj(node.s / node.v)) / ySum[nodeIdx];
 
-            if (diff.real() > PRECISION || diff.imag() > PRECISION)
+            if (std::abs(node.v * std::conj(yv) - node.s) > precision)
             {
                 converged = false;
             }
-            node.v = newV; // Update node voltage
         }
     }
-    while (!converged && iter++ < MAX_ITER);
+
+    if (!converged)
+    {
+        throw std::runtime_error("GaussSeidelSolver: The solution did not converge. Maximum number of iterations reached.");
+    }
 
     // Update slack power.
     for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx)
@@ -78,7 +79,7 @@ int GaussSeidelSolver::solve()
         if (node.type != NodeType::SLACK && node.type != NodeType::SLACK_EXTERNAL)
             continue;
 
-        complex_t i{0, 0};
+        complex_t yv = 0;
 
         for (edge_idx_t edgeIdx : node.edges)
         {
@@ -86,9 +87,10 @@ int GaussSeidelSolver::solve()
             int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
             GridNode& neighbor = grid->nodes[neighborIdx];
 
-            i += neighbor.v * y[edgeIdx];
+            yv -= neighbor.v * y[edgeIdx];
         }
-        node.s = std::conj(std::conj(node.v) * (node.v * ySum[nodeIdx] - i));
+        yv += node.v * ySum[nodeIdx];
+        node.s = node.v * std::conj(yv);
     }
     return iter;
 }

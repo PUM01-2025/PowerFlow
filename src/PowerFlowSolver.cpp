@@ -1,25 +1,55 @@
 #include "powerflow/PowerFlowSolver.hpp"
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
+#include "powerflow/solvers/ZBusJacobiSolver.hpp"
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/SolverTypeEnum.hpp"
 #include "powerflow/NetworkAnalyzer.hpp"
 
+#include <cmath>
 #include <iostream>
 
-PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, Logger *const logger) : network{network}, logger{logger} { }
+PowerFlowSolver::PowerFlowSolver(std::shared_ptr<Network> network, SolverSettings settings, Logger* const logger) : 
+    network{ network }, settings{ std::move(settings) }, logger { logger } {
+    if (settings.max_iterations_total <= 0)
+    {
+        throw std::invalid_argument("Invalid max_iterations_total value");
+    }
+    if (settings.max_iterations_gauss <= 0)
+    {
+        throw std::invalid_argument("Invalid max_iterations_gauss value");
+    }
+    if (settings.gauss_seidel_precision <= 0)
+    {
+        throw std::invalid_argument("Invalid gauss_seidel_precision value");
+    }
+    if (settings.max_iterations_bfs <= 0)
+    {
+        throw std::invalid_argument("Invalid max_iterations_bfs value");
+    }
+    if (settings.bfs_precision <= 0)
+    {
+        throw std::invalid_argument("Invalid bfs_precision value");
+    }
+    if (settings.max_iterations_zbusjacobi <= 0)
+    {
+        throw std::invalid_argument("Invalid max_iterations_zbusjacobi value");
+    }
+    if (settings.zbusjacobi_precision <= 0)
+    {
+        throw std::invalid_argument("Invalid zbus_jacobi_precision value");
+    }
+}
 
-std::tuple<std::vector<complex_t>, int> PowerFlowSolver::solve(const std::vector<complex_t>& S, const std::vector<complex_t>& V, int maxIter)
+void PowerFlowSolver::solve(const std::vector<complex_t>& S, const std::vector<complex_t>& V)
 {
 	if (firstRun)
     {
-		// TODO: Analysera ev felaktigheter i nätverket
 		createGridSolvers();
 		firstRun = false;
 	}
 	updateLoads(S);
 	updateExternalVoltages(V);
-	int iter = runGridSolvers(maxIter);
-	return make_tuple(getLoadVoltages(), iter);
+	runGridSolvers();
 }
 
 void PowerFlowSolver::createGridSolvers()
@@ -28,18 +58,34 @@ void PowerFlowSolver::createGridSolvers()
 
     for (Grid& grid : network->grids)
     {
-        switch (determine_solver(grid))
+        switch (determineSolver(grid))
         {
-        case GAUSSSEIDEL:
-            *logger << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
-            gridSolvers.push_back(std::make_unique<GaussSeidelSolver>(&grid, logger));
-            break;
-        case BACKWARDFOWARDSWEEP:
-            *logger << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
-            gridSolvers.push_back(std::make_unique<BackwardForwardSweepSolver>(&grid, logger));
-            break;
-        default:
-            throw std::runtime_error("No suitable solver found");
+            case GAUSSSEIDEL:
+            {
+                *logger << "Found grid number " << grid_no << " suitable for Gauss-Seidel" << std::endl;
+                std::unique_ptr<GaussSeidelSolver> gs = std::make_unique<GaussSeidelSolver>(&grid, logger,
+                    settings.max_iterations_gauss, settings.gauss_seidel_precision);
+                gridSolvers.push_back(std::move(gs));
+                break;
+            }
+            case BACKWARDFOWARDSWEEP:
+            {
+                *logger << "Found grid number " << grid_no << " suitable for BFS" << std::endl;
+                std::unique_ptr<BackwardForwardSweepSolver> bfs = std::make_unique<BackwardForwardSweepSolver>(&grid, logger,
+                    settings.max_iterations_bfs, settings.bfs_precision);
+                gridSolvers.push_back(std::move(bfs));
+                break;
+            }
+            case ZBUSJACOBI:
+            {
+                *logger << "Found grid number " << grid_no << " suitable for ZBus Jacobi" << std::endl;
+                std::unique_ptr<ZBusJacobiSolver> bfs = std::make_unique<ZBusJacobiSolver>(&grid, logger,
+                    settings.max_iterations_zbusjacobi, settings.zbusjacobi_precision);
+                gridSolvers.push_back(std::move(bfs));
+                break;
+            }
+            default:
+                throw std::runtime_error("No suitable solver found");
         }
         ++grid_no;
     }
@@ -93,7 +139,7 @@ void PowerFlowSolver::updateExternalVoltages(const std::vector<complex_t>& V)
     }
 }
 
-int PowerFlowSolver::runGridSolvers(int maxIter)
+void PowerFlowSolver::runGridSolvers()
 {
 	int iter = 0;
 	int maxGridIter = 0;
@@ -119,17 +165,21 @@ int PowerFlowSolver::runGridSolvers(int maxIter)
 			}
 		}
 	}
-    while (maxGridIter > 1 && iter++ < (maxIter - 1));
-	return iter;
+    while (maxGridIter > 1 && iter++ < settings.max_iterations_total - 1);
+
+    if (maxGridIter > 1)
+    {
+        throw std::runtime_error("PowerFlowSolver: The solution did not converge. Maximum number of iterations reached.");
+    }
 }
 
-std::vector<complex_t> PowerFlowSolver::getLoadVoltages()
+std::vector<complex_t> PowerFlowSolver::getLoadVoltages() const
 {
     std::vector<complex_t> U;
 
-    for (Grid& grid : network->grids)
+    for (Grid const &grid : network->grids)
     {
-        for (GridNode& node : grid.nodes)
+        for (GridNode const &node : grid.nodes)
         {
             if (node.type == NodeType::LOAD)
             {
@@ -138,4 +188,50 @@ std::vector<complex_t> PowerFlowSolver::getLoadVoltages()
         }
     }
     return U;
+}
+std::vector<complex_t> PowerFlowSolver::getAllVoltages() const
+{
+    std::vector<complex_t> result{};
+
+    for (Grid const &g : network->grids)
+    {
+        for (GridNode const &n : g.nodes)
+        {
+            result.push_back(n.v);
+        }
+    }
+    return result;
+}
+std::vector<complex_t> PowerFlowSolver::getCurrents() const
+{
+    std::vector<complex_t> result{};
+
+    for (Grid const &g : network->grids)
+    {
+        for (GridEdge const &e : g.edges)
+        {
+            GridNode p{g.nodes[e.parent]}, c{g.nodes[e.child]};
+            complex_t current{e.z_c / (p.v - c.v)}; // FEL: Stämmer nog inte i och med att det är komplexa tal + trefas!
+            result.push_back(current);
+        }
+    }
+
+    return result;
+}
+std::vector<complex_t> PowerFlowSolver::getSlackPowers() const
+{
+    std::vector<complex_t> result{};
+
+    for (Grid const &g : network->grids)
+    {
+        for (GridNode const &n : g.nodes)
+        {
+            if (n.type == NodeType::SLACK || n.type == NodeType::SLACK_EXTERNAL)
+            {
+                result.push_back(n.s);
+            }
+        }
+    }
+
+    return result;
 }

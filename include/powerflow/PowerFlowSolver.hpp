@@ -7,21 +7,47 @@
 #include <memory>
 #include <tuple>
 #include <vector>
+#include <string>
+
+// Settings that can be passed to the solver.
+struct SolverSettings
+{
+    int max_iterations_gauss{100000};
+    double gauss_seidel_precision{1e-10};
+    int max_iterations_bfs{10000};
+    double bfs_precision{1e-10};
+    int max_iterations_zbusjacobi{10000};
+    double zbusjacobi_precision{1e-10};
+    int max_iterations_total{10000};
+};
+
 
 // Class responsible for solving an entire Network.
 class PowerFlowSolver
 {
 public:
-	// network - The network to solve.
-	// logger - Logger object.
-	PowerFlowSolver(std::shared_ptr<Network> network, Logger* const logger);
-	
-	// RETURNERA PowerFlowSolverResult och ta emot PowerFlowSolverSettings ????
-	std::tuple <std::vector<complex_t>, int> solve(const std::vector<complex_t>& P, const std::vector<complex_t>& V, int maxIter=1000);
-	
+    // network - The network to solve.
+	// logger - Logger object.    
+    PowerFlowSolver(std::shared_ptr<Network> network, SolverSettings settings, Logger *const logger);
+
+    // Solve network.
+    void solve(const std::vector<complex_t> &P, const std::vector<complex_t> &V);
+    
+	// Returns all LOAD voltages in the network.
+	std::vector<complex_t> getLoadVoltages() const;
+
+    // Returns all voltages in the network.
+    std::vector<complex_t> getAllVoltages() const;
+
+    // Returns all currents in the network.
+    std::vector<complex_t> getCurrents() const;
+
+    // Returns all SLACK/SLACK_EXTERNAL powers in the network.
+    std::vector<complex_t> getSlackPowers() const;
 private:
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;
 	std::shared_ptr<Network> network;
+	SolverSettings settings;
 	bool firstRun { true };
     Logger* const logger { nullptr };
 
@@ -35,10 +61,7 @@ private:
 	void updateExternalVoltages(const std::vector<complex_t>& V);
 
 	// Runs the GridSolvers and combines the result.
-	int runGridSolvers(int maxIter);
-
-	// Extracts LOAD node voltages.
-	std::vector<complex_t> getLoadVoltages();
+	void runGridSolvers();
 };
 
 #endif

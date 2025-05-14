@@ -2,7 +2,8 @@
 
 # Kommandot "grid" indikerar att ett nytt grid skapas.
 grid
-# H�r anges baser.
+
+# Här anges baser.
 1 1
 
 # H�r f�ljer kabeldata p� formatet <startnod> <slutnod> <impedans>.
@@ -14,11 +15,12 @@ grid
 4 7 (0.05, 0.03)
 3 5 (0.02, 0.03)
 3 6 (0.03, 0.03)
+5 6 (0.03, 0.03)
 %
 
 # H�r anges de LOAD-noder som studeras. Ett nodindex p� varje rad. Listan
 # avslutas med %-tecken.
-0 e
+0 s
 7 l
 5 l
 6 l

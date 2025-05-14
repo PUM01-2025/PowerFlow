@@ -8,15 +8,18 @@
 class BackwardForwardSweepSolver : public GridSolver
 {
 public:
-    BackwardForwardSweepSolver(Grid *grid, Logger *logger);
+    BackwardForwardSweepSolver(Grid *grid, Logger *logger, int maxIter, double precision);
     int solve();
 
 private:
+    bool converged = false;
+    node_idx_t rootIdx = 0;
+    std::vector<complex_t> I;
+
     // Recursive function that performs a single Backward-Forward sweep.
     // nodeIdx - Index of current node in the grid.
     // prevEdgeIdx - Index of upstream edge (-1 for root node).
     complex_t sweep(node_idx_t nodeIdx, edge_idx_t prevEdgeIdx = -1);
-    bool converged{false};
 };
 
 #endif
