@@ -13,7 +13,8 @@ function [V] = solveSeries(net, S)
     V = zeros(1, length(S));
     for i=1:length(S)
         V_ext = sin(((2*pi)/24)*i)/50 + 1; % Spänning varierar mellan 408 och 392 V under 24h
-        V(i) = net.solve(complex(S(i)), complex(V_ext));
+        net.solve(complex(S(i)), complex(V_ext));
+        V(i) = net.getLoadVoltages();
     end
 end
 
@@ -24,7 +25,7 @@ function [Vdiff] = voltageDiff(net, S, S_known, V_base)
 end
 
 % Läs in exempelnätverket från fil.
-net = PowerFlow("grid_basic.txt");
+net = PowerFlow("grid_basic.txt", []);
 
 % Skapa målfunktionen med påhittad känd effektförbrukning S_known.
 S_known = [400, 500, 70, 100, 200, 300, 1000, 2000, 4000, 2000, 3000, 1000]/S_base;
