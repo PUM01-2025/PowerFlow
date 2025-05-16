@@ -1,30 +1,33 @@
+#include "powerflow/GridAnalyzer.hpp"
+
 #include <vector>
 #include <iostream>
-#include "powerflow/network.hpp"
-#include "powerflow/SolverTypeEnum.hpp"
 #include <stack>
 #include <unordered_set>
 
-// Checks if the grid has only one SLACK/SLACK_EXTERNAL node.
-static bool hasSingleSlackNode(Grid const& grid)
-{
-    int slackNodes = 0;
+static const double ZBUSJACOBI_NODE_LIMIT = 10000;
 
-    for (const GridNode& node : grid.nodes)
+SolverType GridAnalyzer::determineSolver(Grid const& grid)
+{
+    if (isSuitableForBFS(grid))
     {
-        if (node.type == SLACK || node.type == SLACK_EXTERNAL)
+        return BACKWARDFOWARDSWEEP;
+    }
+    else if (!hasZeroImpedance(grid))
+    {
+        if (hasSingleSlackNode(grid) && grid.nodes.size() < ZBUSJACOBI_NODE_LIMIT)
         {
-            slackNodes++;
+            return ZBUSJACOBI;
+        }
+        else
+        {
+            return GAUSSSEIDEL;
         }
     }
-    return slackNodes == 1;
+    return NONE;
 }
 
-// Checks if the grid is suitable for Backward-Forward-Sweep:
-// - The grid must contain no cycles.
-// - The LOAD nodes must be leaf nodes.
-// - The grid must contain exactly one SLACK/SLACK_EXTERNAL node.
-static bool isSuitableForBFS(Grid const& grid)
+bool GridAnalyzer::isSuitableForBFS(Grid const& grid)
 {
     std::stack<node_idx_t> todo_list{};
     std::unordered_set<node_idx_t> visited_nodes{};
@@ -51,7 +54,7 @@ static bool isSuitableForBFS(Grid const& grid)
         GridNode current_grid_node = grid.nodes[current_node];
 
         // Verify that LOAD nodes are leaf nodes.
-        if (current_grid_node.type == NodeType::LOAD && 
+        if (current_grid_node.type == NodeType::LOAD &&
             current_grid_node.edges.size() != 1)
         {
             return false;
@@ -80,29 +83,36 @@ static bool isSuitableForBFS(Grid const& grid)
             }
             else
             {
-                std::cerr << "Error! found edge with myself not in it!" << std::endl; // KASTA FEL HÄR?
+                throw std::runtime_error("Error! found edge with myself not in it!");
             }
-
             visited_edges.insert(id);
         }
     }
-
     return hasSingleSlackNode(grid);
 }
 
-// Returns Solvertype Enum depending on grid structure.
-SolverType determineSolver(Grid const& grid)
+bool GridAnalyzer::hasZeroImpedance(Grid const& grid)
 {
-    if (isSuitableForBFS(grid))
+    for (const GridEdge& edge : grid.edges)
     {
-        return BACKWARDFOWARDSWEEP;
+        if (edge.z_c == 0.0)
+        {
+            return true;
+        }
     }
-    else if (hasSingleSlackNode(grid) && grid.nodes.size() < 10000) // "MAGISK" KONSTANT!!!!!
+    return false;
+}
+
+bool GridAnalyzer::hasSingleSlackNode(Grid const& grid)
+{
+    int slackNodes = 0;
+
+    for (const GridNode& node : grid.nodes)
     {
-        return ZBUSJACOBI;
+        if (node.type == SLACK || node.type == SLACK_EXTERNAL)
+        {
+            slackNodes++;
+        }
     }
-    else
-    {
-        return GAUSSSEIDEL;
-    }
+    return slackNodes == 1;
 }

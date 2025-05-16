@@ -30,7 +30,7 @@ private:
     void getGridBase(Grid &grid);
 
     // Loads the list of connections from the network file.
-    std::vector<GridConnection> loadConnections(const Network& network);
+    std::vector<GridConnection> loadConnections();
 
     // Returns the next non-comment and non-empty line in the network file.
     bool getNextLine(std::string &line);

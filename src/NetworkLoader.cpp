@@ -17,7 +17,7 @@ std::unique_ptr<Network> NetworkLoader::loadNetwork()
         }
         else if (line == "connections")
         {
-            network->connections = loadConnections(*network);
+            network->connections = loadConnections();
         }
         else
         {
@@ -30,7 +30,7 @@ std::unique_ptr<Network> NetworkLoader::loadNetwork()
 Grid NetworkLoader::loadGrid()
 {
     Grid grid;
-    // Load Grid base.
+
     getGridBase(grid);
 
     std::string line;
@@ -63,7 +63,9 @@ Grid NetworkLoader::loadGrid()
         std::pair newEdge = std::make_pair(edge.parent, edge.child);
         if (uniqueEdges.find(newEdge) != uniqueEdges.end())
         {
-            throw NetworkLoaderError("Multiple edges between node " + std::to_string(edge.parent) + " and " + std::to_string(edge.child), curLine);
+            throw NetworkLoaderError("Multiple edges between node " + 
+                std::to_string(edge.parent) + " and " + 
+                std::to_string(edge.child), curLine);
         }
         else
         {
@@ -163,7 +165,7 @@ void NetworkLoader::getGridBase(Grid& grid)
     }
 }
 
-std::vector<GridConnection> NetworkLoader::loadConnections(const Network& network)
+std::vector<GridConnection> NetworkLoader::loadConnections()
 {
     std::vector<GridConnection> connections;
     std::string line;
@@ -187,36 +189,11 @@ std::vector<GridConnection> NetworkLoader::loadConnections(const Network& networ
         }
         if (!(sstream >> connection.pqGrid))
         {
-            throw NetworkLoaderError("Invalid PQ grid index", curLine); // Byt namn till LOAD/MIDDLE??
+            throw NetworkLoaderError("Invalid PQ grid index", curLine);
         }
         if (!(sstream >> connection.pqNode))
         {
             throw NetworkLoaderError("Invalid PQ node index", curLine);
-        }
-
-        //Check if the middle grid exists
-        if (network.grids.size() < connection.pqGrid)
-        {
-            throw NetworkLoaderError("The middle grid " + std::to_string(connection.pqGrid) +
-                " doesn't exist", curLine);
-        }
-        //Check if the slack node exists
-        if (network.grids.at(connection.pqGrid).nodes.size() < connection.slackNode)
-        {
-            throw NetworkLoaderError("The slack node " + std::to_string(connection.slackNode) +
-                "in the middle grid doesn't exist", curLine);
-        }
-        //Check if the slack grid exists
-        if (network.grids.size() < connection.slackGrid)
-        {
-            throw NetworkLoaderError("The middle grid " + std::to_string(connection.slackGrid) +
-                " doesn't exist", curLine);
-        }
-        //Check if the middle node exists
-        if (network.grids.at(connection.slackGrid).nodes.size() < connection.pqNode)
-        {
-            throw NetworkLoaderError("The slack node " + std::to_string(connection.pqNode) +
-                "in the middle grid doesn't exist", curLine);
         }
 
         connections.push_back(connection);

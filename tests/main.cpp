@@ -6,7 +6,7 @@
 #include "powerflow/solvers/GaussSeidelSolver.hpp"
 #include "powerflow/solvers/ZBusJacobiSolver.hpp"
 #include "powerflow/PowerFlowSolver.hpp"
-#include "powerflow/NetworkAnalyzer.hpp"
+#include "powerflow/GridAnalyzer.hpp"
 #include "powerflow/logger/CppLogger.hpp"
 
 #include <fstream>
@@ -160,7 +160,7 @@ TEST_CASE("Compare treestructure", "[validation]") {
         {0.005, 0.004},
         {0.004, 0.002}
     };  
-    std::vector<complex_t> V = {};
+    std::vector<complex_t> V = { {1,0 } };
     pfs.solve(P, V);
 
     std::ifstream fileSingle(localPath + "examples/test_networks/test_network_single_grid.txt");
@@ -212,16 +212,16 @@ TEST_CASE("Compare treestructure", "[validation]") {
 
 //AUTHOR: Brenner   
 TEST_CASE("Choose solver", "[validation]"){
-    SECTION("NetworkAnalyzer"){
+    SECTION("GridAnalyzer"){
 
         std::ifstream tree_file( localPath + "examples/test_networks/test_network.txt");                        //Ladda in exempelnätverk med trädstruktur
         CHECK_FALSE(tree_file.fail());                                              //Säkerställ att filen kunde laddas in
         NetworkLoader tree_loader(tree_file);                                       //Skapa en loader
         std::unique_ptr<Network> tree_network = tree_loader.loadNetwork();          //Spara som nätverk
-        
+        GridAnalyzer analyzer;
         for(unsigned long i = 0; i < tree_network->grids.size(); i++){
             
-            REQUIRE(determineSolver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
+            REQUIRE(analyzer.determineSolver(tree_network->grids[i]) == BACKWARDFOWARDSWEEP); //Ingen grid får ha en cykel
         }
     
         std::ifstream cycle_file(localPath + "examples/test_networks/test_network_cycle.txt");                 //Ladda in exempelnätverk med cykel
@@ -230,7 +230,7 @@ TEST_CASE("Choose solver", "[validation]"){
         std::unique_ptr<Network> cycle_network = cycle_loader.loadNetwork();        //Spara som nätverk
         bool containsCycle = false;                                                 //Blir sann om det finns åtminstone en cykel
         for(unsigned long i = 0; i < cycle_network->grids.size(); i++){
-            if(determineSolver(cycle_network->grids[i]) != BACKWARDFOWARDSWEEP){
+            if(analyzer.determineSolver(cycle_network->grids[i]) != BACKWARDFOWARDSWEEP){
                 containsCycle = true;
             }
         }

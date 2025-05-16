@@ -5,6 +5,7 @@ enum SolverType
 {
     GAUSSSEIDEL,
     BACKWARDFOWARDSWEEP,
-    ZBUSJACOBI
+    ZBUSJACOBI,
+    NONE
 };
 #endif
