@@ -236,6 +236,14 @@ The elements in the I vector are the currents in the edges in the same order the
 S_slack = net.getSlackPowers();
 ```
 
+#### Reset network
+
+```
+net.reset();
+```
+
+All voltages will be set to 1 and all powers will be set to 0.
+
 #### Passing solver options
 
 It is possible to pass additional options to the solver using a settings struct:
