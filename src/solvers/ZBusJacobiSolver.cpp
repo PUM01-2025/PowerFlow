@@ -17,6 +17,9 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 	}
 
 	node_idx_t N = grid->nodes.size();
+	V = Eigen::VectorXcd(N);
+	S = Eigen::VectorXcd(N);
+	I = Eigen::VectorXcd(N);
 	Eigen::MatrixXcd ybus = Eigen::MatrixXcd::Zero(N, N);
 	slackNodeIdx = -1;
 
@@ -70,9 +73,6 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 int ZBusJacobiSolver::solve()
 {
 	node_idx_t N = grid->nodes.size();
-	Eigen::VectorXcd V(N);
-	Eigen::VectorXcd S(N);
-	Eigen::VectorXcd I(N);
 
 	// Transfer node voltages and powers to V and S vectors.
 	for (node_idx_t nodeIdx = 0; nodeIdx < N; ++nodeIdx)

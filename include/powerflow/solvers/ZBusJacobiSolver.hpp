@@ -14,6 +14,9 @@ public:
 
 private:
     Eigen::MatrixXcd Z; // Impedance matrix
+    Eigen::VectorXcd V;
+    Eigen::VectorXcd S;
+    Eigen::VectorXcd I;
     node_idx_t slackNodeIdx = -1;
 
     // Updates the slack node power.
