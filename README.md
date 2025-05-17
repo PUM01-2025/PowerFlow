@@ -16,7 +16,7 @@ In addition to CMake and a compiler, you may need additional software depending 
 
 ### Matlab
 
-PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. To be able to compile and run the MEX file, Matlab must be installed and added to the PATH on your computer. PowerFlow has been tested to work with Matlab version R2024b.
+PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. To be able to compile and run the MEX file, Matlab must be installed and added to the PATH on your computer. PowerFlow has been tested to work with Matlab version R2024b and R2025a.
 
 To compile the MEX file, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
 
