@@ -16,7 +16,7 @@ In addition to CMake and a compiler, you may need additional software depending 
 
 ### Matlab
 
-PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. To be able to compile and run the MEX file, Matlab must be installed and added to the PATH on your computer. PowerFlow has been tested to work with Matlab version R2024b and R2025a.
+PowerFlow can be compiled into a [Matlab executable (MEX)](https://se.mathworks.com/help/matlab/cpp-mex-file-applications.html) that can then be used like any other Matlab function. To be able to compile and run the MEX file, Matlab must be installed and **added to the PATH** on your computer. PowerFlow has been tested to work with Matlab version R2024b and R2025a.
 
 To compile the MEX file, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
 
@@ -45,7 +45,7 @@ PowerFlow can be compiled into a [pybind11 module](https://github.com/pybind/pyb
 
 ***NOTE:** On Windows, Python must be installed using the official installer (found [here](https://www.python.org/)), **NOT** using the Microsoft Store! During the installation, make sure to select the "Add to PATH" option.*
 
-***NOTE:** When installing pybind11 using pip, it may be necessary to select the "global" version.*
+***NOTE:** When installing pybind11 using pip, it may be necessary to select the "global" version. On some Linux distributions, pybind11 may be installed using the package manager. For example, on Ubuntu, the python3-pybind11 package can be installed using apt.*
 
 To compile the Python module, execute the following in a terminal/PowerShell inside the PowerFlow root directory:
 
