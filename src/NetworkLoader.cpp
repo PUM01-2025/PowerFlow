@@ -148,11 +148,11 @@ void NetworkLoader::getGridBase(Grid& grid)
 
     getNextLine(line);
     sstream << line;
-    if (!(sstream >> grid.sBase) || grid.sBase == 0)
+    if (!(sstream >> grid.sBase))
     {
         throw NetworkLoaderError("Invalid S base", curLine);
     }
-    if (!(sstream >> grid.vBase) || grid.vBase == 0)
+    if (!(sstream >> grid.vBase))
     {
         throw NetworkLoaderError("Invalid V base", curLine);
     }

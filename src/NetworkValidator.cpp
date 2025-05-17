@@ -34,6 +34,11 @@ void NetworkValidator::validateConnections(const Network& network)
                 std::to_string(conn.pqGrid) + " in connection " +
                 std::to_string(connIdx));
         }
+        if (conn.slackGrid == conn.pqGrid)
+        {
+            throw std::invalid_argument("Connection in the same grid " + 
+                std::to_string(conn.slackGrid) + " not allowed");
+        }
         if (conn.slackNode < 0 || conn.slackNode >= network.grids.at(conn.slackGrid).nodes.size())
         {
             throw std::invalid_argument("Invalid node number " +
@@ -121,15 +126,39 @@ void NetworkValidator::validateGrid(const Grid& grid, const grid_idx_t gridIdx)
         throw std::invalid_argument("Invalid base in grid " + std::to_string(gridIdx));
     }
 
-    for (const GridEdge& edge : grid.edges)
+    for (edge_idx_t edgeIdx = 0; edgeIdx < grid.edges.size(); ++edgeIdx)
     {
+        const GridEdge& edge = grid.edges.at(edgeIdx);
+
         if (edge.parent < 0 || edge.parent >= grid.nodes.size())
         {
-            throw std::invalid_argument("Invalid edge parent in grid " + std::to_string(gridIdx));
+            throw std::invalid_argument("Invalid edge " + std::to_string(edgeIdx) + 
+                " parent in grid " + std::to_string(gridIdx));
         }
         if (edge.child < 0 || edge.child >= grid.nodes.size())
         {
-            throw std::invalid_argument("Invalid edge child in grid " + std::to_string(gridIdx));
+            throw std::invalid_argument("Invalid edge " + std::to_string(edgeIdx) +
+                " child in grid " + std::to_string(gridIdx));
+        }
+        if (edge.child == edge.parent)
+        {
+            throw std::invalid_argument("Invalid edge " + std::to_string(edgeIdx) +
+                " that connects to the same node in grid " + std::to_string(gridIdx));
+        }
+        for (edge_idx_t edgeIdx2 = 0; edgeIdx2 < grid.edges.size(); ++edgeIdx2)
+        {
+            if (edgeIdx2 == edgeIdx)
+                continue;
+
+            const GridEdge& edge2 = grid.edges.at(edgeIdx2);
+
+            if ((edge2.child == edge.child && edge2.parent == edge.parent) ||
+                (edge2.child == edge.parent && edge2.parent == edge.child))
+            {
+                throw std::invalid_argument("More than one edge detected between node " +
+                    std::to_string(edge.parent) + " and node " + std::to_string(edge.child) +
+                    " in grid " + std::to_string(gridIdx));
+            }
         }
     }
 
