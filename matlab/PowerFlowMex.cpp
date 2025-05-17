@@ -75,6 +75,10 @@ public:
         {
             getSlackPowers(outputs, inputs);
         }
+        else if (command == "reset")
+        {
+            resetNetwork(outputs, inputs);
+        }
         else if (command == "unload")
         {
             unloadNetwork(outputs, inputs);
@@ -88,7 +92,10 @@ public:
 private:
     std::uint64_t getSolverHandle(matlab::mex::ArgumentList inputs)
     {
-        if (inputs.size() < 2 || inputs[1].getType() != matlab::data::ArrayType::UINT64 || inputs[1].getNumberOfElements() != 1)
+        if (inputs.size() < 2 || 
+            inputs[1].getType() != matlab::data::ArrayType::UINT64 || 
+            inputs[1].getNumberOfElements() != 1 ||
+            solvers.count(inputs[1][0]) == 0)
         {
             throw std::invalid_argument("Invalid or missing Network handle");
         }
@@ -251,6 +258,12 @@ private:
         std::vector<complex_t> S = solver->getSlackPowers();
         matlab::data::ArrayFactory factory;
         outputs[0] = factory.createArray({ 1, S.size() }, S.begin(), S.end());
+    }
+
+    void resetNetwork(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)
+    {
+        std::unique_ptr<PowerFlowSolver>& solver = solvers.at(getSolverHandle(inputs));
+        solver->reset();
     }
 
     void unloadNetwork(matlab::mex::ArgumentList outputs, matlab::mex::ArgumentList inputs)

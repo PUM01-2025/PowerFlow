@@ -57,6 +57,11 @@ public:
         return solver->getSlackPowers();
     }
 
+    void reset()
+    {
+        solver->reset();
+    }
+
 private:
     std::unique_ptr<PowerFlowSolver> solver;
     CppLogger cpp_logger{};
@@ -80,5 +85,6 @@ PYBIND11_MODULE(PowerFlowPython, m)
         .def("getLoadVoltages", &PowerFlow::getLoadVoltages, "Get the LOAD node voltages")
         .def("getAllVoltages", &PowerFlow::getAllVoltages, "Get all node voltages")
         .def("getCurrents", &PowerFlow::getCurrents, "Get currents")
-        .def("getSlackPowers", &PowerFlow::getSlackPowers, "Get SLACK/SLACK_EXTERNAL powers");
+        .def("getSlackPowers", &PowerFlow::getSlackPowers, "Get SLACK/SLACK_EXTERNAL powers")
+        .def("reset", &PowerFlow::reset, "Reset network powers and voltages");
 }

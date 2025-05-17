@@ -43,6 +43,9 @@ public:
 
     // Returns all SLACK/SLACK_EXTERNAL powers in the network.
     std::vector<complex_t> getSlackPowers() const;
+
+    // Resets powers to 0 and voltages to 1.
+    void reset();
 private:
 	std::vector<std::unique_ptr<GridSolver>> gridSolvers;
 	std::shared_ptr<Network> network;

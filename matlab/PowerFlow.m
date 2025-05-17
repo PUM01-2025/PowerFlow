@@ -39,5 +39,9 @@ classdef PowerFlow < handle
         function [S] = getSlackPowers(this)
             S = PowerFlowMex("getSlackPowers", this.networkHandle);
         end
+
+        function reset(this)
+            PowerFlowMex("reset", this.networkHandle);
+        end
     end
 end
