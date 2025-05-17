@@ -12,7 +12,6 @@ public:
     int solve();
 
 private:
-    bool converged = false;
     node_idx_t rootIdx = -1;
     std::vector<complex_t> I;
 
@@ -20,6 +19,9 @@ private:
     // nodeIdx - Index of current node in the grid.
     // prevEdgeIdx - Index of upstream edge (-1 for root node).
     complex_t sweep(node_idx_t nodeIdx, edge_idx_t prevEdgeIdx = -1);
+
+    // Checks if the solution has converged.
+    bool hasConverged();
 };
 
 #endif

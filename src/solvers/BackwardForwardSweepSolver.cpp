@@ -1,8 +1,8 @@
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/network.hpp"
 
-BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid, 
-    Logger *const logger, int maxIter, double precision) 
+BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid,
+    Logger* const logger, int maxIter, double precision)
     : GridSolver(grid, logger, maxIter, precision)
 {
     rootIdx = -1;
@@ -24,15 +24,15 @@ BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid *grid,
 int BackwardForwardSweepSolver::solve()
 {
     int iter = 0;
-    converged = false;
+    bool converged = false;
 
     // SLACK power must be negative in the BFS algorithm.
     grid->nodes[rootIdx].s = -grid->nodes[rootIdx].s;
 
-    while (!converged && iter++ < maxIterations) 
+    while (!converged && iter++ < maxIterations)
     {
-        converged = true; // Until proven otherwise by sweep
         sweep(rootIdx, -1);
+        converged = hasConverged();
     }
 
     // Change SLACK power to positive value before returning.
@@ -46,23 +46,22 @@ int BackwardForwardSweepSolver::solve()
 }
 
 complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
-                                            edge_idx_t prevEdgeIdx)
+    edge_idx_t prevEdgeIdx)
 {
-    GridNode &node = grid->nodes[nodeIdx];
+    GridNode& node = grid->nodes[nodeIdx];
 
     bool isRoot = prevEdgeIdx == -1;
 
     if (!isRoot)
     {
-        GridEdge &prevEdge = grid->edges[prevEdgeIdx];
+        GridEdge& prevEdge = grid->edges[prevEdgeIdx];
         node_idx_t prevNodeIdx = prevEdge.parent == nodeIdx ? prevEdge.child : prevEdge.parent;
-        GridNode &prevNode = grid->nodes[prevNodeIdx];
+        GridNode& prevNode = grid->nodes[prevNodeIdx];
 
         I[prevEdgeIdx] = std::conj((-node.s) / (SQRT3 * node.v));
         node.v = prevNode.v - SQRT3 * I[prevEdgeIdx] * prevEdge.z_c;
     }
 
-    bool isLeaf = true;
     complex_t s = 0;
 
     for (node_idx_t edgeIdx : node.edges)
@@ -70,27 +69,69 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
         if (edgeIdx == prevEdgeIdx)
             continue;
 
-        GridEdge &edge = grid->edges[edgeIdx];
+        GridEdge& edge = grid->edges[edgeIdx];
         node_idx_t nextIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
 
-        isLeaf = false;
         s += sweep(nextIdx, edgeIdx);
     }
 
+    bool isLeaf = !isRoot && node.edges.size() == 1;
+
     if (!isLeaf)
     {
-        if (std::abs(node.s - s) > precision)
-            converged = false;
         node.s = s;
     }
 
     if (!isRoot)
     {
-        GridEdge &prevEdge = grid->edges[prevEdgeIdx];
+        GridEdge& prevEdge = grid->edges[prevEdgeIdx];
 
         return node.s - 3.0 * prevEdge.z_c * I[prevEdgeIdx] *
-                            std::conj(I[prevEdgeIdx]);
+            std::conj(I[prevEdgeIdx]);
     }
-    else
-        return (0.0);
+    return (0.0);
+}
+
+bool BackwardForwardSweepSolver::hasConverged()
+{
+    for (node_idx_t nodeIdx = 0; nodeIdx < grid->nodes.size(); ++nodeIdx)
+    {
+        GridNode& node = grid->nodes[nodeIdx];
+
+        if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
+            continue;
+
+        complex_t yv = 0.0;
+        complex_t ySum = 0.0;
+
+        for (size_t edgeIdx : node.edges)
+        {
+            GridEdge& edge = grid->edges[edgeIdx];
+            int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
+            GridNode& neighbor = grid->nodes[neighborIdx];
+
+            complex_t y = 1.0 / edge.z_c; // Om z = 0 ????????
+            yv -= neighbor.v * y;
+            ySum += y;
+        }
+        yv += node.v * ySum;
+
+        bool isLeaf = node.edges.size() == 1;
+
+        if (isLeaf)
+        {
+            if (std::abs(node.v * std::conj(yv) - node.s) > precision)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (std::abs(node.v * std::conj(yv) - 0.0) > precision)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
