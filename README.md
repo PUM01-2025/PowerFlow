@@ -124,7 +124,9 @@ PowerFlow implements three different algorithms (solvers): For grids that have a
 Some limitations on the structure of a network are imposed by PowerFlow:
 
 - It is not possible to have more than one edge between the same pair of nodes.
-- It is not possible to have disjointed graphs.
+- It is not possible to have disjointed grids.
+- Each grid must have at least one SLACK/SLACK_EXTERNAL node. Note that some solvers only accept a single SLACK/SLACK_EXTERNAL node.
+- The same SLACK/MIDDLE node can only be used in one connection.
 - When the Backward-Forward-Sweep algorithm is used (i.e., when the grid is a tree), it is possible to specify cables with 0 impedance. This can be used to "simulate" LOAD nodes that are not leaves by creating a LOAD node that connects to a MIDDLE node using an edge with 0 impedance. The other solvers do not allow cables with 0 impedance!
 
 ### Network files
