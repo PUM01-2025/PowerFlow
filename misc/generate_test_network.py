@@ -2,12 +2,13 @@ import random
 import typing
 
 
-def generate_grid(file: typing.TextIO) -> tuple[int, int]:
-    file.write("grid\n")
-    file.write("10000000 400\n")
+def generate_grid(file: typing.TextIO, grid_no: int) -> tuple[int, int]:
 
     network = {}
     grid_size = random.randint(20, 200)
+    file.write("grid\n")
+    file.write(f"# {grid_no} \n")
+    file.write("10000000 400\n")
 
     for i in range(1, grid_size):
         parent = random.randint(0, i - 1)
@@ -42,22 +43,22 @@ def generate_network(file_name: str, loops: bool = False):
         size = 1
         loads = 0
         for i in range(0, networks):
-            (grid_size, grid_loads) = generate_grid(f)
+            (grid_size, grid_loads) = generate_grid(f, i)
             size += grid_size + 1
             loads += grid_loads
 
         f.write("grid\n")
         f.write("1000000000 10000\n")
-        for i in range(1, networks):
-            f.write(f"{i-1} {i} (0.0005, 0.0005)\n")
+        for i in range(1, networks+1):
+            f.write(f"{i} {i-1} (0.0005, 0.0005)\n")
         f.write(f"{0} {i} (0.0005, 0.0005)\n")
 
         f.write("%\n")
         f.write("0 e\n")
         f.write("%\n")
         f.write("connections\n")
-        for i in range(0, networks):
-            f.write(f"{networks} {i} {i} 0\n")
+        for i in range(1, networks+1):
+            f.write(f"{networks} {i} {i-1} 0\n")
 
         f.write("%\n")
 
