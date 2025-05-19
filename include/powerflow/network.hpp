@@ -42,10 +42,10 @@ struct GridNode
 // Edge between two grids.
 struct GridConnection
 {
-    grid_idx_t slackGrid{};
-    grid_idx_t pqGrid{};
-    node_idx_t slackNode{};
-    node_idx_t pqNode{};
+    grid_idx_t loadImplicitGrid{};
+    grid_idx_t slackImplicitGrid{};
+    node_idx_t loadImplicitNode{};
+    node_idx_t slackImplicitNode{};
 };
 
 struct Grid

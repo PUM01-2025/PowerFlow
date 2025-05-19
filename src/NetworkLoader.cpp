@@ -183,21 +183,21 @@ std::vector<GridConnection> NetworkLoader::loadConnections()
         GridConnection connection;
         sstream << line;
 
-        if (!(sstream >> connection.slackGrid))
+        if (!(sstream >> connection.loadImplicitGrid))
         {
-            throw NetworkLoaderError("Invalid slack grid index", curLine);
+            throw NetworkLoaderError("Invalid grid index", curLine);
         }
-        if (!(sstream >> connection.slackNode))
+        if (!(sstream >> connection.loadImplicitNode))
         {
-            throw NetworkLoaderError("Invalid slack node index", curLine);
+            throw NetworkLoaderError("Invalid LOAD_IMPLICIT node index", curLine);
         }
-        if (!(sstream >> connection.pqGrid))
+        if (!(sstream >> connection.slackImplicitGrid))
         {
-            throw NetworkLoaderError("Invalid PQ grid index", curLine);
+            throw NetworkLoaderError("Invalid grid index", curLine);
         }
-        if (!(sstream >> connection.pqNode))
+        if (!(sstream >> connection.slackImplicitNode))
         {
-            throw NetworkLoaderError("Invalid PQ node index", curLine);
+            throw NetworkLoaderError("Invalid SLACK_IMPLICIT node index", curLine);
         }
 
         connections.push_back(connection);

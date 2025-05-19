@@ -22,73 +22,47 @@ void NetworkValidator::validateConnections(const Network& network)
     {
         const GridConnection& conn = network.connections.at(connIdx);
 
-        if (conn.slackGrid < 0 || conn.slackGrid >= network.grids.size())
+        if (conn.loadImplicitGrid < 0 || conn.loadImplicitGrid >= network.grids.size())
         {
             throw std::invalid_argument("Invalid grid number " + 
-                std::to_string(conn.slackGrid) + " in connection " + 
+                std::to_string(conn.loadImplicitGrid) + " in connection " + 
                 std::to_string(connIdx));
         }
-        if (conn.pqGrid < 0 || conn.pqGrid >= network.grids.size())
+        if (conn.slackImplicitGrid < 0 || conn.slackImplicitGrid >= network.grids.size())
         {
             throw std::invalid_argument("Invalid grid number " +
-                std::to_string(conn.pqGrid) + " in connection " +
+                std::to_string(conn.slackImplicitGrid) + " in connection " +
                 std::to_string(connIdx));
         }
-        if (conn.slackGrid == conn.pqGrid)
+        if (conn.loadImplicitGrid == conn.slackImplicitGrid)
         {
             throw std::invalid_argument("Connection in the same grid " + 
-                std::to_string(conn.slackGrid) + " not allowed");
+                std::to_string(conn.loadImplicitGrid) + " not allowed");
         }
-        if (conn.slackNode < 0 || conn.slackNode >= network.grids.at(conn.slackGrid).nodes.size())
+        if (conn.loadImplicitNode < 0 || conn.loadImplicitNode >= network.grids.at(conn.loadImplicitGrid).nodes.size())
         {
             throw std::invalid_argument("Invalid node number " +
-                std::to_string(conn.slackNode) + " for grid " +
-                std::to_string(conn.slackGrid) + " in connection " +
+                std::to_string(conn.loadImplicitNode) + " for grid " +
+                std::to_string(conn.loadImplicitGrid) + " in connection " +
                 std::to_string(connIdx));
         }
-        if (conn.pqNode < 0 || conn.pqNode >= network.grids.at(conn.pqGrid).nodes.size())
+        if (conn.slackImplicitNode < 0 || conn.slackImplicitNode >= network.grids.at(conn.slackImplicitGrid).nodes.size())
         {
             throw std::invalid_argument("Invalid node number " +
-                std::to_string(conn.pqNode) + " for grid " +
-                std::to_string(conn.pqGrid) + " in connection " +
+                std::to_string(conn.slackImplicitNode) + " for grid " +
+                std::to_string(conn.slackImplicitGrid) + " in connection " +
                 std::to_string(connIdx));
         }
-        if (network.grids.at(conn.slackGrid).nodes.at(conn.slackNode).type != LOAD_IMPLICIT)
+        if (network.grids.at(conn.loadImplicitGrid).nodes.at(conn.loadImplicitNode).type != LOAD_IMPLICIT)
         {
             throw std::invalid_argument("Invalid node type in connection " + std::to_string(connIdx));
         }
-        if (network.grids.at(conn.pqGrid).nodes.at(conn.pqNode).type != SLACK_IMPLICIT)
+        if (network.grids.at(conn.slackImplicitGrid).nodes.at(conn.slackImplicitNode).type != SLACK_IMPLICIT)
         {
             throw std::invalid_argument("Invalid node type in connection " + std::to_string(connIdx));
         }
-
-        std::tuple<grid_idx_t, node_idx_t> middleNode = std::make_pair(conn.slackGrid, conn.slackNode);
-        std::tuple<grid_idx_t, node_idx_t> slackNode = std::make_pair(conn.pqGrid, conn.pqNode);
-
-        if (middleNodes.count(middleNode) != 0)
-        {
-            throw std::invalid_argument("Multiple connections to node " + 
-                std::to_string(conn.slackNode) + " in grid " + 
-                std::to_string(conn.slackGrid) + " detected");
-        }
-        if (slackNodes.count(slackNode) != 0)
-        {
-            throw std::invalid_argument("Multiple connections to node " + 
-                std::to_string(conn.pqNode) + " in grid " + 
-                std::to_string(conn.pqGrid) + " detected");
-        }
-        middleNodes.insert(middleNode);
-        slackNodes.insert(slackNode);
     }
 
-    if (networkIsDisjoint(network))
-    {
-        throw std::invalid_argument("Not all grids in the network are connected");
-    }   
-}
-
-bool NetworkValidator::networkIsDisjoint(const Network& network)
-{
     // Verify that every SLACK_IMPLICIT/LOAD_IMPLICIT node has one and only one
     // associated connection.
     for (grid_idx_t gridIdx = 0; gridIdx < network.grids.size(); ++gridIdx)
@@ -105,22 +79,22 @@ bool NetworkValidator::networkIsDisjoint(const Network& network)
 
                 for (const GridConnection& conn : network.connections)
                 {
-                    if ((node.type == SLACK_IMPLICIT && conn.pqGrid == gridIdx &&
-                            conn.pqNode == nodeIdx) ||
-                        (node.type == LOAD_IMPLICIT && conn.slackGrid == gridIdx &&
-                            conn.slackNode == nodeIdx))
+                    if ((node.type == SLACK_IMPLICIT && conn.slackImplicitGrid == gridIdx &&
+                        conn.slackImplicitNode == nodeIdx) ||
+                        (node.type == LOAD_IMPLICIT && conn.loadImplicitGrid == gridIdx &&
+                            conn.loadImplicitNode == nodeIdx))
                     {
                         ++conns;
                     }
                 }
                 if (conns != 1)
                 {
-                    return true;
+                    throw std::invalid_argument("Grid " + std::to_string(gridIdx) + 
+                        " not properly connected to the rest of the network");
                 }
             }
         }
     }
-    return false;
 }
 
 void NetworkValidator::validateGrid(const Grid& grid, const grid_idx_t gridIdx)

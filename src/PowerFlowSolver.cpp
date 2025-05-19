@@ -160,13 +160,13 @@ void PowerFlowSolver::runGridSolvers()
             // Update connections (simulates "fake" connection with z = 0).
             for (GridConnection& connection : network->connections)
             {
-                Grid& slackGrid = network->grids[connection.slackGrid];
-                Grid& pqGrid = network->grids[connection.pqGrid];
-                GridNode& slackNode = slackGrid.nodes[connection.slackNode];
-                GridNode& pqNode = pqGrid.nodes[connection.pqNode];
+                Grid& loadImplicitGrid = network->grids[connection.loadImplicitGrid];
+                Grid& slackImplicitGrid = network->grids[connection.slackImplicitGrid];
+                GridNode& loadImplicitNode = loadImplicitGrid.nodes[connection.loadImplicitNode];
+                GridNode& slackImplicitNode = slackImplicitGrid.nodes[connection.slackImplicitNode];
 
-				slackNode.s = -((pqNode.s * pqGrid.sBase) / slackGrid.sBase);
-				pqNode.v = slackNode.v;
+				loadImplicitNode.s = -((slackImplicitNode.s * slackImplicitGrid.sBase) / loadImplicitGrid.sBase);
+				slackImplicitNode.v = loadImplicitNode.v;
 			}
 		}
 	}

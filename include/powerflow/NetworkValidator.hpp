@@ -19,9 +19,6 @@ private:
     // Validates Network connections.
     void validateConnections(const Network& network);
 
-    // Returns true if there are missing connections between grids in the network.
-    bool networkIsDisjoint(const Network& network);
-
     // Validates a single grid.
     void validateGrid(const Grid& grid, const grid_idx_t gridIdx);
 
