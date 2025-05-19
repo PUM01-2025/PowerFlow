@@ -8,7 +8,7 @@ BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid,
     rootIdx = -1;
     for (node_idx_t i = 0; i < grid->nodes.size(); ++i)
     {
-        if (grid->nodes[i].type == NodeType::SLACK || grid->nodes[i].type == NodeType::SLACK_EXTERNAL)
+        if (grid->nodes[i].type == NodeType::SLACK_IMPLICIT || grid->nodes[i].type == NodeType::SLACK)
         {
             rootIdx = i;
             break;
@@ -98,7 +98,7 @@ bool BackwardForwardSweepSolver::hasConverged()
     {
         GridNode& node = grid->nodes[nodeIdx];
 
-        if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
+        if (node.type == NodeType::SLACK_IMPLICIT || node.type == NodeType::SLACK)
             continue;
 
         complex_t yv = 0.0;

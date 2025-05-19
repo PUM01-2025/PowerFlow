@@ -43,7 +43,7 @@ int GaussSeidelSolver::solve()
         {
             GridNode& node = grid->nodes[nodeIdx];
 
-            if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
+            if (node.type == NodeType::SLACK_IMPLICIT || node.type == NodeType::SLACK)
                 continue; // Slack node voltage is already known
 
             complex_t yv = 0;
@@ -76,7 +76,7 @@ int GaussSeidelSolver::solve()
     {
         GridNode& node = grid->nodes[nodeIdx];
 
-        if (node.type != NodeType::SLACK && node.type != NodeType::SLACK_EXTERNAL)
+        if (node.type != NodeType::SLACK_IMPLICIT && node.type != NodeType::SLACK)
             continue;
 
         complex_t yv = 0;

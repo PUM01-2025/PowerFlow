@@ -14,13 +14,13 @@ private:
     // Checks if the grid is suitable for Backward-Forward-Sweep:
     // - The grid must contain no cycles.
     // - The LOAD nodes must be leaf nodes.
-    // - The grid must contain exactly one SLACK/SLACK_EXTERNAL node.
+    // - The grid must contain exactly one SLACK_IMPLICIT/SLACK node.
     bool isSuitableForBFS(Grid const& grid);
 
     // Checks if the grid has an edge with impedance set to 0.
     bool hasZeroImpedance(Grid const& grid);
 
-    // Checks if the grid has only one SLACK/SLACK_EXTERNAL node.
+    // Checks if the grid has only one SLACK_IMPLICIT/SLACK node.
     bool hasSingleSlackNode(Grid const& grid);
 };
 

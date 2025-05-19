@@ -118,17 +118,21 @@ Grid NetworkLoader::loadGrid()
         {
             throw NetworkLoaderError("Missing or invalid node type", curLine);
         }
-        if (type == "s")
+        if (type == "si")
         {
-            grid.nodes.at(nodeIdx).type = NodeType::SLACK;
+            grid.nodes.at(nodeIdx).type = NodeType::SLACK_IMPLICIT;
         }
         else if (type == "l")
         {
             grid.nodes.at(nodeIdx).type = NodeType::LOAD;
         }
-        else if (type == "e")
+        else if (type == "s")
         {
-            grid.nodes.at(nodeIdx).type = NodeType::SLACK_EXTERNAL;
+            grid.nodes.at(nodeIdx).type = NodeType::SLACK;
+        }
+        else if (type == "li")
+        {
+            grid.nodes.at(nodeIdx).type = NodeType::LOAD_IMPLICIT;
         }
         else
         {

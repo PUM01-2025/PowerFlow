@@ -53,8 +53,9 @@ bool GridAnalyzer::isSuitableForBFS(Grid const& grid)
         // add neighbors to stack
         GridNode current_grid_node = grid.nodes[current_node];
 
-        // Verify that LOAD nodes are leaf nodes.
-        if (current_grid_node.type == NodeType::LOAD &&
+        // Verify that LOAD/LOAD_IMPLICIT nodes are leaf nodes.
+        if ((current_grid_node.type == NodeType::LOAD ||
+            current_grid_node.type == NodeType::LOAD_IMPLICIT) &&
             current_grid_node.edges.size() != 1)
         {
             return false;
@@ -109,7 +110,7 @@ bool GridAnalyzer::hasSingleSlackNode(Grid const& grid)
 
     for (const GridNode& node : grid.nodes)
     {
-        if (node.type == SLACK || node.type == SLACK_EXTERNAL)
+        if (node.type == SLACK_IMPLICIT || node.type == SLACK)
         {
             slackNodes++;
         }

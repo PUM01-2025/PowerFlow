@@ -41,7 +41,7 @@ public:
     // Returns all currents in the network.
     std::vector<complex_t> getCurrents() const;
 
-    // Returns all SLACK/SLACK_EXTERNAL powers in the network.
+    // Returns all SLACK_IMPLICIT/SLACK powers in the network.
     std::vector<complex_t> getSlackPowers() const;
 
     // Resets powers to 0 and voltages to 1.
@@ -59,7 +59,7 @@ private:
 	// Updates LOAD node powers.
 	void updateLoads(const std::vector<complex_t>& P);
 
-	// Updates SLACK_EXTERNAL node voltages.
+	// Updates SLACK node voltages.
 	void updateExternalVoltages(const std::vector<complex_t>& V);
 
 	// Runs the GridSolvers and combines the result.

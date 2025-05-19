@@ -53,11 +53,11 @@ void NetworkValidator::validateConnections(const Network& network)
                 std::to_string(conn.pqGrid) + " in connection " +
                 std::to_string(connIdx));
         }
-        if (network.grids.at(conn.slackGrid).nodes.at(conn.slackNode).type != MIDDLE)
+        if (network.grids.at(conn.slackGrid).nodes.at(conn.slackNode).type != LOAD_IMPLICIT)
         {
             throw std::invalid_argument("Invalid node type in connection " + std::to_string(connIdx));
         }
-        if (network.grids.at(conn.pqGrid).nodes.at(conn.pqNode).type != SLACK)
+        if (network.grids.at(conn.pqGrid).nodes.at(conn.pqNode).type != SLACK_IMPLICIT)
         {
             throw std::invalid_argument("Invalid node type in connection " + std::to_string(connIdx));
         }
@@ -89,7 +89,8 @@ void NetworkValidator::validateConnections(const Network& network)
 
 bool NetworkValidator::networkIsDisjoint(const Network& network)
 {
-    // Verify that every SLACK node has one and only one associated connection.
+    // Verify that every SLACK_IMPLICIT/LOAD_IMPLICIT node has one and only one
+    // associated connection.
     for (grid_idx_t gridIdx = 0; gridIdx < network.grids.size(); ++gridIdx)
     {
         const Grid& grid = network.grids.at(gridIdx);
@@ -98,13 +99,16 @@ bool NetworkValidator::networkIsDisjoint(const Network& network)
         {
             const GridNode& node = grid.nodes.at(nodeIdx);
 
-            if (node.type == SLACK)
+            if (node.type == SLACK_IMPLICIT || node.type == LOAD_IMPLICIT)
             {
-                int conns = 0; // Number of connections to this SLACK node
+                int conns = 0; // Number of connections to this node
 
                 for (const GridConnection& conn : network.connections)
                 {
-                    if (conn.pqGrid == gridIdx && conn.pqNode == nodeIdx)
+                    if ((node.type == SLACK_IMPLICIT && conn.pqGrid == gridIdx &&
+                            conn.pqNode == nodeIdx) ||
+                        (node.type == LOAD_IMPLICIT && conn.slackGrid == gridIdx &&
+                            conn.slackNode == nodeIdx))
                     {
                         ++conns;
                     }

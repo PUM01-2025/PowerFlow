@@ -18,7 +18,7 @@ grid
 
 # H�r anges de LOAD-noder som studeras. Ett nodindex p� varje rad. Listan
 # avslutas med %-tecken.
-0 e
+0 s
 7 l
 5 l
 6 l

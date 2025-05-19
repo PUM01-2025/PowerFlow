@@ -128,7 +128,7 @@ void PowerFlowSolver::updateExternalVoltages(const std::vector<complex_t>& V)
     {
         for (GridNode& node : grid.nodes)
         {
-            if (node.type == NodeType::SLACK_EXTERNAL)
+            if (node.type == NodeType::SLACK)
             {
                 if (vIdx == V.size())
                 {
@@ -234,7 +234,7 @@ std::vector<complex_t> PowerFlowSolver::getSlackPowers() const
     {
         for (GridNode const &n : g.nodes)
         {
-            if (n.type == NodeType::SLACK || n.type == NodeType::SLACK_EXTERNAL)
+            if (n.type == NodeType::SLACK_IMPLICIT || n.type == NodeType::SLACK)
             {
                 result.push_back(n.s);
             }

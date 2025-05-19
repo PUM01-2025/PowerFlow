@@ -27,7 +27,7 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 	{
 		GridNode& node = grid->nodes.at(nodeIdx);
 		
-		if (node.type == NodeType::SLACK || node.type == NodeType::SLACK_EXTERNAL)
+		if (node.type == NodeType::SLACK_IMPLICIT || node.type == NodeType::SLACK)
 		{
 			if (slackNodeIdx != -1)
 			{
@@ -52,7 +52,7 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 
 	if (slackNodeIdx == -1)
 	{
-		throw std::runtime_error("ZBusJacobiSolver: Could not find SLACK/SLACK_EXTERNAL node");
+		throw std::runtime_error("ZBusJacobiSolver: Could not find SLACK_IMPLICIT/SLACK node");
 	}
 
 	Z = ybus.inverse();
@@ -77,7 +77,7 @@ int ZBusJacobiSolver::solve()
 	// Transfer node voltages and powers to V and S vectors.
 	for (node_idx_t nodeIdx = 0; nodeIdx < N; ++nodeIdx)
 	{
-		if (grid->nodes[nodeIdx].type == SLACK || grid->nodes[nodeIdx].type == SLACK_EXTERNAL)
+		if (grid->nodes[nodeIdx].type == SLACK_IMPLICIT || grid->nodes[nodeIdx].type == SLACK)
 		{
 			// Slack node power is set to V*conj(V) in ZBus Jacobi.
 			S(nodeIdx) = grid->nodes[nodeIdx].v * std::conj(grid->nodes[nodeIdx].v);

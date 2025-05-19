@@ -86,17 +86,18 @@ Each edge in the graph has an associated impedance (Z) and each node has an asso
 
 #### Node types
 
-A grid node is of one of the following types: LOAD, MIDDLE, SLACK_EXTERNAL or SLACK.
+A grid node is of one of the following types: LOAD, LOAD_IMPLICIT, MIDDLE, SLACK, SLACK_IMPLICIT.
 
 - LOAD nodes are nodes where the power consumption is known and the voltage is unknown.
+- LOAD_IMPLICIT nodes are similar to LOAD nodes, but the power is instead specified by a connection to another grid.
 - MIDDLE nodes are nodes that are only used for branching and connections.
-- SLACK_EXTERNAL nodes are nodes where the voltage is known and the power is unknown.
-- SLACK nodes are similar to SLACK_EXTERNAL nodes, but the voltage is instead specified by a connection to another grid.
+- SLACK nodes are nodes where the voltage is known and the power is unknown.
+- SLACK_IMPLICIT nodes are similar to SLACK nodes, but the voltage is instead specified by a connection to another grid.
 
 Note that:
 
-- Each grid in a network must have a voltage reference. Therefore, at least one SLACK_EXTERNAL or SLACK node must exist in each grid.
-- When connecting two grids, one of the nodes has to be a SLACK node and the other node has to be a MIDDLE node.
+- Each grid in a network must have a voltage reference. Therefore, at least one SLACK or SLACK_IMPLICIT node must exist in each grid.
+- When connecting two grids, one of the nodes has to be a SLACK_IMPLICIT node and the other node has to be a LOAD_IMPLICIT node.
 
 #### Per-unit
 
@@ -117,7 +118,7 @@ When a network is loaded, all voltages are initially set to (1, 0). Further calc
 
 #### Solvers
 
-PowerFlow implements three different algorithms (solvers): For grids that have a single SLACK/SLACK_EXTERNAL node, contain no cycles and where the LOAD nodes are located at the "leaves", a *Backward-Forward-Sweep* (BFS) algorithm is used. For other grids, the *ZBus Jacobi* or *Gauss-Seidel* algorithm is used. *ZBus Jacobi* can only be used when a grid contains a single SLACK/SLACK_EXTERNAL node and when the grid doesn't contain too many nodes. PowerFlow automatically detects which solver is most suitable for each grid.
+PowerFlow implements three different algorithms (solvers): For grids that have a single SLACK/SLACK_IMPLICIT node, contain no cycles and where the LOAD/LOAD_IMPLICIT nodes are located at the "leaves", a *Backward-Forward-Sweep* (BFS) algorithm is used. For other grids, the *ZBus Jacobi* or *Gauss-Seidel* algorithm is used. *ZBus Jacobi* can only be used when a grid contains a single SLACK/SLACK_IMPLICIT node and when the grid doesn't contain too many nodes. PowerFlow automatically detects which solver is most suitable for each grid.
 
 #### Limitations
 
@@ -125,9 +126,9 @@ Some limitations on the structure of a network are imposed by PowerFlow:
 
 - It is not possible to have more than one edge between the same pair of nodes.
 - It is not possible to have disjointed grids.
-- Each grid must have at least one SLACK/SLACK_EXTERNAL node. Note that some solvers only accept a single SLACK/SLACK_EXTERNAL node.
-- The same SLACK/MIDDLE node can only be used in one connection.
-- When the Backward-Forward-Sweep algorithm is used (i.e., when the grid is a tree), it is possible to specify cables with 0 impedance. This can be used to "simulate" LOAD nodes that are not leaves by creating a LOAD node that connects to a MIDDLE node using an edge with 0 impedance. The other solvers do not allow cables with 0 impedance!
+- Each grid must have at least one SLACK/SLACK_IMPLICIT node. Note that some solvers only accept a single SLACK/SLACK_IMPLICIT node.
+- The same SLACK_IMPLICIT/LOAD_IMPLICIT nodes can only be used in one connection.
+- Impedances cannot be 0.
 
 ### Network files
 
@@ -151,10 +152,13 @@ grid
 %
 
 # Node types on the format: <node> <type>.
-# <type> can be either e (SLACK_EXTERNAL), s (SLACK) or l (LOAD).
+# <type> can be either s (SLACK), si (SLACK_IMPLICIT), l (LOAD)
+# or li (LOAD_IMPLICIT).
 # Nodes not listed here will automatically become MIDDLE nodes.
 # The % sign marks end of list. 
 0 s
+2 li
+3 li
 %
 
 # Grid 1.
@@ -163,7 +167,7 @@ grid
 0 1 (0.02, 0.02)
 1 2 (0.05, 0.03)
 %
-0 s
+0 si
 2 l
 %
 
@@ -173,7 +177,7 @@ grid
 0 1 (0.02, 0.03)
 0 2 (0.03, 0.03)
 %
-0 s
+0 si
 1 l
 2 l
 %
@@ -208,7 +212,7 @@ net.solve(S, V);
 
 `net.solve` performs the power flow calculation. S, V and V_res are **complex** row vectors. The S vector must contain one complex value per LOAD node in the network.
 
-In a network with *n* grids, each containing *m_1* to *m_n* number of LOAD nodes, the first *m_1* values in the S vector correspond to the load nodes in the first grid, the second *m_2* values correspond to the load nodes in the second grid and so on. The LOAD nodes are in turn ordered by their ID, i.e., a LOAD node with ID 0 comes before LOAD node with ID 3 in the S vector. In the same way, V must contain one complex value per SLACK_EXTERNAL node in the network.
+In a network with *n* grids, each containing *m_1* to *m_n* number of LOAD nodes, the first *m_1* values in the S vector correspond to the load nodes in the first grid, the second *m_2* values correspond to the load nodes in the second grid and so on. The LOAD nodes are in turn ordered by their ID, i.e., a LOAD node with ID 0 comes before LOAD node with ID 3 in the S vector. In the same way, V must contain one complex value per SLACK node in the network.
 
 #### Get LOAD node voltages
 
@@ -232,7 +236,7 @@ I = net.getCurrents();
 
 The elements in the I vector are the currents in the edges in the same order they appear in the Network file. In a network with *n* grids, each containing *m_1* to *m_n* number of edges, the first *m_1* values in the I vector correspond to the edges in the first grid, the second *m_2* values correspond to the edges in the second grid and so on.
 
-#### Get SLACK/SLACK_EXTERNAL node voltages
+#### Get SLACK/SLACK_IMPLICIT node voltages
 
 ```
 S_slack = net.getSlackPowers();

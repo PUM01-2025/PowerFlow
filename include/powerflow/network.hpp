@@ -23,10 +23,11 @@ struct GridEdge
 // Possible node types.
 enum NodeType
 {
-    SLACK_EXTERNAL,
-    SLACK,
+    LOAD,
+    LOAD_IMPLICIT,
     MIDDLE,
-    LOAD
+    SLACK,
+    SLACK_IMPLICIT
 };
 
 // Graph node struct.
