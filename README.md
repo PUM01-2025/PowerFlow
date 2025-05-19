@@ -183,7 +183,7 @@ grid
 %
 
 # Connections between grids on the format:
-# <"upper" grid> <MIDDLE node in "upper" grid> <"lower" grid> <SLACK node in "lower" grid>
+# <"upper" grid> <LOAD_IMPLICIT node in "upper" grid> <"lower" grid> <SLACK_IMPLICIT node in "lower" grid>
 # The % sign marks end of list.
 connections
 0 2 1 0
