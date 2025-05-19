@@ -140,6 +140,23 @@ void NetworkValidator::validateGrid(const Grid& grid, const grid_idx_t gridIdx)
         }
     }
 
+    bool foundSlackNode = false;
+    for (node_idx_t nodeIdx = 0; nodeIdx < grid.nodes.size(); ++nodeIdx)
+    {
+        const GridNode& node = grid.nodes.at(nodeIdx);
+
+        if (node.type == SLACK || node.type == SLACK_IMPLICIT)
+        {
+            foundSlackNode = true;
+            break;
+        }
+    }
+
+    if (!foundSlackNode)
+    {
+        throw std::invalid_argument("Missing slack node in grid " + std::to_string(gridIdx));
+    }
+
     if (gridIsDisjoint(grid))
     {
         throw std::invalid_argument("Grid " + std::to_string(gridIdx) + " consists of multiple disjoint graphs");

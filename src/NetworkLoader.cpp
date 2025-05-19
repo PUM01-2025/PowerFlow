@@ -36,9 +36,7 @@ Grid NetworkLoader::loadGrid()
     std::string line;
     std::stringstream sstream{};
     int nodeCount = 0; // Number of nodes in the grid
-    std::set<std::pair<int, int>> uniqueEdges;
     
-
     // Get edges.
     while (getNextLine(line))
     {
@@ -52,24 +50,13 @@ Grid NetworkLoader::loadGrid()
         {
             throw NetworkLoaderError("Invalid edge parent index", curLine);
         }
-        if (!(sstream >> edge.child) || edge.child < 0 || edge.child == edge.parent)
+        if (!(sstream >> edge.child) || edge.child < 0)
         {
             throw NetworkLoaderError("Invalid edge child index", curLine);
         }
         if (!(sstream >> edge.z_c))
         {
             throw NetworkLoaderError("Invalid edge impedance", curLine);
-        }
-        std::pair newEdge = std::make_pair(edge.parent, edge.child);
-        if (uniqueEdges.find(newEdge) != uniqueEdges.end())
-        {
-            throw NetworkLoaderError("Multiple edges between node " + 
-                std::to_string(edge.parent) + " and " + 
-                std::to_string(edge.child), curLine);
-        }
-        else
-        {
-            uniqueEdges.insert(newEdge);
         }
 
         // edge.z_c = edge.z_c / ((grid.vBase * grid.vBase) / grid.sBase); // Convert to per-unit

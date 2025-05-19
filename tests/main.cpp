@@ -34,16 +34,67 @@ TEST_CASE("Networkloader input", "[!throws]" ) {
     REQUIRE(test_input_error_message("Invalid edge parent index", localPath + "examples/test_networks/invalid_edge_parent_index.txt"));
     REQUIRE(test_input_error_message("Invalid edge child index", localPath + "examples/test_networks/invalid_edge_child_index.txt"));
     REQUIRE(test_input_error_message("Invalid edge impedance", localPath + "examples/test_networks/invalid_edge_impedance_index.txt"));
-    REQUIRE(test_input_error_message("Invalid slack grid index", localPath + "examples/test_networks/invalid_slack_grid_index.txt"));
-    REQUIRE(test_input_error_message("Invalid slack node index", localPath + "examples/test_networks/invalid_slack_node_index.txt"));
-    REQUIRE(test_input_error_message("Invalid PQ grid index", localPath + "examples/test_networks/invalid_PQ_grid_index.txt"));
-    REQUIRE(test_input_error_message("Invalid PQ node index", localPath + "examples/test_networks/invalid_PQ_node_index.txt"));
+    REQUIRE(test_input_error_message("Invalid grid index", localPath + "examples/test_networks/invalid_slack_grid_index.txt"));
+    REQUIRE(test_input_error_message("Invalid LOAD_IMPLICIT node index", localPath + "examples/test_networks/invalid_slack_node_index.txt"));
+    REQUIRE(test_input_error_message("Invalid grid index", localPath + "examples/test_networks/invalid_PQ_grid_index.txt"));
+    REQUIRE(test_input_error_message("Invalid SLACK_IMPLICIT node index", localPath + "examples/test_networks/invalid_PQ_node_index.txt"));
+    REQUIRE(test_input_error_message("Invalid node type", localPath + "examples/test_networks/invalid_node_type.txt"));
+}
 
-    //This does not work, check the test file to see what error messeges you get instead
-    std::ifstream file(localPath + "examples/test_networks/invalid_end_of_list.txt");
-    CHECK_FALSE(file.fail()); 
+void validatePFSThrow(const std::string& filePath)
+{
+    std::ifstream file(filePath);
+    CHECK_FALSE(file.fail());
+
     NetworkLoader loader(file);
-    //REQUIRE_THROWS_WITH(loader.loadNetwork(), Catch::Matchers::Contains("Missing end-of-list indicator"));
+    std::unique_ptr<Network> net = loader.loadNetwork();
+    CppLogger logger(std::cout);
+    SolverSettings settings{};
+    PowerFlowSolver pfs(std::move(net), settings, &logger);
+}
+
+TEST_CASE("Network validation", "[!throws]") {
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/invalid_node_type_in_connection.txt"),
+        Catch::Matchers::Contains("Invalid node type in connection 0"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/invalid_node_type_in_connection_2.txt"),
+        Catch::Matchers::Contains("Invalid node type in connection 1"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/missing_connections.txt"),
+        Catch::Matchers::Contains("Grid 0 not properly connected to the rest of the network"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/double_edge.txt"),
+        Catch::Matchers::Contains("More than one edge detected between node 0 and node 2 in grid 2"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/double_connection.txt"),
+        Catch::Matchers::Contains("Grid 0 not properly connected to the rest of the network"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/missing_slack.txt"),
+        Catch::Matchers::Contains("Missing slack node in grid 3"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/inner_connection.txt"),
+        Catch::Matchers::Contains("Connection in the same grid 2 not allowed"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/edge_same_node.txt"),
+        Catch::Matchers::Contains("Invalid edge 2 that connects to the same node in grid 1"));
+    
+    // Disjoint grid.
+    REQUIRE_THROWS_WITH([]() {
+        std::unique_ptr<Network> net = std::make_unique<Network>();
+        Grid grid;
+        GridNode node1;
+        GridNode node2;
+        node1.type = SLACK;
+        node2.type = LOAD;
+        grid.nodes.push_back(node1);
+        grid.nodes.push_back(node2);
+        net->grids.push_back(grid);
+        CppLogger logger(std::cout);
+        SolverSettings settings{};
+        PowerFlowSolver pfs(std::move(net), settings, &logger);
+    }(), Catch::Matchers::Contains("Grid 0 consists of multiple disjoint graphs"));
+
+
 }
 
 
@@ -235,5 +286,13 @@ TEST_CASE("Choose solver", "[validation]"){
             }
         }
         REQUIRE(containsCycle);
+
+        std::ifstream slack_file(localPath + "examples/test_networks/multiple_slack_nodes.txt");
+        CHECK_FALSE(slack_file.fail());
+        NetworkLoader slack_loader(slack_file);
+        std::unique_ptr<Network> slack_network = slack_loader.loadNetwork();
+        SolverType solverTypeSlack = analyzer.determineSolver(slack_network->grids[2]);
+        REQUIRE(solverTypeSlack != ZBUSJACOBI);
+        REQUIRE(solverTypeSlack != BACKWARDFOWARDSWEEP);
     }
 }
