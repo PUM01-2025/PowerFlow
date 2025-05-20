@@ -23,6 +23,11 @@ BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid,
 
 int BackwardForwardSweepSolver::solve()
 {
+    if (hasConverged())
+    {
+        return 0;
+    }
+
     int iter = 0;
     bool converged = false;
 
@@ -110,7 +115,7 @@ bool BackwardForwardSweepSolver::hasConverged()
             int neighborIdx = edge.parent == nodeIdx ? edge.child : edge.parent;
             GridNode& neighbor = grid->nodes[neighborIdx];
 
-            complex_t y = 1.0 / edge.z_c; // Om z = 0 ????????
+            complex_t y = 1.0 / edge.z_c;
             yv -= neighbor.v * y;
             ySum += y;
         }

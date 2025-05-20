@@ -18,6 +18,8 @@ public:
     virtual ~GridSolver() {};
 
     // Runs the GridSolver algorithm. Returns number of iterations.
+    // The solve method MUST return 0 iterations if the solution has already
+    // converged!
     virtual int solve() = 0;
 protected:
     Grid* grid{nullptr};

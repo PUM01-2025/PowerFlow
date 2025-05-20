@@ -12,7 +12,9 @@ public:
 
 private:
     std::vector<complex_t> y{};    // Admittances
-    std::vector<complex_t> ySum{}; // "Self-admittances" (diagonal elements in admittance matrix)
+
+    // Checks if the solution has converged.
+    bool hasConverged();
 };
 
 #endif

@@ -144,11 +144,11 @@ TEST_CASE("Compare output of BFS and GS and zbus jacobi","[validation]"){
                 if(net->grids[i].nodes[j].type == NodeType::MIDDLE){
                     continue;
                 }
-                //Kollar att GS svaret är inom 0.000001 av BFS svaret med hjälp av en catch2 matcher
-                CHECK_THAT(net->grids[i].nodes[j].v.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.real(), 0.000001));
-                CHECK_THAT(net->grids[i].nodes[j].v.imag(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.imag(), 0.000001));
-                CHECK_THAT(net->grids[i].nodes[j].s.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].s.real(), 0.000001));
-                CHECK_THAT(net->grids[i].nodes[j].s.imag(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].s.imag(), 0.000001));
+                //Kollar att GS svaret är inom 1e-10 av BFS svaret med hjälp av en catch2 matcher
+                CHECK_THAT(net->grids[i].nodes[j].v.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.real(), 1e-10));
+                CHECK_THAT(net->grids[i].nodes[j].v.imag(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].v.imag(), 1e-10));
+                CHECK_THAT(net->grids[i].nodes[j].s.real(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].s.real(), 1e-10));
+                CHECK_THAT(net->grids[i].nodes[j].s.imag(), Catch::Matchers::WithinAbs(netBFS->grids[i].nodes[j].s.imag(), 1e-10));
             }
         }
     }
@@ -189,13 +189,13 @@ TEST_CASE("Compare GS and ZBus Jacobi", "[validation]") {
         solver->solve();
     }
 
-    CHECK_THAT(net->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[7].v.real(), 0.000001));
-    CHECK_THAT(net->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[5].v.real(), 0.000001));
-    CHECK_THAT(net->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[6].v.real(), 0.000001));
+    CHECK_THAT(net->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[7].v.real(), 1e-10));
+    CHECK_THAT(net->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[5].v.real(), 1e-10));
+    CHECK_THAT(net->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[6].v.real(), 1e-10));
 
-    CHECK_THAT(net->grids[0].nodes[7].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[7].v.imag(), 0.000001));
-    CHECK_THAT(net->grids[0].nodes[5].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[5].v.imag(), 0.000001));
-    CHECK_THAT(net->grids[0].nodes[6].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[6].v.imag(), 0.000001));
+    CHECK_THAT(net->grids[0].nodes[7].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[7].v.imag(), 1e-10));
+    CHECK_THAT(net->grids[0].nodes[5].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[5].v.imag(), 1e-10));
+    CHECK_THAT(net->grids[0].nodes[6].v.imag(), Catch::Matchers::WithinAbs(net2->grids[0].nodes[6].v.imag(), 1e-10));
 }
 
 TEST_CASE("Compare treestructure", "[validation]") {
@@ -227,37 +227,37 @@ TEST_CASE("Compare treestructure", "[validation]") {
     std::vector<complex_t> VSingle = { {1, 0} };
     pfsSingle.solve(PSingle, VSingle);
 
-    CHECK_THAT(netSingle->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[3].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[4].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[1].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[2].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[3].v.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[4].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[5].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[6].v.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[7].v.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.real(), 1e-10));
 
-    CHECK_THAT(netSingle->grids[0].nodes[1].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[2].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[3].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[4].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[5].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[6].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[7].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[1].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].v.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[2].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].v.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[3].v.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].v.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[4].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].v.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[5].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].v.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[6].v.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].v.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[7].v.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].v.imag(), 1e-10));
 
-    CHECK_THAT(netSingle->grids[0].nodes[1].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[2].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[3].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[4].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[5].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[6].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.real(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[7].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.real(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[1].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[2].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[3].s.real(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[4].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[5].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[6].s.real(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.real(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[7].s.real(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.real(), 1e-10));
 
-    CHECK_THAT(netSingle->grids[0].nodes[1].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[2].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[3].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[4].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[5].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[6].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.imag(), 0.000001));
-    CHECK_THAT(netSingle->grids[0].nodes[7].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.imag(), 0.000001));
+    CHECK_THAT(netSingle->grids[0].nodes[1].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[1].s.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[2].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[2].s.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[3].s.imag(), Catch::Matchers::WithinAbs(net->grids[0].nodes[3].s.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[4].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[1].s.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[5].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[1].s.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[6].s.imag(), Catch::Matchers::WithinAbs(net->grids[2].nodes[2].s.imag(), 1e-10));
+    CHECK_THAT(netSingle->grids[0].nodes[7].s.imag(), Catch::Matchers::WithinAbs(net->grids[1].nodes[2].s.imag(), 1e-10));
     
 }
 

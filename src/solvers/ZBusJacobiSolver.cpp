@@ -17,9 +17,9 @@ ZBusJacobiSolver::ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter
 	}
 
 	node_idx_t N = grid->nodes.size();
-	V = Eigen::VectorXcd(N);
-	S = Eigen::VectorXcd(N);
-	I = Eigen::VectorXcd(N);
+	V = Eigen::VectorXcd::Zero(N);
+	S = Eigen::VectorXcd::Zero(N);
+	I = Eigen::VectorXcd::Zero(N);
 	Eigen::MatrixXcd ybus = Eigen::MatrixXcd::Zero(N, N);
 	slackNodeIdx = -1;
 
@@ -91,10 +91,9 @@ int ZBusJacobiSolver::solve()
 
 	int iter = 0;
 	bool converged = false;
-	while (iter++ < maxIterations)
+
+	while (iter < maxIterations)
 	{
-		I = S.cwiseQuotient(V).conjugate();
-		V = Z * I;
 		double diff = (V.cwiseProduct(I.conjugate()) - S).cwiseAbs().maxCoeff();
 
 		if (diff < precision)
@@ -102,14 +101,20 @@ int ZBusJacobiSolver::solve()
 			converged = true;
 			break;
 		}
+		I = S.cwiseQuotient(V).conjugate();
+		V = Z * I;
+		iter++;
 	}
 
 	// Store calculated node voltages.
-	for (node_idx_t nodeIdx = 0; nodeIdx < N; ++nodeIdx)
+	if (iter != 0)
 	{
-		if (nodeIdx != slackNodeIdx)
+		for (node_idx_t nodeIdx = 0; nodeIdx < N; ++nodeIdx)
 		{
-			grid->nodes[nodeIdx].v = V(nodeIdx);
+			if (nodeIdx != slackNodeIdx)
+			{
+				grid->nodes[nodeIdx].v = V(nodeIdx);
+			}
 		}
 	}
 
@@ -119,8 +124,10 @@ int ZBusJacobiSolver::solve()
 	}
 
 	// Update the slack node power.
-	updateSlackPower();
-
+	if (iter != 0)
+	{
+		updateSlackPower();
+	}
 	return iter;
 }
 

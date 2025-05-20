@@ -156,7 +156,6 @@ void PowerFlowSolver::runGridSolvers()
         {
             int gridIter = solver->solve();
             maxGridIter = std::max(gridIter, maxGridIter);
-
             // Update connections (simulates "fake" connection with z = 0).
             for (GridConnection& connection : network->connections)
             {
@@ -169,10 +168,11 @@ void PowerFlowSolver::runGridSolvers()
 				slackImplicitNode.v = loadImplicitNode.v;
 			}
 		}
+        iter++;
 	}
-    while (maxGridIter > 1 && iter++ < settings.max_iterations_total - 1);
+    while (maxGridIter > 0 && iter < settings.max_iterations_total);
 
-    if (maxGridIter > 1)
+    if (maxGridIter > 0)
     {
         throw std::runtime_error("PowerFlowSolver: The solution did not converge. Maximum number of iterations reached.");
     }
