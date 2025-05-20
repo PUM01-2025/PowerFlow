@@ -19,10 +19,12 @@ GaussSeidelSolver::GaussSeidelSolver(Grid* grid, Logger* const logger,
 
 int GaussSeidelSolver::solve()
 {
-    if (hasConverged())
+    if (!firstRun && hasConverged())
     {
         return 0;
     }
+
+    firstRun = false;
 
     bool converged = false;
     int iter = 0;

@@ -23,10 +23,12 @@ BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid,
 
 int BackwardForwardSweepSolver::solve()
 {
-    if (hasConverged())
+    if (!firstRun && hasConverged())
     {
         return 0;
     }
+
+    firstRun = false;
 
     int iter = 0;
     bool converged = false;

@@ -18,6 +18,7 @@ private:
     Eigen::VectorXcd S;
     Eigen::VectorXcd I;
     node_idx_t slackNodeIdx = -1;
+    bool firstRun = true;
 
     // Updates the slack node power.
     void updateSlackPower();

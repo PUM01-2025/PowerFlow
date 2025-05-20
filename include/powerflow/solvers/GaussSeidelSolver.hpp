@@ -12,6 +12,7 @@ public:
 
 private:
     std::vector<complex_t> y{};    // Admittances
+    bool firstRun = true;
 
     // Checks if the solution has converged.
     bool hasConverged();

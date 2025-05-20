@@ -14,6 +14,7 @@ public:
 private:
     node_idx_t rootIdx = -1;
     std::vector<complex_t> I;
+    bool firstRun = true;
 
     // Recursive function that performs a single Backward-Forward sweep.
     // nodeIdx - Index of current node in the grid.

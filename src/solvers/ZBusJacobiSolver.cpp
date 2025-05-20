@@ -98,8 +98,12 @@ int ZBusJacobiSolver::solve()
 
 		if (diff < precision)
 		{
-			converged = true;
-			break;
+			if (!firstRun)
+			{
+				converged = true;
+				break;
+			}
+			firstRun = false;
 		}
 		I = S.cwiseQuotient(V).conjugate();
 		V = Z * I;
