@@ -156,18 +156,18 @@ void PowerFlowSolver::runGridSolvers()
         {
             int gridIter = solver->solve();
             maxGridIter = std::max(gridIter, maxGridIter);
-            // Update connections (simulates "fake" connection with z = 0).
-            for (GridConnection& connection : network->connections)
-            {
-                Grid& loadImplicitGrid = network->grids[connection.loadImplicitGrid];
-                Grid& slackImplicitGrid = network->grids[connection.slackImplicitGrid];
-                GridNode& loadImplicitNode = loadImplicitGrid.nodes[connection.loadImplicitNode];
-                GridNode& slackImplicitNode = slackImplicitGrid.nodes[connection.slackImplicitNode];
-
-				loadImplicitNode.s = -((slackImplicitNode.s * slackImplicitGrid.sBase) / loadImplicitGrid.sBase);
-				slackImplicitNode.v = loadImplicitNode.v;
-			}
 		}
+        // Update connections (simulates "fake" connection with z = 0).
+        for (GridConnection& connection : network->connections)
+        {
+            Grid& loadImplicitGrid = network->grids[connection.loadImplicitGrid];
+            Grid& slackImplicitGrid = network->grids[connection.slackImplicitGrid];
+            GridNode& loadImplicitNode = loadImplicitGrid.nodes[connection.loadImplicitNode];
+            GridNode& slackImplicitNode = slackImplicitGrid.nodes[connection.slackImplicitNode];
+
+            loadImplicitNode.s = -((slackImplicitNode.s * slackImplicitGrid.sBase) / loadImplicitGrid.sBase);
+            slackImplicitNode.v = loadImplicitNode.v;
+        }
         iter++;
 	}
     while (maxGridIter > 0 && iter < settings.max_iterations_total);
