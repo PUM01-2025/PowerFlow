@@ -10,7 +10,8 @@ class ZBusJacobiSolver : public GridSolver
 {
 public:
     ZBusJacobiSolver(Grid* grid, Logger* const logger, int maxIter, double precision);
-    int solve();
+    int solve() override;
+    void reset() override;
 
 private:
     Eigen::MatrixXcd Z; // Impedance matrix
@@ -18,7 +19,7 @@ private:
     Eigen::VectorXcd S;
     Eigen::VectorXcd I;
     node_idx_t slackNodeIdx = -1;
-    bool firstRun = true;
+    bool firstRun = true; // Used to indicate that slack power has not been calculated
 
     // Updates the slack node power.
     void updateSlackPower();

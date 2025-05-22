@@ -1,6 +1,8 @@
 #include "powerflow/solvers/BackwardForwardSweepSolver.hpp"
 #include "powerflow/network.hpp"
 
+#include <algorithm>
+
 BackwardForwardSweepSolver::BackwardForwardSweepSolver(Grid* grid,
     Logger* const logger, int maxIter, double precision)
     : GridSolver(grid, logger, maxIter, precision)
@@ -97,6 +99,13 @@ complex_t BackwardForwardSweepSolver::sweep(node_idx_t nodeIdx,
             std::conj(I[prevEdgeIdx]);
     }
     return (0.0);
+}
+
+void BackwardForwardSweepSolver::reset()
+{
+    GridSolver::reset();
+    std::fill(I.begin(), I.end(), 0);
+    firstRun = true;
 }
 
 bool BackwardForwardSweepSolver::hasConverged()

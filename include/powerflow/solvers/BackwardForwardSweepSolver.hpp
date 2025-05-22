@@ -9,12 +9,13 @@ class BackwardForwardSweepSolver : public GridSolver
 {
 public:
     BackwardForwardSweepSolver(Grid *grid, Logger *logger, int maxIter, double precision);
-    int solve();
+    int solve() override;
+    void reset() override;
 
 private:
     node_idx_t rootIdx = -1;
     std::vector<complex_t> I;
-    bool firstRun = true;
+    bool firstRun = true; // Used to indicate that slack power has not been calculated
 
     // Recursive function that performs a single Backward-Forward sweep.
     // nodeIdx - Index of current node in the grid.

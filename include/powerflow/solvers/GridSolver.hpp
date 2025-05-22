@@ -21,6 +21,9 @@ public:
     // The solve method MUST return 0 iterations if the solution has already
     // converged!
     virtual int solve() = 0;
+
+    // Resets the solver.
+    virtual void reset();
 protected:
     Grid* grid{nullptr};
     Logger* const logger{nullptr};

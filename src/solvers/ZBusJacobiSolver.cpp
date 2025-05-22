@@ -135,6 +135,16 @@ int ZBusJacobiSolver::solve()
 	return iter;
 }
 
+void ZBusJacobiSolver::reset()
+{
+	GridSolver::reset();
+	node_idx_t N = grid->nodes.size();
+	V = Eigen::VectorXcd::Zero(N);
+	S = Eigen::VectorXcd::Zero(N);
+	I = Eigen::VectorXcd::Zero(N);
+	firstRun = true;
+}
+
 void ZBusJacobiSolver::updateSlackPower()
 {
 	complex_t yv = 0;

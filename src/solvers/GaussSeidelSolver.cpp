@@ -94,6 +94,12 @@ int GaussSeidelSolver::solve()
     return iter;
 }
 
+void GaussSeidelSolver::reset()
+{
+    GridSolver::reset();
+    firstRun = true;
+}
+
 bool GaussSeidelSolver::hasConverged()
 {
     for (node_idx_t nodeIdx{}; nodeIdx < grid->nodes.size(); ++nodeIdx)

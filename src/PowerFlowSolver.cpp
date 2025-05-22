@@ -245,12 +245,8 @@ std::vector<complex_t> PowerFlowSolver::getSlackPowers() const
 
 void PowerFlowSolver::reset()
 {
-    for (Grid& grid : network->grids)
+    for (std::unique_ptr<GridSolver>& solver : gridSolvers)
     {
-        for (GridNode& node : grid.nodes)
-        {
-            node.v = 1.0;
-            node.s = 0.0;
-        }
+        solver->reset();
     }
 }
