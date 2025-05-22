@@ -112,7 +112,7 @@ where *S_base* and *V_base* are positive, real-valued scale factors. Each grid i
 
 #### Algorithm description
 
-PowerFlow calculates voltages in each grid separately using different solvers (algorithms) depending on the structure of the grid (see "Solvers" below). Grid solvers are executed sequentially, starting from grid 0. When the voltages in a grid have converged, the voltages and powers are transferred between all grids as specified by the connections in the network. Then, the next grid solver is executed and so on. The algorithm stops when PowerFlow has detected that all grid solutions have converged.
+PowerFlow calculates voltages in each grid separately using different solvers (algorithms) depending on the structure of the grid (see "Solvers" below). Grid solvers are executed sequentially, starting from grid 0. When all grid solvers have been executed, the voltages and powers are transferred between all grids as specified by the connections in the network. Then, the grid solvers are executed again and so on. The algorithm stops when PowerFlow has detected that all grid solutions have converged within 0 iterations.
 
 When a network is loaded, all voltages are initially set to (1, 0). Further calculations use the previously calculated voltages as initial guesses.
 
@@ -261,19 +261,19 @@ settings.max_iterations_total = 10000;
 % Max number of iterations for the Gauss-Seidel solver.
 settings.max_iterations_gauss = 100000;
 
-% Precision for the Gauss-Seidel solver.
+% Largest acceptable power mismatch for the Gauss-Seidel solver. 
 settings.gauss_seidel_precision = 1e-10;
 
 % Max number of iterations for the Backward-Forward-Sweep solver.
 settings.max_iterations_bfs = 10000;
 
-% Precision for the Backward-Forward-Sweep solver.
+% Largest acceptable power mismatch for the Backward-Forward-Sweep solver.
 settings.bfs_precision = 1e-10;
 
 % Max number of iterations for the ZBus Jacobi solver.
 settings.max_iterations_zbusjacobi = 10000;
 
-% Precision for the ZBus Jacobi solver.
+% Largest acceptable power mismatch for the ZBus Jacobi solver.
 settings.zbusjacobi_precision = 1e-10;
 
 net = PowerFlow("path/to/network.txt", settings);
