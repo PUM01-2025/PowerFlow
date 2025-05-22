@@ -77,6 +77,9 @@ TEST_CASE("Network validation", "[!throws]") {
 
     REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/edge_same_node.txt"),
         Catch::Matchers::Contains("Invalid edge 2 that connects to the same node in grid 1"));
+
+    REQUIRE_THROWS_WITH(validatePFSThrow(localPath + "examples/test_networks/zero_impedance.txt"),
+        Catch::Matchers::Contains("Invalid zero impedance in edge 1 in grid 1"));
     
     // Disjoint grid.
     REQUIRE_THROWS_WITH([]() {

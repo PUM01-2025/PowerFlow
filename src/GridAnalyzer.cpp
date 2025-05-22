@@ -13,18 +13,14 @@ SolverType GridAnalyzer::determineSolver(Grid const& grid)
     {
         return BACKWARDFOWARDSWEEP;
     }
-    else if (!hasZeroImpedance(grid))
+    else if (hasSingleSlackNode(grid) && grid.nodes.size() < ZBUSJACOBI_NODE_LIMIT)
     {
-        if (hasSingleSlackNode(grid) && grid.nodes.size() < ZBUSJACOBI_NODE_LIMIT)
-        {
-            return ZBUSJACOBI;
-        }
-        else
-        {
-            return GAUSSSEIDEL;
-        }
+        return ZBUSJACOBI;
     }
-    return NONE;
+    else
+    {
+        return GAUSSSEIDEL;
+    }
 }
 
 bool GridAnalyzer::isSuitableForBFS(Grid const& grid)
@@ -90,18 +86,6 @@ bool GridAnalyzer::isSuitableForBFS(Grid const& grid)
         }
     }
     return hasSingleSlackNode(grid);
-}
-
-bool GridAnalyzer::hasZeroImpedance(Grid const& grid)
-{
-    for (const GridEdge& edge : grid.edges)
-    {
-        if (edge.z_c == 0.0)
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 bool GridAnalyzer::hasSingleSlackNode(Grid const& grid)

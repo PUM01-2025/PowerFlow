@@ -108,6 +108,11 @@ void NetworkValidator::validateGrid(const Grid& grid, const grid_idx_t gridIdx)
     {
         const GridEdge& edge = grid.edges.at(edgeIdx);
 
+        if (edge.z_c == 0.0)
+        {
+            throw std::invalid_argument("Invalid zero impedance in edge " +
+                std::to_string(edgeIdx) + " in grid " + std::to_string(gridIdx));
+        }
         if (edge.parent < 0 || edge.parent >= grid.nodes.size())
         {
             throw std::invalid_argument("Invalid edge " + std::to_string(edgeIdx) + 
